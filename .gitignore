@@ -1,36 +1,41 @@
-# Secrets (never commit)
-.secret
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Dependencies & build
-node_modules
-.next
-out
-dist
-build
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Local env overrides (keep committed `.env` for non-secrets per spec; ignore machine-specific overrides)
-.env.local
-.env.*.local
+# testing
+/coverage
 
-# Debug / OS
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-*.log
+*.pem
 
-# Convex
-.convex
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# IDE
-.idea
-.vscode/*
-!.vscode/extensions.json
+# env files (can opt-in for committing if needed)
+.env*
 
-# Playwright
-test-results/
-playwright-report/
-playwright/.cache/
+# vercel
+.vercel
 
-# Vitest
-coverage/
-
-# Optional: generated OpenAPI client (uncomment if you gitignore generated output)
-# lib/api/generated
+# typescript
+*.tsbuildinfo
+next-env.d.ts
