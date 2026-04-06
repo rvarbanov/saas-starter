@@ -15,11 +15,7 @@ type ExternalLinkButtonProps = {
  * (Base UI `render` + `nativeButton={false}`). Keeps pages as Server Components by
  * colocating client UI in this wrapper.
  */
-export function ExternalLinkButton({
-  href,
-  children,
-  ...linkProps
-}: ExternalLinkButtonProps) {
+export function ExternalLinkButton({ href, children, ...linkProps }: ExternalLinkButtonProps) {
   return (
     <Button nativeButton={false} render={<Link href={href} {...linkProps} />}>
       {children}
