@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -16,14 +16,18 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!**/.next",
-      "!**/out",
-      "!**/build",
-      "!**/dist",
-      "!**/coverage",
-      "!**/node_modules",
+      "!!**/.next",
+      "!!**/out",
+      "!!**/build",
+      "!!**/dist",
+      "!!**/coverage",
       "!next-env.d.ts"
     ]
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
   },
   "javascript": {
     "formatter": {
@@ -33,6 +37,9 @@
     }
   },
   "css": {
+    "formatter": {
+      "lineWidth": 100
+    },
     "parser": {
       "tailwindDirectives": true
     }
