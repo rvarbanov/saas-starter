@@ -33,7 +33,7 @@ The template must be:
 - **UI components:** **shadcn/ui** (Radix + Tailwind conventions). For layout and dashboard-style patterns, the repo may follow or adapt ideas from [next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard) (example only—not a hard dependency).  
 - **API client generation (optional but supported):** **OpenAPI Generator** (or documented equivalent) for generated clients under `lib/api/` (or similar) when REST/OpenAPI is in play—keep scripts and docs in the repo.  
 - **Testing:**
-  - **Unit, integration, and component (UI) tests:** Vitest; **test files use the `*.spec.ts` / `*.spec.tsx` naming convention and live next to the file under test** (same directory), unless E2E—see below.
+  - **Unit, integration, and component (UI) tests:** Vitest; test files use **`*.spec.ts`** / **`*.spec.tsx`** next to the file under test (same directory), unless E2E—see below. Implementation uses **`vitest.config.mts`** with separate projects (e.g. **Node** for `lib/**/*.spec.ts`, **happy-dom** + React for `components/**/*.spec.{ts,tsx}`); see **`IMPLEMENTATION.md` §11**.
   - **End-to-end (E2E) tests:** Playwright only; typically under `tests/e2e/` (or `e2e/`) because they span the whole app.
 - **Tooling & developer experience:** **Biome** for linting and formatting (single toolchain for JS/TS/JSON/CSS where applicable). **Husky** is **optional**: add it when you want local Git hooks (e.g. pre-commit Biome); quality is enforced by **CI** without Husky. Document any hooks in `IMPLEMENTATION.md` and `../README.md` if you add them.  
 - **Containerization (required):** **Docker** + **Docker Compose** for running the application locally in a reproducible way and for running **integration tests** inside containers so local setup differences do not break CI. See **Docker** and **CI/CD** sections below.  
@@ -80,6 +80,7 @@ At minimum, the repository should include:
 
 - **Configuration & scripts**
   - `package.json` with scripts for dev, build, test (unit/integration), test:integration (docker or documented), test:e2e, lint, format, and typecheck.
+  - **`vitest.config.mts`** and **`vitest.setup.ts`** for Vitest (projects, coverage, component setup)—see **`IMPLEMENTATION.md` §11**.
   - `tsconfig.json` with strict TypeScript settings.
   - **Biome** configuration (`biome.json` or equivalent) for lint and format (replaces separate ESLint + Prettier for this template unless a documented exception is needed).
   - **Husky** (optional): `.husky/` only if you adopt local Git hooks; not required for spec-complete.
@@ -113,7 +114,8 @@ Convex and Next may use additional env files per their docs; align with the spli
 - `dev`: start the local development environment via **Docker Compose** (e.g. `docker compose up --build`).  
 - `build`: build the application for production.  
 - `start`: run the production build locally.  
-- `test`: run unit/integration suite via **Docker Compose** (container command runs Vitest and picks up `*.spec.*` colocated files).  
+- `test`: run unit/integration suite via **Docker Compose** (container command runs Vitest and picks up `*.spec.*` colocated files); until Compose is standardized, **`pnpm test`** may invoke **`vitest run`** directly (see **`IMPLEMENTATION.md` §11**).  
+- `test:coverage` (recommended): Vitest with **`@vitest/coverage-v8`** (same colocated specs as `test`).  
 - `test:integration`: run integration tests **via Docker** (e.g. `docker compose run …`) as documented—required for spec-complete.  
 - `test:e2e`: run Playwright E2E tests via **Docker Compose**.  
 - `lint`: run Biome check (or equivalent), typically via a container command in Compose.  

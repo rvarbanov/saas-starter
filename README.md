@@ -8,27 +8,29 @@ A production-ready template for **SaaS-style** apps: public, dashboard, and admi
 
 ## Overview
 
-Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (`*.spec.*` colocated), **Playwright** (E2E), **Biome**, **Docker** + **Compose**, optional **OpenAPI Generator**, **GitHub Actions** → **Vercel**.
+Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (**`*.spec.*`** colocated), **Playwright** (E2E), **Biome**, **Docker** + **Compose**, optional **OpenAPI Generator**, **GitHub Actions** → **Vercel**.
 
 ---
 
 ## Technology stack (summary)
 
-| Layer | Choice |
-|--------|--------|
-| Framework | Next.js 16+ (App Router, Turbopack) |
-| Language | TypeScript 5.1+ |
-| Styling / UI | Tailwind CSS, **shadcn/ui** |
-| Auth | **WorkOS** AuthKit — [example repo](https://github.com/workos/next-authkit-example/tree/main) |
-| Data | **Convex** |
+
+| Layer          | Choice                                                                                                                              |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Framework      | Next.js 16+ (App Router, Turbopack)                                                                                                 |
+| Language       | TypeScript 5.1+                                                                                                                     |
+| Styling / UI   | Tailwind CSS, **shadcn/ui**                                                                                                         |
+| Auth           | **WorkOS** AuthKit — [example repo](https://github.com/workos/next-authkit-example/tree/main)                                       |
+| Data           | **Convex**                                                                                                                          |
 | Async / queues | **TBD** — evaluate [Vercel Queues](https://vercel.com/docs/queues) vs alternatives before locking (see `docs/IMPLEMENTATION.md` §9) |
-| Lint / format | **Biome** |
-| API clients | **OpenAPI Generator** (optional; `generate:api`) |
-| Git hooks | Optional (e.g. Husky); **CI** enforces quality |
-| Tests | Vitest + colocated **`*.spec.ts[x]`**; Playwright in `tests/e2e/`; **integration tests in Docker** |
-| Containers | **Docker** + **Docker Compose** (required) |
-| Deploy | **Vercel** |
-| CI | **GitHub Actions** |
+| Lint / format  | **Biome**                                                                                                                           |
+| API clients    | **OpenAPI Generator** (optional; `generate:api`)                                                                                    |
+| Git hooks      | Optional (e.g. Husky); **CI** enforces quality                                                                                      |
+| Tests          | Vitest + colocated **`*.spec.ts`** / **`*.spec.tsx`**; Playwright in `tests/e2e/`; **integration tests in Docker**                  |
+| Containers     | **Docker** + **Docker Compose** (required)                                                                                          |
+| Deploy         | **Vercel**                                                                                                                          |
+| CI             | **GitHub Actions**                                                                                                                  |
+
 
 **Dashboard layout inspiration:** [next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard) (example only).
 
@@ -38,39 +40,45 @@ Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (`
 
 ### Public (no auth) — SEO & trust
 
-| Route (examples) | Purpose |
-|------------------|---------|
-| `/` | Landing |
-| `/about` | Company / product |
-| `/contact` | Contact / leads |
-| `/privacy` | Privacy policy |
-| `/terms` | Terms of service |
-| `/pricing` | Plans (or contact-sales CTA) |
-| Auth + **WorkOS callbacks** | As required by AuthKit |
+
+| Route (examples)            | Purpose                      |
+| --------------------------- | ---------------------------- |
+| `/`                         | Landing                      |
+| `/about`                    | Company / product            |
+| `/contact`                  | Contact / leads              |
+| `/privacy`                  | Privacy policy               |
+| `/terms`                    | Terms of service             |
+| `/pricing`                  | Plans (or contact-sales CTA) |
+| Auth + **WorkOS callbacks** | As required by AuthKit       |
+
 
 ### Private (authenticated)
 
-| Route (examples) | Purpose |
-|------------------|---------|
-| `/dashboard` or `/app` | Authenticated home + primary CRUD |
-| `/profile` or `/settings` | User’s own account |
-| `/team` / workspace routes | **Manager**: manage assigned team(s) |
-| `/work` / assigned work | **Team member**: own work items |
-| `/admin/...` | **Super admin** only |
 
-**Roles:** **Super admin** (global), **Manager** (team scope), **Team member** (self + assigned work); a user **can have multiple roles**. See **`docs/IMPLEMENTATION.md` §4**.
+| Route (examples)           | Purpose                              |
+| -------------------------- | ------------------------------------ |
+| `/dashboard` or `/app`     | Authenticated home + primary CRUD    |
+| `/profile` or `/settings`  | User’s own account                   |
+| `/team` / workspace routes | **Manager**: manage assigned team(s) |
+| `/work` / assigned work    | **Team member**: own work items      |
+| `/admin/...`               | **Super admin** only                 |
+
+
+**Roles:** **Super admin** (global), **Manager** (team scope), **Team member** (self + assigned work); a user **can have multiple roles**. See `**docs/IMPLEMENTATION.md`** §4.
 
 ---
 
 ## Environment files
 
-| File | In git? | Purpose |
-|------|---------|---------|
-| **`.env`** | **Yes** | Non-secret defaults and public config only |
-| **`.secret.example`** | **Yes** | Template: secret *names* with placeholders |
-| **`.secret`** | **No** (gitignored) | Real secrets locally; use Vercel/GitHub secrets in deploy/CI |
 
-Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.md` §2.2**.
+| File                  | In git?             | Purpose                                                      |
+| --------------------- | ------------------- | ------------------------------------------------------------ |
+| `**.env**`            | **Yes**             | Non-secret defaults and public config only                   |
+| `**.secret.example`** | **Yes**             | Template: secret *names* with placeholders                   |
+| `**.secret`**         | **No** (gitignored) | Real secrets locally; use Vercel/GitHub secrets in deploy/CI |
+
+
+Details: `**docs/SPECIFICATION.md`** (Configuration) and `**docs/IMPLEMENTATION.md**` §2.2.
 
 ---
 
@@ -103,7 +111,8 @@ Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.
 ├── next.config.ts
 ├── package.json
 ├── playwright.config.ts
-├── vitest.config.ts
+├── vitest.config.mts             # Vitest (ESM); see docs/IMPLEMENTATION.md §11
+├── vitest.setup.ts               # @testing-library/jest-dom matchers (components project)
 ├── tsconfig.json
 ├── .env                         # committed non-secrets
 ├── .secret.example              # committed secret template
@@ -116,46 +125,52 @@ Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.
 
 Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module they test (not only under `tests/`).
 
+**Vitest (current setup):** `pnpm test` runs `**vitest run`**; `pnpm test:coverage` runs `**vitest run --coverage**`. Configuration is `**vitest.config.mts**`: two projects—`**unit**` (`lib/**/*.spec.ts`, Node) and `**components**` (`components/**/*.spec.{ts,tsx}`, **happy-dom** + React). Component tests use **Testing Library** and `**vitest.setup.ts`** (jest-dom matchers). In CI (`CI` env), Vitest adds the `**github-actions**` reporter. See `**docs/IMPLEMENTATION.md**` §11 for mocks (e.g. `next/link`), coverage scope, and conventions.
+
 ---
 
 ## Scripts (expected)
 
-| Script | Purpose |
-|--------|---------|
-| `dev` | **Docker Compose** local stack |
-| `build` / `start` | Production |
-| `lint` / `format` | Biome (run via Compose service command) |
-| `typecheck` | `tsc` or equivalent (via Compose command) |
-| `test` | Vitest (colocated `*.spec.*`) via **Docker Compose** |
-| `test:integration` | Integration tests **via Docker Compose** |
-| `test:e2e` | Playwright via **Docker Compose** |
-| `generate:api` | OpenAPI client (if used) |
+
+| Script             | Purpose                                              |
+| ------------------ | ---------------------------------------------------- |
+| `dev`              | **Docker Compose** local stack                       |
+| `build` / `start`  | Production                                           |
+| `lint` / `format`  | Biome (run via Compose service command)              |
+| `typecheck`        | `tsc` or equivalent (via Compose command)            |
+| `test`             | Vitest (colocated `*.spec.*`) via **Docker Compose** |
+| `test:integration` | Integration tests **via Docker Compose**             |
+| `test:e2e`         | Playwright via **Docker Compose**                    |
+| `generate:api`     | OpenAPI client (if used)                             |
+
 
 ---
 
 ## Quick start
 
-1. Clone / use template → `pnpm install`  
-2. Copy **`.secret.example`** → **`.secret`** when you wire auth/backend; adjust **`.env`** (non-secret) as needed  
-3. **Current milestone:** run **`pnpm dev`** and open [http://localhost:3000](http://localhost:3000). **Docker Compose** (`docker compose up --build`) is the canonical path once the Docker phase lands—see Linear / project roadmap.  
-4. Read **`docs/IMPLEMENTATION.md` §1** for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
+1. Clone / use template → `pnpm install`
+2. Copy `**.secret.example`** → `**.secret**` when you wire auth/backend; adjust `**.env**` (non-secret) as needed
+3. **Current milestone:** run `**pnpm dev`** and open [http://localhost:3000](http://localhost:3000). **Docker Compose** (`docker compose up --build`) is the canonical path once the Docker phase lands—see Linear / project roadmap.
+4. Read `**docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
 
 ---
 
 ## Documentation map
 
-| Topic | Where |
-|--------|--------|
-| SEO & routing | `docs/IMPLEMENTATION.md` §3 |
-| Roles | `docs/IMPLEMENTATION.md` §4 |
-| Navigation & layout | `docs/IMPLEMENTATION.md` §5–6 |
-| Design / theme | `docs/IMPLEMENTATION.md` §7 |
-| Docker | `docs/IMPLEMENTATION.md` §8 · `docs/SPECIFICATION.md` |
-| Queues evaluation | `docs/IMPLEMENTATION.md` §9 |
-| OpenAPI | `docs/IMPLEMENTATION.md` §10 |
-| Testing (colocated specs, Docker integration) | `docs/IMPLEMENTATION.md` §11 |
-| **CI/CD** | `docs/IMPLEMENTATION.md` §12 |
-| **Vercel deploy** | `docs/IMPLEMENTATION.md` §12.2 |
+
+| Topic                                        | Where                                                 |
+| -------------------------------------------- | ----------------------------------------------------- |
+| SEO & routing                                | `docs/IMPLEMENTATION.md` §3                           |
+| Roles                                        | `docs/IMPLEMENTATION.md` §4                           |
+| Navigation & layout                          | `docs/IMPLEMENTATION.md` §5–6                         |
+| Design / theme                               | `docs/IMPLEMENTATION.md` §7                           |
+| Docker                                       | `docs/IMPLEMENTATION.md` §8 · `docs/SPECIFICATION.md` |
+| Queues evaluation                            | `docs/IMPLEMENTATION.md` §9                           |
+| OpenAPI                                      | `docs/IMPLEMENTATION.md` §10                          |
+| Vitest (colocated specs, projects, coverage) | `docs/IMPLEMENTATION.md` §11                          |
+| **CI/CD**                                    | `docs/IMPLEMENTATION.md` §12                          |
+| **Vercel deploy**                            | `docs/IMPLEMENTATION.md` §12.2                        |
+
 
 ---
 
@@ -182,5 +197,6 @@ Informal notes and deferred decisions—see **[wip/wip.md](wip/wip.md)**. Older 
 ## Notes
 
 - **docs/INTENT.md** is goals-only; **docs/SPECIFICATION.md** is the stack and acceptance bar.  
-- **Queues:** explore options before committing (see **`docs/IMPLEMENTATION.md` §9**).  
+- **Queues:** explore options before committing (see `**docs/IMPLEMENTATION.md`** §9).  
 - **Lint:** run Biome in CI; Next.js 16+ does not lint inside `next build` by default.
+
