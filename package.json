@@ -7,19 +7,28 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "docker compose up --build",
+    "dev:native": "next dev",
     "build": "next build",
     "start": "next start",
     "check": "biome check .",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:integration": "docker compose run --rm app pnpm test",
+    "typecheck": "tsc --noEmit",
+    "convex:dev": "convex dev",
+    "convex:codegen": "convex codegen"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
+    "@workos-inc/authkit-nextjs": "^3.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "convex": "^1.34.1",
+    "dotenv": "^17.4.1",
     "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "react": "19.2.4",
@@ -30,6 +39,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

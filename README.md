@@ -73,12 +73,13 @@ Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (*
 
 | File                  | In git?             | Purpose                                                      |
 | --------------------- | ------------------- | ------------------------------------------------------------ |
-| `**.env**`            | **Yes**             | Non-secret defaults and public config only                   |
-| `**.secret.example`** | **Yes**             | Template: secret *names* with placeholders                   |
-| `**.secret`**         | **No** (gitignored) | Real secrets locally; use Vercel/GitHub secrets in deploy/CI |
+| `**.env**`            | **Yes**             | Non-secrets: app URL, **`NEXT_PUBLIC_CONVEX_URL`**, **`WORKOS_CLIENT_ID`**, redirects, etc. |
+| `**.secret.example`** | **Yes**             | Template for **`.secret`** (copy and rename; fill `replace-me`) |
+| `**.secret`**         | **No** (gitignored) | Server secrets (e.g. **`WORKOS_API_KEY`**, **`WORKOS_COOKIE_PASSWORD`**). Vercel/GitHub use their own stores in deploy/CI. |
 
+Next.js does **not** load **`.secret`** by default; this repo loads it in **`next.config.ts`** (and Vitest loads it in **`vitest.setup.ts`**). Docker Compose references **`.secret`** optionally (`required: false`).
 
-Details: `**docs/SPECIFICATION.md`** (Configuration) and `**docs/IMPLEMENTATION.md**` §2.2.
+Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.md`** §2.2.
 
 ---
 
@@ -105,9 +106,10 @@ Details: `**docs/SPECIFICATION.md`** (Configuration) and `**docs/IMPLEMENTATION.
 ├── tests/e2e/                   # Playwright (E2E). Vitest: colocate *.spec.ts[x] next to source files elsewhere
 ├── biome.json
 ├── docker-compose.yml
-├── Dockerfile
+├── Dockerfile                   # production image (standalone)
+├── Dockerfile.dev               # Compose dev deps
 ├── .dockerignore
-├── middleware.ts                # WorkOS / session
+├── proxy.ts                     # WorkOS AuthKit (Next.js 16+; was middleware.ts in ≤15)
 ├── next.config.ts
 ├── package.json
 ├── playwright.config.ts
@@ -140,7 +142,8 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `typecheck`        | `tsc` or equivalent (via Compose command)            |
 | `test`             | Vitest (colocated `*.spec.*`) via **Docker Compose** |
 | `test:integration` | Integration tests **via Docker Compose**             |
-| `test:e2e`         | Playwright via **Docker Compose**                    |
+| `test:e2e`         | Playwright (`tests/e2e/`); starts `dev:native`. Optional **`E2E_WORKOS_EMAIL`** / **`E2E_WORKOS_PASSWORD`** enable full hosted sign-in; otherwise that spec is skipped |
+| `convex:dev`       | `convex dev` — sync **`convex/`** to your dev deployment, watch, codegen |
 | `generate:api`     | OpenAPI client (if used)                             |
 
 
@@ -149,9 +152,10 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 ## Quick start
 
 1. Clone / use template → `pnpm install`
-2. Copy `**.secret.example`** → `**.secret**` when you wire auth/backend; adjust `**.env**` (non-secret) as needed
-3. **Current milestone:** run `**pnpm dev`** and open [http://localhost:3000](http://localhost:3000). **Docker Compose** (`docker compose up --build`) is the canonical path once the Docker phase lands—see Linear / project roadmap.
-4. Read `**docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
+2. Copy `**.secret.example`** → `**.secret**` and replace `replace-me` values. Edit committed `**.env`** for public URLs and ids (`NEXT_PUBLIC_CONVEX_URL`, `WORKOS_CLIENT_ID`, …).
+3. **Convex:** set **`NEXT_PUBLIC_CONVEX_URL`** in **`.env`** to your deployment URL, then run **`pnpm convex:dev`** in a second terminal to push **`convex/`** functions to that deployment.
+4. Run **`pnpm dev`** (`docker compose up --build`) and open [http://localhost:3000](http://localhost:3000). Use **`pnpm dev:native`** if Docker is unavailable.
+5. Read **`docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
 
 ---
 

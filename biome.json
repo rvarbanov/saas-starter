@@ -16,6 +16,7 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
+      "!!**/convex/_generated",
       "!!**/.next",
       "!!**/out",
       "!!**/build",

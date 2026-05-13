@@ -34,6 +34,7 @@ These routes must exist for **SEO**, **trust**, and **compliance** (adjust paths
 | `/terms`                              | Terms of service                                                                            |
 | `/pricing`                            | Pricing / plans (if SaaS monetization applies; otherwise a single “Contact sales” CTA page) |
 | Auth entry + OAuth/OIDC **callbacks** | As required by **WorkOS AuthKit** (see WorkOS docs)                                         |
+| `/sign-in` + `/sign-in/redirect`        | In-app sign-in landing (email/password copy) → server redirect that starts AuthKit / PKCE   |
 
 
 **SEO:** All public pages should use the Next.js **[Metadata](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)** API, stable titles/descriptions, canonical URLs where duplicates exist, and link to **`/sitemap.xml`** and **`/robots.txt`** (or App Router equivalents). See **§7**.
@@ -94,11 +95,15 @@ Use these as the install / setup source of truth. Versions must satisfy `**SPECI
 
 Per `**SPECIFICATION.md`**:
 
-1. `**.env**` — Committed. Non-secret keys and safe defaults only.
-2. `**.secret.example**` — Committed. Placeholder names for every secret.
-3. `**.secret**` — **Not committed.** Copy from `.secret.example`, fill real values locally; CI/Vercel use their own secret stores.
+1. `**.env**` — Committed. Non-secret keys only: e.g. **`NEXT_PUBLIC_APP_URL`**, **`NEXT_PUBLIC_CONVEX_URL`** (public HTTPS `https://….convex.cloud`), **`WORKOS_CLIENT_ID`**, **`NEXT_PUBLIC_WORKOS_REDIRECT_URI`**.
+2. `**.secret.example**` — Committed. Copy to **`.secret`** and replace `replace-me` entries.
+3. `**.secret**` — **Not committed.** Server secrets (e.g. **`WORKOS_API_KEY`**, **`WORKOS_COOKIE_PASSWORD`**); optional **`CONVEX_DEPLOY_KEY`** for CI deploy. CI/Vercel use their own secret stores.
 
-Fill **WorkOS / AuthKit** and **Convex** values according to [WorkOS docs](https://workos.com/docs) and [Convex dashboard](https://dashboard.convex.dev/).
+**Loading:** Next.js does not load **`.secret`** by default. This template loads it in **`next.config.ts`** (via `dotenv`) and **`vitest.setup.ts`** so local dev and tests match. **Docker Compose** lists **`.secret`** as an optional `env_file` (see `docker-compose.yml`).
+
+**Convex:** Put the deployment URL in **`.env`** as **`NEXT_PUBLIC_CONVEX_URL`**. Run **`pnpm convex:dev`** to sync `**convex/**` to that deployment and regenerate `**convex/_generated/**` when connected. Set **`WORKOS_CLIENT_ID`** on the Convex deployment (`npx convex env set …`) when using `**convex/auth.config.ts**`.
+
+Fill details from [WorkOS docs](https://workos.com/docs) and [Convex dashboard](https://dashboard.convex.dev/).
 
 ### 2.3 Run the dev environment (Docker Compose standard)
 
@@ -195,7 +200,7 @@ If Docker is temporarily unavailable, native dev may be used only as a fallback 
 
 ### 8.3 Docs
 
-- Document commands: `docker compose up`, `docker compose run --rm app pnpm test:integration` (or your chosen script).  
+- Document commands: `docker compose up`, `pnpm test:integration` (`docker compose run --rm app pnpm test`).  
 - Link: [Docker Compose](https://docs.docker.com/compose/).
 
 ---
@@ -264,11 +269,11 @@ Align with `**SPECIFICATION.md**`: public, WorkOS flows, dashboard CRUD happy pa
 
 ### 11.6 Commands
 
-- `dev` — Docker Compose local stack (`docker compose up --build` or project wrapper script); until Compose is wired, `**pnpm dev**` may run Next directly—see `**README.md**`.  
+- `dev` — `**pnpm dev**` → Docker Compose (`docker compose up --build`); `**pnpm dev:native**` → `next dev` without Docker.  
 - `test` — `**pnpm test**` runs Vitest (`*.spec.*` colocated); when the template standardizes on Compose, the same suite may be invoked inside a container.  
 - `test:coverage` — `**pnpm test:coverage**` (Vitest + v8 coverage).  
 - `test:integration` — Docker Compose integration test command.  
-- `test:e2e` — Docker Compose Playwright command.
+- `test:e2e` — Playwright; `**playwright.config.ts**` spins up `**pnpm dev:native**` for the smoke suite. Run E2E fully inside Compose later if you want identical parity with Docker-only dev.
 
 ---
 
@@ -289,6 +294,8 @@ Official: [GitHub Actions quickstart](https://docs.github.com/en/actions/quickst
 7. (Optional) build artifact
 
 Secrets: use **GitHub Actions secrets** — never raw `.secret` in CI.
+
+**Smoke CI without real WorkOS/Convex:** GitHub Actions sets placeholder `WORKOS_*` env vars for the E2E job (no `.secret` file in CI). Locally, use **`.secret`** per `**SPECIFICATION.md**`. Add GitHub Secrets for production-like preview/prod deploys.
 
 ### 12.2 CD — Vercel
 

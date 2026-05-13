@@ -105,7 +105,7 @@ At minimum, the repository should include:
 
 Also maintain **`.gitignore`** rules: ignore `.secret`, ignore local overrides like `.env.local` if used for machine-specific non-secret overrides (document the pattern in `IMPLEMENTATION.md`).
 
-Convex and Next may use additional env files per their docs; align with the split above (secrets only in `.secret` / CI secrets).
+Convex and Next may use additional env files per their docs; align with the split above (secrets only in `.secret` / CI secrets). **This template:** Next loads **`.secret`** from **`next.config.ts`** (so secrets are not duplicated in `.env.local` unless you choose to add overrides there).
 
 ### Scripts
 
