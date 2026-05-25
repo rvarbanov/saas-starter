@@ -1,0 +1,10 @@
+autoInstallPeers: true
+
+allowBuilds:
+  "@biomejs/biome": true
+  "@playwright/test": true
+  "@tailwindcss/oxide": true
+  esbuild: true
+  lightningcss: true
+  msw: true
+  sharp: true
