@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS base
+FROM node:24.16.0-bookworm-slim AS base
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
