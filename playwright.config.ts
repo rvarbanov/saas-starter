@@ -1,69 +1,21 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
-import { config as loadEnv } from "dotenv";
+import {
+  AUTH_STORAGE_PATH,
+  envPositiveInt,
+  getCanonicalPlaywrightOrigin,
+  getPlaywrightOriginUrl,
+  hasWorkOsE2eCreds,
+  isLocalDevHost,
+  loadPlaywrightEnv,
+  parseOriginForDevServer,
+} from "./playwright/env";
 
-const cwd = process.cwd();
-const envPath = resolve(cwd, ".env");
-const secretPath = resolve(cwd, ".secret");
-if (existsSync(envPath)) {
-  loadEnv({ path: envPath, quiet: true });
-}
-if (existsSync(secretPath)) {
-  loadEnv({ path: secretPath, quiet: true, override: true });
-}
-
-const DEFAULT_ORIGIN = "http://localhost:3000";
-
-/** Positive integer from env, or fallback when missing / invalid / non-positive. */
-function envPositiveInt(name: string, fallback: number): number {
-  const raw = process.env[name]?.trim();
-  if (raw === undefined || raw === "") return fallback;
-  const n = Number.parseInt(raw, 10);
-  return Number.isFinite(n) && n > 0 ? n : fallback;
-}
-
-/**
- * Canonical Playwright origin.
- * Fallback: PLAYWRIGHT_BASE_URL → NEXT_PUBLIC_APP_URL → http://localhost:3000
- */
-function getCanonicalPlaywrightOrigin(): string {
-  const playwrightBase = process.env.PLAYWRIGHT_BASE_URL?.trim();
-  if (playwrightBase) {
-    try {
-      return new URL(playwrightBase).origin;
-    } catch {
-      /* fall through */
-    }
-  }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (appUrl) {
-    try {
-      return new URL(appUrl).origin;
-    } catch {
-      /* fall through */
-    }
-  }
-
-  return DEFAULT_ORIGIN;
-}
-
-function isLocalDevHost(hostname: string): boolean {
-  const h = hostname.toLowerCase();
-  return h === "localhost" || h === "127.0.0.1" || h === "::1";
-}
+loadPlaywrightEnv();
 
 const playwrightOrigin = getCanonicalPlaywrightOrigin();
-const playwrightOriginUrl = (() => {
-  try {
-    return new URL(playwrightOrigin);
-  } catch {
-    return new URL(DEFAULT_ORIGIN);
-  }
-})();
-
+const playwrightOriginUrl = getPlaywrightOriginUrl();
 const runLocalWebServer = isLocalDevHost(playwrightOriginUrl.hostname);
+const { port, bindHost } = parseOriginForDevServer();
 
 const testTimeoutMs = envPositiveInt("PLAYWRIGHT_TEST_TIMEOUT_MS", 60_000);
 const expectTimeoutMs = envPositiveInt("PLAYWRIGHT_EXPECT_TIMEOUT_MS", 10_000);
@@ -71,12 +23,35 @@ const navigationTimeoutMs = envPositiveInt("PLAYWRIGHT_NAVIGATION_TIMEOUT_MS", 3
 const actionTimeoutMs = envPositiveInt("PLAYWRIGHT_ACTION_TIMEOUT_MS", 15_000);
 const webServerTimeoutMs = envPositiveInt("PLAYWRIGHT_WEBSERVER_TIMEOUT_MS", 120_000);
 
+const chromiumProject = {
+  name: "chromium",
+  testIgnore: [/auth\.setup\.ts/, /auth-authenticated\.spec\.ts/],
+  use: { ...devices["Desktop Chrome"] },
+};
+
+const projects = hasWorkOsE2eCreds()
+  ? [
+      { name: "setup", testMatch: /auth\.setup\.ts/ },
+      chromiumProject,
+      {
+        name: "authenticated",
+        testMatch: /auth-authenticated\.spec\.ts/,
+        use: {
+          ...devices["Desktop Chrome"],
+          storageState: AUTH_STORAGE_PATH,
+        },
+        dependencies: ["setup"],
+      },
+    ]
+  : [chromiumProject];
+
 // TODO(staging): Point PLAYWRIGHT_BASE_URL at a preview/staging deployment and rely on CI/env
 // to skip local webServer (non-loopback hosts disable `webServer` below); align NEXT_PUBLIC_APP_URL
 // and OAuth redirect URIs with that same origin.
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  globalSetup: "./playwright/global-setup.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
@@ -89,17 +64,19 @@ export default defineConfig({
   use: {
     baseURL: playwrightOrigin,
     trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     navigationTimeout: navigationTimeoutMs,
     actionTimeout: actionTimeoutMs,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects,
   ...(runLocalWebServer
     ? {
         webServer: {
-          command: "node scripts/dev-e2e.mjs",
+          command: `pnpm exec next dev --port ${port} --hostname ${bindHost}`,
           url: `${playwrightOrigin}/api/health`,
           reuseExistingServer: !process.env.CI,
           timeout: webServerTimeoutMs,
+          gracefulShutdown: { signal: "SIGTERM", timeout: 500 },
         },
       }
     : {}),

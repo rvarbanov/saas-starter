@@ -104,6 +104,7 @@ Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.
 ├── lib/
 │   └── api/                     # Optional OpenAPI-generated client
 ├── tests/e2e/                   # Playwright (E2E). Vitest: colocate *.spec.ts[x] next to source files elsewhere
+├── playwright/                  # E2E env helpers + global setup (not test specs)
 ├── biome.json
 ├── docker-compose.yml
 ├── Dockerfile                   # production image (standalone)
@@ -142,13 +143,20 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `typecheck`        | `tsc` or equivalent (via Compose command)            |
 | `test`             | Vitest (colocated `*.spec.*`) via **Docker Compose** |
 | `test:integration` | Integration tests **via Docker Compose**             |
-| `test:e2e`         | Playwright (`tests/e2e/`); reuses a healthy dev server or starts one via `dev:e2e`. See **Playwright E2E** below |
+| `test:e2e`         | Playwright (`tests/e2e/`); `playwright.config.ts` starts or reuses `next dev` via native `webServer`. See **Playwright E2E** below |
 | `convex:dev`       | `convex dev` — sync **`convex/`** to your dev deployment, watch, codegen |
 | `generate:api`     | OpenAPI client (if used)                             |
 
 ### Playwright E2E
 
-`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/`. Readiness is checked at **`/api/health`** (not the home page). When a dev server is already healthy at the resolved origin, Playwright **reuses** it instead of starting another process.
+`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/`. [`playwright.config.ts`](playwright.config.ts) uses Playwright’s native [`webServer`](https://playwright.dev/docs/test-webserver) to start `next dev` (or reuse an existing server). Readiness is checked at **`/api/health`**.
+
+**Projects:**
+
+| Project | When | Specs |
+| --- | --- | --- |
+| `chromium` | Always | Smoke + unauthenticated auth shell |
+| `setup` + `authenticated` | `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` set in `.secret` | Full WorkOS login (once) → `playwright/.auth/user.json` → dashboard + sign-out |
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
@@ -158,9 +166,11 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `PLAYWRIGHT_NAVIGATION_TIMEOUT_MS` | No | `30000` | Navigation timeout |
 | `PLAYWRIGHT_ACTION_TIMEOUT_MS` | No | `15000` | Action timeout |
 | `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` | No | `120000` | Max wait for dev server readiness |
-| `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | No | — | Enable full WorkOS login spec (set in `.secret`) |
+| `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | No | — | Enable `setup` + `authenticated` projects (set in `.secret`) |
 
-If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) or keep **`make run`** / **`pnpm dev:native`** running and re-run **`make e2e`**.
+CI runs shell tests with placeholder `WORKOS_*` env vars. For full authenticated E2E in CI, add `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD` as GitHub Actions secrets.
+
+If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) or keep **`make run`** / **`pnpm dev:native`** running and re-run **`make e2e`** (Playwright reuses a healthy server when `reuseExistingServer` is enabled locally).
 
 ---
 

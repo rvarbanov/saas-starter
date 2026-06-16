@@ -51,7 +51,6 @@ e2e-install: ## Install Playwright Chromium browser
 	$(PNPM) exec playwright install chromium --with-deps
 
 e2e: ## End-to-end tests (Playwright)
-	node scripts/e2e-preflight.mjs
 	$(PNPM) test:e2e
 
 convex-dev: ## Sync convex/ to dev deployment (watch + codegen)

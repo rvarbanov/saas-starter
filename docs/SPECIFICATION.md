@@ -117,11 +117,13 @@ Convex and Next may use additional env files per their docs; align with the spli
 - `test`: run unit/integration suite via **Docker Compose** (container command runs Vitest and picks up `*.spec.*` colocated files); until Compose is standardized, **`pnpm test`** may invoke **`vitest run`** directly (see **`IMPLEMENTATION.md` §11**).  
 - `test:coverage` (recommended): Vitest with **`@vitest/coverage-v8`** (same colocated specs as `test`).  
 - `test:integration`: run integration tests **via Docker** (e.g. `docker compose run …`) as documented—required for spec-complete.  
-- `test:e2e`: run Playwright E2E tests via **Docker Compose**.  
+- `test:e2e`: run Playwright E2E tests (native host + Playwright `webServer`; see **intentional deviation** below).  
 - `lint`: run Biome check (or equivalent), typically via a container command in Compose.  
 - `format`: run Biome format (check or write, as documented), via Compose command.  
 - `typecheck` (or equivalent): run TypeScript (`tsc --noEmit` or `next build` with type errors failing the build) via Compose command. Required for quality gates; if you omit a dedicated script, document that CI runs an equivalent check so merges cannot bypass types.  
 - Optional: `generate:api` for OpenAPI client generation.
+
+**Intentional deviation (E2E):** This template runs Playwright **natively** via `playwright.config.ts` `webServer` (starts `next dev`, waits on `/api/health`) rather than inside Docker Compose. Integration tests still use Compose. Revisit Compose-based E2E when dev/test environment parity requires it.
 
 ---
 
@@ -161,7 +163,7 @@ The template must enforce **testing as a first-class requirement**:
     - Type checks.
     - Lint.
     - Unit/integration tests via **Docker Compose** (Vitest, colocated `*.spec.*`).
-    - **Full E2E suite via Docker Compose** (Playwright).
+    - **Full E2E suite** (Playwright on the host with `webServer`; see Scripts § intentional deviation).
   - Direct pushes to branches without a PR should still run the same checks when CI is triggered; release branches follow the same bar unless you document an exception (not recommended for this template).
 
 - **Continuous Deployment (CD)**
