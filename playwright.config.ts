@@ -24,17 +24,29 @@ function envPositiveInt(name: string, fallback: number): number {
 }
 
 /**
- * Canonical Playwright origin: parse `PLAYWRIGHT_BASE_URL` if set (absolute URL,
- * optional path — we use `.origin` for readiness checks and base URL), else localhost:3000.
+ * Canonical Playwright origin.
+ * Fallback: PLAYWRIGHT_BASE_URL → NEXT_PUBLIC_APP_URL → http://localhost:3000
  */
 function getCanonicalPlaywrightOrigin(): string {
-  const raw = process.env.PLAYWRIGHT_BASE_URL?.trim();
-  if (!raw) return DEFAULT_ORIGIN;
-  try {
-    return new URL(raw).origin;
-  } catch {
-    return DEFAULT_ORIGIN;
+  const playwrightBase = process.env.PLAYWRIGHT_BASE_URL?.trim();
+  if (playwrightBase) {
+    try {
+      return new URL(playwrightBase).origin;
+    } catch {
+      /* fall through */
+    }
   }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (appUrl) {
+    try {
+      return new URL(appUrl).origin;
+    } catch {
+      /* fall through */
+    }
+  }
+
+  return DEFAULT_ORIGIN;
 }
 
 function isLocalDevHost(hostname: string): boolean {
@@ -57,6 +69,7 @@ const testTimeoutMs = envPositiveInt("PLAYWRIGHT_TEST_TIMEOUT_MS", 60_000);
 const expectTimeoutMs = envPositiveInt("PLAYWRIGHT_EXPECT_TIMEOUT_MS", 10_000);
 const navigationTimeoutMs = envPositiveInt("PLAYWRIGHT_NAVIGATION_TIMEOUT_MS", 30_000);
 const actionTimeoutMs = envPositiveInt("PLAYWRIGHT_ACTION_TIMEOUT_MS", 15_000);
+const webServerTimeoutMs = envPositiveInt("PLAYWRIGHT_WEBSERVER_TIMEOUT_MS", 120_000);
 
 // TODO(staging): Point PLAYWRIGHT_BASE_URL at a preview/staging deployment and rely on CI/env
 // to skip local webServer (non-loopback hosts disable `webServer` below); align NEXT_PUBLIC_APP_URL
@@ -83,10 +96,10 @@ export default defineConfig({
   ...(runLocalWebServer
     ? {
         webServer: {
-          command: "pnpm dev:native",
-          url: playwrightOrigin,
+          command: "node scripts/dev-e2e.mjs",
+          url: `${playwrightOrigin}/api/health`,
           reuseExistingServer: !process.env.CI,
-          timeout: 120_000,
+          timeout: webServerTimeoutMs,
         },
       }
     : {}),

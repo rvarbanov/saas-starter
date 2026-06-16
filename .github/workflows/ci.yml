@@ -73,7 +73,8 @@ jobs:
         run: pnpm test:e2e
         env:
           CI: true
-          # No `.secret` in CI; Next/AuthKit need placeholders for `pnpm dev:native` in Playwright webServer.
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          # No `.secret` in CI; Next/AuthKit need placeholders for Playwright webServer.
           WORKOS_CLIENT_ID: client_01CIPlaceholderXXXXXXXXXXXXXXXX
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/callback
           NEXT_PUBLIC_APP_URL: http://localhost:3000

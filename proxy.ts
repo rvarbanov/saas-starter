@@ -9,5 +9,9 @@ export default authkitProxy({
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Exclude /sign-in/redirect: authkitProxy sets a PKCE cookie on every unauthenticated
+  // request, but that route also calls getSignInUrl() — two sealed states → OAuth state mismatch.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|sign-in/redirect|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

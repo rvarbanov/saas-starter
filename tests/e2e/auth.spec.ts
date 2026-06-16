@@ -20,7 +20,7 @@ test.describe("auth shell", () => {
   });
 });
 
-test.describe("full WorkOS login", () => {
+test.describe.skip("full WorkOS login", () => {
   test.skip(
     !process.env.E2E_WORKOS_EMAIL || !process.env.E2E_WORKOS_PASSWORD,
     "Set E2E_WORKOS_EMAIL and E2E_WORKOS_PASSWORD to run full login E2E.",

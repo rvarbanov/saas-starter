@@ -1,6 +1,5 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import Link from "next/link";
-import { signOutToHome } from "@/app/actions/auth";
 import { ConvexDeploymentNote } from "@/components/convex-deployment-note";
 
 export default async function DashboardPage() {
@@ -27,14 +26,12 @@ export default async function DashboardPage() {
         >
           Back to home
         </Link>
-        <form action={signOutToHome}>
-          <button
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-            type="submit"
-          >
-            Sign out
-          </button>
-        </form>
+        <Link
+          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          href="/sign-out"
+        >
+          Sign out
+        </Link>
       </div>
     </main>
   );

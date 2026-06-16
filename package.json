@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "docker compose up --build",
     "dev:native": "next dev",
+    "dev:e2e": "node scripts/dev-e2e.mjs",
     "build": "next build",
     "start": "next start",
     "check": "biome check .",

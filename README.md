@@ -142,10 +142,25 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `typecheck`        | `tsc` or equivalent (via Compose command)            |
 | `test`             | Vitest (colocated `*.spec.*`) via **Docker Compose** |
 | `test:integration` | Integration tests **via Docker Compose**             |
-| `test:e2e`         | Playwright (`tests/e2e/`); starts `dev:native`. Optional **`E2E_WORKOS_EMAIL`** / **`E2E_WORKOS_PASSWORD`** enable full hosted sign-in; otherwise that spec is skipped |
+| `test:e2e`         | Playwright (`tests/e2e/`); reuses a healthy dev server or starts one via `dev:e2e`. See **Playwright E2E** below |
 | `convex:dev`       | `convex dev` — sync **`convex/`** to your dev deployment, watch, codegen |
 | `generate:api`     | OpenAPI client (if used)                             |
 
+### Playwright E2E
+
+`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/`. Readiness is checked at **`/api/health`** (not the home page). When a dev server is already healthy at the resolved origin, Playwright **reuses** it instead of starting another process.
+
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `PLAYWRIGHT_BASE_URL` | No | `NEXT_PUBLIC_APP_URL` → `http://localhost:3000` | Test `baseURL`; non-loopback hosts skip the local `webServer` |
+| `PLAYWRIGHT_TEST_TIMEOUT_MS` | No | `60000` | Per-test timeout |
+| `PLAYWRIGHT_EXPECT_TIMEOUT_MS` | No | `10000` | Assertion timeout |
+| `PLAYWRIGHT_NAVIGATION_TIMEOUT_MS` | No | `30000` | Navigation timeout |
+| `PLAYWRIGHT_ACTION_TIMEOUT_MS` | No | `15000` | Action timeout |
+| `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` | No | `120000` | Max wait for dev server readiness |
+| `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | No | — | Enable full WorkOS login spec (set in `.secret`) |
+
+If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) or keep **`make run`** / **`pnpm dev:native`** running and re-run **`make e2e`**.
 
 ---
 

@@ -4,6 +4,7 @@
  */
 export const AUTHKIT_UNAUTHENTICATED_PATHS = [
   "/",
+  "/api/health",
   "/callback",
   "/sign-in",
   "/sign-in/redirect",

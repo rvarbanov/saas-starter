@@ -1,9 +1,6 @@
-import { getSignInUrl } from "@workos-inc/authkit-nextjs";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-/** Starts the AuthKit OAuth/PKCE flow (hosted UI supports email + password when enabled in WorkOS). */
-export async function GET() {
-  const url = await getSignInUrl({ returnTo: "/dashboard" });
-  // Use NextResponse.redirect in Route Handlers — not `redirect()` from `next/navigation` (throw-based; can flash in dev).
-  return NextResponse.redirect(url);
+/** Legacy entry — delegate to /dashboard so authkitProxy owns the OAuth/PKCE redirect. */
+export function GET(request: NextRequest) {
+  return NextResponse.redirect(new URL("/dashboard", request.url));
 }
