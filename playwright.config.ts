@@ -28,9 +28,15 @@ const webServerCommand = useProductionWebServer
   ? `node playwright/next-prod-server.mjs --port ${port} --hostname ${bindHost}`
   : `node playwright/next-dev-server.mjs --port ${port} --hostname ${bindHost}`;
 
+const playwrightWorkers = process.env.PLAYWRIGHT_WORKERS?.trim()
+  ? envPositiveInt("PLAYWRIGHT_WORKERS", 1)
+  : process.env.CI
+    ? 2
+    : undefined;
+
 const chromiumProject = {
   name: "chromium",
-  testIgnore: [/auth\.setup\.ts/, /auth-authenticated\.spec\.ts/],
+  testIgnore: [/auth\.setup\.ts/, /auth-authenticated\.spec\.ts/, /auth-sign-out\.spec\.ts/],
   use: { ...devices["Desktop Chrome"] },
 };
 
@@ -45,8 +51,16 @@ const projects = hasWorkOsE2eCreds()
           ...devices["Desktop Chrome"],
           storageState: AUTH_STORAGE_PATH,
         },
-        dependencies: ["setup", "chromium"],
-        fullyParallel: false,
+        dependencies: ["setup"],
+      },
+      {
+        name: "authenticated-sign-out",
+        testMatch: /auth-sign-out\.spec\.ts/,
+        use: {
+          ...devices["Desktop Chrome"],
+          storageState: AUTH_STORAGE_PATH,
+        },
+        dependencies: ["authenticated"],
       },
     ]
   : [chromiumProject];
@@ -62,7 +76,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI || hasWorkOsE2eCreds() ? 1 : undefined,
+  workers: playwrightWorkers,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   timeout: testTimeoutMs,
   expect: {

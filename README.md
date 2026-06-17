@@ -156,7 +156,7 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | Project | When | Specs |
 | --- | --- | --- |
 | `chromium` | Always | Smoke + unauthenticated auth shell |
-| `setup` + `authenticated` | `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` set in `.secret` | Full WorkOS login (once) → `playwright/.auth/user.json` → dashboard + sign-out |
+| `setup` + `authenticated` + `authenticated-sign-out` | `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` set in `.secret` | WorkOS login (once) → read-only session tests (parallel) → sign-out last |
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
@@ -165,6 +165,7 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `PLAYWRIGHT_EXPECT_TIMEOUT_MS` | No | `10000` | Assertion timeout |
 | `PLAYWRIGHT_NAVIGATION_TIMEOUT_MS` | No | `30000` | Navigation timeout |
 | `PLAYWRIGHT_ACTION_TIMEOUT_MS` | No | `15000` | Action timeout |
+| `PLAYWRIGHT_WORKERS` | No | CPU-based locally; `2` in CI | Parallel test workers (`1` to force serial) |
 | `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` | No | `120000` | Max wait for dev server readiness |
 | `PLAYWRIGHT_WEB_SERVER` | No | `development` | Set to `production` for `make e2e-prod` (standalone server after build) |
 | `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | No | — | Enable `setup` + `authenticated` projects (set in `.secret`) |
