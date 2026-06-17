@@ -40,7 +40,8 @@ const projects = hasWorkOsE2eCreds()
           ...devices["Desktop Chrome"],
           storageState: AUTH_STORAGE_PATH,
         },
-        dependencies: ["setup"],
+        dependencies: ["setup", "chromium"],
+        fullyParallel: false,
       },
     ]
   : [chromiumProject];
@@ -55,7 +56,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI || hasWorkOsE2eCreds() ? 1 : undefined,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   timeout: testTimeoutMs,
   expect: {
@@ -74,7 +75,7 @@ export default defineConfig({
         webServer: {
           command: `pnpm exec next dev --port ${port} --hostname ${bindHost}`,
           url: `${playwrightOrigin}/api/health`,
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: false,
           timeout: webServerTimeoutMs,
           gracefulShutdown: { signal: "SIGTERM", timeout: 500 },
         },

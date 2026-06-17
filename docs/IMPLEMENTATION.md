@@ -273,11 +273,15 @@ Docker Compose E2E remains a future option if dev/test parity requires it (`**SP
 
 ### 11.6 Commands
 
-- `dev` — `**pnpm dev**` → Docker Compose (`docker compose up --build`); `**pnpm dev:native**` → `next dev` without Docker.  
-- `test` — `**pnpm test**` runs Vitest (`*.spec.*` colocated); when the template standardizes on Compose, the same suite may be invoked inside a container.  
-- `test:coverage` — `**pnpm test:coverage**` (Vitest + v8 coverage).  
-- `test:integration` — Docker Compose integration test command.  
-- `test:e2e` — Playwright; `**playwright.config.ts**` manages `**next dev**` via native `**webServer**` (no wrapper scripts).
+Makefile targets (see root `Makefile`; legacy aliases `run`, `run-native`, `start` still work):
+
+- `make dev` — `next dev` without Docker (daily local dev).
+- `make run-docker` — Docker Compose (`docker compose up --build`).
+- `make start-prod` — production build + `next start` (prefetch/caching smoke test).
+- `make verify` — format, lint, typecheck, unit tests, and E2E.
+- `make ci` — typecheck, lint, unit tests (CI quality job, no E2E).
+
+pnpm equivalents: `pnpm dev:native`, `pnpm dev`, `pnpm build && pnpm start`, `pnpm test`, `pnpm test:e2e`.
 
 ---
 

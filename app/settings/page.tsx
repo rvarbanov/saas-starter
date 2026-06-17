@@ -5,6 +5,8 @@ export const metadata = {
   title: "Settings",
 };
 
+export const dynamic = "force-dynamic";
+
 /** Example protected route (same auth shell as `/dashboard`). */
 export default async function SettingsPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
@@ -17,6 +19,7 @@ export default async function SettingsPage() {
       <Link
         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
         href="/dashboard"
+        prefetch={false}
       >
         Back to dashboard
       </Link>

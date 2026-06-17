@@ -170,7 +170,7 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 
 CI runs shell tests with placeholder `WORKOS_*` env vars. For full authenticated E2E in CI, add `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD` as GitHub Actions secrets.
 
-If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) or keep **`make run`** / **`pnpm dev:native`** running and re-run **`make e2e`** (Playwright reuses a healthy server when `reuseExistingServer` is enabled locally).
+If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) before running **`make e2e`** or **`make verify`** (Playwright always starts a fresh dev server for E2E).
 
 ---
 
@@ -179,8 +179,10 @@ If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof
 1. Clone / use template → `pnpm install`
 2. Copy `**.secret.example`** → `**.secret**` and replace `replace-me` values. Edit committed `**.env`** for public URLs and ids (`NEXT_PUBLIC_CONVEX_URL`, `WORKOS_CLIENT_ID`, …).
 3. **Convex:** set **`NEXT_PUBLIC_CONVEX_URL`** in **`.env`** to your deployment URL, then run **`pnpm convex:dev`** in a second terminal to push **`convex/`** functions to that deployment.
-4. Run **`pnpm dev`** (`docker compose up --build`) and open [http://localhost:3000](http://localhost:3000). Use **`pnpm dev:native`** if Docker is unavailable.
+4. Run **`make dev`** (`next dev` without Docker) or **`make run-docker`** (Docker Compose) and open [http://localhost:3000](http://localhost:3000).
 5. Read **`docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
+
+**Makefile shortcuts:** `make dev` (daily dev), `make run-docker`, `make start-prod` (production smoke test), `make verify` (fmt + lint + typecheck + test + e2e), `make ci` (typecheck + lint + test).
 
 ---
 

@@ -1,11 +1,10 @@
-import { withAuth } from "@workos-inc/authkit-nextjs";
-import Link from "next/link";
+import { AuthHomeCta } from "@/components/auth-home-cta";
 import { ConvexStatus } from "@/components/convex-status";
 import { ExternalLinkButton } from "@/components/external-link-button";
 
-export default async function Home() {
-  const auth = await withAuth();
+export const dynamic = "force-dynamic";
 
+export default function Home() {
   return (
     <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col justify-center gap-8 px-6 py-24">
       <p className="text-sm font-medium text-muted-foreground">SaaS Starter Kit</p>
@@ -18,21 +17,7 @@ export default async function Home() {
       </p>
       <ConvexStatus />
       <div className="flex flex-wrap items-center gap-3">
-        {auth.user ? (
-          <Link
-            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
-            href="/dashboard"
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <Link
-            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
-            href="/sign-in"
-          >
-            Sign in
-          </Link>
-        )}
+        <AuthHomeCta />
         <ExternalLinkButton
           href="https://github.com/rvarbanov/saas-starter"
           rel="noopener noreferrer"

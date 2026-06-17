@@ -1,6 +1,9 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import Link from "next/link";
 import { ConvexDeploymentNote } from "@/components/convex-deployment-note";
+import { SignOutButton } from "@/components/sign-out-button";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
@@ -13,25 +16,22 @@ export default async function DashboardPage() {
         {user.email ?? user.id} — authenticated via WorkOS AuthKit (MVP shell; roles and data next).
       </p>
       <ConvexDeploymentNote />
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Link
           className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           href="/settings"
+          prefetch={false}
         >
           Settings
         </Link>
         <Link
           className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           href="/"
+          prefetch={false}
         >
           Back to home
         </Link>
-        <Link
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-          href="/sign-out"
-        >
-          Sign out
-        </Link>
+        <SignOutButton />
       </div>
     </main>
   );

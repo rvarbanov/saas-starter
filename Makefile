@@ -3,7 +3,7 @@
 PNPM ?= pnpm
 DOCKER_COMPOSE ?= docker compose
 
-.PHONY: help install run run-native build start lint fmt format check typecheck \
+.PHONY: help install dev start-prod run-docker verify run run-native build start lint fmt format check typecheck \
 	test test-coverage e2e e2e-install integration convex-dev convex-codegen ci
 
 help: ## Show available commands
@@ -12,17 +12,25 @@ help: ## Show available commands
 install: ## Install dependencies (pnpm)
 	$(PNPM) install
 
-run: ## Start local dev stack (Docker Compose)
+dev: ## Next.js dev server (native, no Docker)
+	$(PNPM) dev:native
+
+start-prod: build ## Production build + next start
+	$(PNPM) start
+
+run-docker: ## Dev stack via Docker Compose
 	$(PNPM) dev
 
-run-native: ## Start Next.js dev server without Docker
-	$(PNPM) dev:native
+verify: fmt lint typecheck test e2e ## Full local validation (format, lint, typecheck, unit, e2e)
+
+run-native: dev ## Alias for dev
+
+run: run-docker ## Alias for run-docker
 
 build: ## Production build
 	$(PNPM) build
 
-start: ## Start production server (run build first)
-	$(PNPM) start
+start: start-prod ## Alias for start-prod
 
 lint: ## Lint with Biome
 	$(PNPM) lint
