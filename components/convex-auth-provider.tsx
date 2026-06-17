@@ -2,7 +2,7 @@
 
 import { useAccessToken, useAuth } from "@workos-inc/authkit-nextjs/components";
 import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { isConvexConfigured } from "@/lib/convex-config";
 
 function useConvexAuthFromWorkOS() {
@@ -20,8 +20,12 @@ function useConvexAuthFromWorkOS() {
     }: {
       forceRefreshToken: boolean;
     }) => {
-      const token = await getAccessToken();
-      return token ?? null;
+      try {
+        const token = await getAccessToken();
+        return token ?? null;
+      } catch {
+        return null;
+      }
     },
   };
 }
@@ -34,6 +38,13 @@ function ConvexAuthProviderInner({
   convexUrl: string;
 }) {
   const client = useMemo(() => new ConvexReactClient(convexUrl), [convexUrl]);
+
+  useEffect(() => {
+    return () => {
+      void client.close();
+    };
+  }, [client]);
+
   return (
     <ConvexProviderWithAuth client={client} useAuth={useConvexAuthFromWorkOS}>
       {children}

@@ -149,7 +149,7 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 
 ### Playwright E2E
 
-`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/`. [`playwright.config.ts`](playwright.config.ts) uses Playwright’s native [`webServer`](https://playwright.dev/docs/test-webserver) to start `next dev` (or reuse an existing server). Readiness is checked at **`/api/health`**.
+`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/`. [`playwright.config.ts`](playwright.config.ts) uses Playwright’s native [`webServer`](https://playwright.dev/docs/test-webserver) to start a fresh `next dev` for each run. Readiness is checked at **`/api/health`**. Authenticated sign-out depends on WorkOS **Sign-out redirects** matching `NEXT_PUBLIC_APP_URL`.
 
 **Projects:**
 
@@ -171,6 +171,8 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 CI runs shell tests with placeholder `WORKOS_*` env vars. For full authenticated E2E in CI, add `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD` as GitHub Actions secrets.
 
 If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) before running **`make e2e`** or **`make verify`** (Playwright always starts a fresh dev server for E2E).
+
+Occasional `[WebServer] Error: aborted` or `Failed to fetch` lines during `next dev` E2E are usually benign (in-flight requests cancelled on navigation). If a run hangs on the sign-out test, ensure port 3000 is free and re-run; the Convex auth bridge returns `null` instead of throwing when WorkOS tokens are unavailable during logout.
 
 ---
 

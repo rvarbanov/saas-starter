@@ -46,6 +46,7 @@ const projects = hasWorkOsE2eCreds()
     ]
   : [chromiumProject];
 
+// Authenticated sign-out E2E requires WorkOS Sign-out redirects = NEXT_PUBLIC_APP_URL.
 // TODO(staging): Point PLAYWRIGHT_BASE_URL at a preview/staging deployment and rely on CI/env
 // to skip local webServer (non-loopback hosts disable `webServer` below); align NEXT_PUBLIC_APP_URL
 // and OAuth redirect URIs with that same origin.

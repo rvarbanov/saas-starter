@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { AUTH_STORAGE_PATH, getCanonicalPlaywrightOrigin } from "../../playwright/env";
 
 test.describe("authenticated session", () => {
   test.describe.configure({ mode: "serial" });
@@ -16,24 +17,33 @@ test.describe("authenticated session", () => {
     await expect(page.getByRole("heading", { name: /^Account$/i })).toBeVisible();
 
     await page.goto("/");
+    await expect(page.getByTestId(/convex-status/)).toBeVisible();
     await expect(page.getByRole("link", { name: /^Dashboard$/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /^Sign in$/i })).not.toBeVisible();
   });
 
-  test("sign out ends session and returns home", async ({ page }) => {
-    await page.goto("/dashboard");
-    await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+  test("sign out ends session and returns home", async ({ browser, baseURL }) => {
+    const appOrigin = baseURL ?? getCanonicalPlaywrightOrigin();
+    const context = await browser.newContext({ storageState: AUTH_STORAGE_PATH });
+    const page = await context.newPage();
 
-    await Promise.all([
-      page.waitForURL((url) => url.pathname === "/", {
-        timeout: 60_000,
-        waitUntil: "commit",
-      }),
-      page.getByRole("button", { name: /^Sign out$/i }).click(),
-    ]);
-    await expect(page.getByRole("link", { name: /^Sign in$/i })).toBeVisible();
+    try {
+      await page.goto("/dashboard");
+      await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 
-    await page.goto("/dashboard");
-    await expect(page).not.toHaveURL(/\/dashboard\/?$/);
+      await Promise.all([
+        page.waitForURL((url) => url.origin === appOrigin && url.pathname === "/", {
+          timeout: 60_000,
+          waitUntil: "load",
+        }),
+        page.getByRole("button", { name: /^Sign out$/i }).click(),
+      ]);
+      await expect(page.getByRole("link", { name: /^Sign in$/i })).toBeVisible();
+
+      await page.goto("/dashboard");
+      await expect(page).not.toHaveURL(/\/dashboard\/?$/);
+    } finally {
+      await context.close();
+    }
   });
 });
