@@ -23,6 +23,11 @@ const navigationTimeoutMs = envPositiveInt("PLAYWRIGHT_NAVIGATION_TIMEOUT_MS", 3
 const actionTimeoutMs = envPositiveInt("PLAYWRIGHT_ACTION_TIMEOUT_MS", 15_000);
 const webServerTimeoutMs = envPositiveInt("PLAYWRIGHT_WEBSERVER_TIMEOUT_MS", 120_000);
 
+const useProductionWebServer = process.env.PLAYWRIGHT_WEB_SERVER === "production";
+const webServerCommand = useProductionWebServer
+  ? `node playwright/next-prod-server.mjs --port ${port} --hostname ${bindHost}`
+  : `node playwright/next-dev-server.mjs --port ${port} --hostname ${bindHost}`;
+
 const chromiumProject = {
   name: "chromium",
   testIgnore: [/auth\.setup\.ts/, /auth-authenticated\.spec\.ts/],
@@ -74,7 +79,7 @@ export default defineConfig({
   ...(runLocalWebServer
     ? {
         webServer: {
-          command: `pnpm exec next dev --port ${port} --hostname ${bindHost}`,
+          command: webServerCommand,
           url: `${playwrightOrigin}/api/health`,
           reuseExistingServer: false,
           timeout: webServerTimeoutMs,

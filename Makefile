@@ -4,7 +4,7 @@ PNPM ?= pnpm
 DOCKER_COMPOSE ?= docker compose
 
 .PHONY: help install dev start-prod run-docker verify run run-native build start lint fmt format check typecheck \
-	test test-coverage e2e e2e-install integration convex-dev convex-codegen ci
+	test test-coverage e2e e2e-prod e2e-install integration convex-dev convex-codegen ci
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -58,8 +58,11 @@ integration: ## Integration tests in Docker Compose
 e2e-install: ## Install Playwright Chromium browser
 	$(PNPM) exec playwright install chromium --with-deps
 
-e2e: ## End-to-end tests (Playwright)
+e2e: ## End-to-end tests (Playwright, next dev)
 	$(PNPM) test:e2e
+
+e2e-prod: build ## E2E against production server (next build + next start)
+	PLAYWRIGHT_WEB_SERVER=production $(PNPM) test:e2e
 
 convex-dev: ## Sync convex/ to dev deployment (watch + codegen)
 	$(PNPM) convex:dev

@@ -4,20 +4,27 @@ import { AUTH_STORAGE_PATH, getCanonicalPlaywrightOrigin } from "../../playwrigh
 test.describe("authenticated session", () => {
   test.describe.configure({ mode: "serial" });
 
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.title !== "session persists across dashboard, settings, and home") {
+      return;
+    }
+    await page.goto("about:blank");
+  });
+
   test("dashboard shows signed-in user", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
   });
 
   test("session persists across dashboard, settings, and home", async ({ page }) => {
-    await page.goto("/dashboard");
+    await page.goto("/dashboard", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 
-    await page.goto("/settings");
+    await page.goto("/settings", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: /^Account$/i })).toBeVisible();
 
-    await page.goto("/");
-    await expect(page.getByTestId(/convex-status/)).toBeVisible();
+    await page.goto("/", { waitUntil: "load" });
+    await expect(page.getByTestId("convex-status")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("link", { name: /^Dashboard$/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /^Sign in$/i })).not.toBeVisible();
   });
@@ -28,7 +35,7 @@ test.describe("authenticated session", () => {
     const page = await context.newPage();
 
     try {
-      await page.goto("/dashboard");
+      await page.goto("/dashboard", { waitUntil: "load" });
       await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 
       await Promise.all([

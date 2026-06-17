@@ -143,13 +143,13 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `typecheck`        | `tsc` or equivalent (via Compose command)            |
 | `test`             | Vitest (colocated `*.spec.*`) via **Docker Compose** |
 | `test:integration` | Integration tests **via Docker Compose**             |
-| `test:e2e`         | Playwright (`tests/e2e/`); `playwright.config.ts` starts or reuses `next dev` via native `webServer`. See **Playwright E2E** below |
+| `test:e2e`         | Playwright (`tests/e2e/`); see **Playwright E2E** below (`make e2e` = dev, `make e2e-prod` = production) |
 | `convex:dev`       | `convex dev` — sync **`convex/`** to your dev deployment, watch, codegen |
 | `generate:api`     | OpenAPI client (if used)                             |
 
 ### Playwright E2E
 
-`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/`. [`playwright.config.ts`](playwright.config.ts) uses Playwright’s native [`webServer`](https://playwright.dev/docs/test-webserver) to start a fresh `next dev` for each run. Readiness is checked at **`/api/health`**. Authenticated sign-out depends on WorkOS **Sign-out redirects** matching `NEXT_PUBLIC_APP_URL`.
+`make e2e` (or `pnpm test:e2e`) runs Playwright against `tests/e2e/` using a fresh **`next dev`** server. `make e2e-prod` runs **`next build`** then Playwright against the **standalone** server (same layout as Docker — `node server.js` in `.next/standalone`). [`playwright.config.ts`](playwright.config.ts) uses Playwright’s native [`webServer`](https://playwright.dev/docs/test-webserver). Readiness is checked at **`/api/health`**. Authenticated sign-out depends on WorkOS **Sign-out redirects** matching `NEXT_PUBLIC_APP_URL`.
 
 **Projects:**
 
@@ -166,13 +166,14 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `PLAYWRIGHT_NAVIGATION_TIMEOUT_MS` | No | `30000` | Navigation timeout |
 | `PLAYWRIGHT_ACTION_TIMEOUT_MS` | No | `15000` | Action timeout |
 | `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` | No | `120000` | Max wait for dev server readiness |
+| `PLAYWRIGHT_WEB_SERVER` | No | `development` | Set to `production` for `make e2e-prod` (standalone server after build) |
 | `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | No | — | Enable `setup` + `authenticated` projects (set in `.secret`) |
 
 CI runs shell tests with placeholder `WORKOS_*` env vars. For full authenticated E2E in CI, add `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD` as GitHub Actions secrets.
 
 If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) before running **`make e2e`** or **`make verify`** (Playwright always starts a fresh dev server for E2E).
 
-Occasional `[WebServer] Error: aborted` or `Failed to fetch` lines during `next dev` E2E are usually benign (in-flight requests cancelled on navigation). If a run hangs on the sign-out test, ensure port 3000 is free and re-run; the Convex auth bridge returns `null` instead of throwing when WorkOS tokens are unavailable during logout.
+Sign-out closes the Convex client on `pagehide` before the WorkOS logout redirect. Playwright E2E starts `next dev` via [`playwright/next-dev-server.mjs`](playwright/next-dev-server.mjs), which filters benign `Error: aborted` / `ECONNRESET` lines from fast navigation. If a run hangs on the sign-out test, ensure port 3000 is free (`lsof -ti:3000`) and re-run.
 
 ---
 
@@ -184,7 +185,7 @@ Occasional `[WebServer] Error: aborted` or `Failed to fetch` lines during `next 
 4. Run **`make dev`** (`next dev` without Docker) or **`make run-docker`** (Docker Compose) and open [http://localhost:3000](http://localhost:3000).
 5. Read **`docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
 
-**Makefile shortcuts:** `make dev` (daily dev), `make run-docker`, `make start-prod` (production smoke test), `make verify` (fmt + lint + typecheck + test + e2e), `make ci` (typecheck + lint + test).
+**Makefile shortcuts:** `make dev` (daily dev), `make run-docker`, `make start-prod` (production smoke test), `make e2e` (fast, `next dev`), `make e2e-prod` (stricter, `next start`), `make verify` (fmt + lint + typecheck + test + e2e), `make ci` (typecheck + lint + test).
 
 ---
 
