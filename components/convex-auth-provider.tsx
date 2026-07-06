@@ -1,62 +1,61 @@
 "use client";
 
 import { useAccessToken, useAuth } from "@workos-inc/authkit-nextjs/components";
-import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
-import { type ReactNode, useEffect, useMemo } from "react";
+import { ConvexProviderWithAuth } from "convex/react";
+import type { ReactNode } from "react";
+import { useCallback, useMemo, useRef } from "react";
+import { ConvexUserSync } from "@/components/convex-user-sync";
+import { getConvexClient } from "@/lib/convex-client";
 import { isConvexConfigured } from "@/lib/convex-config";
 
 function useConvexAuthFromWorkOS() {
   const { user, loading: userLoading } = useAuth();
   const { getAccessToken, loading: tokenLoading } = useAccessToken();
+  const getAccessTokenRef = useRef(getAccessToken);
+  getAccessTokenRef.current = getAccessToken;
 
   const isLoading = userLoading || tokenLoading;
   const isAuthenticated = user !== null;
 
-  return {
-    isLoading,
-    isAuthenticated,
-    fetchAccessToken: async ({
-      forceRefreshToken: _forceRefreshToken,
-    }: {
-      forceRefreshToken: boolean;
-    }) => {
+  const fetchAccessToken = useCallback(
+    async ({ forceRefreshToken: _forceRefreshToken }: { forceRefreshToken: boolean }) => {
       try {
-        const token = await getAccessToken();
+        const token = await getAccessTokenRef.current();
         return token ?? null;
       } catch {
         return null;
       }
     },
-  };
+    [],
+  );
+
+  return useMemo(
+    () => ({
+      isLoading,
+      isAuthenticated,
+      fetchAccessToken,
+    }),
+    [fetchAccessToken, isAuthenticated, isLoading],
+  );
 }
 
-function ConvexAuthProviderInner({
-  children,
-  convexUrl,
-}: {
-  children: ReactNode;
-  convexUrl: string;
-}) {
-  const client = useMemo(() => new ConvexReactClient(convexUrl), [convexUrl]);
-
-  useEffect(() => {
-    return () => {
-      void client.close();
-    };
-  }, [client]);
+function ConvexAuthProviderInner({ children }: { children: ReactNode }) {
+  const client = getConvexClient();
+  if (!client) {
+    return <>{children}</>;
+  }
 
   return (
     <ConvexProviderWithAuth client={client} useAuth={useConvexAuthFromWorkOS}>
-      {children}
+      <ConvexUserSync>{children}</ConvexUserSync>
     </ConvexProviderWithAuth>
   );
 }
 
 /** Skips Convex when `NEXT_PUBLIC_CONVEX_URL` is missing or still a placeholder. */
 export function ConvexAuthProvider({ children }: { children: ReactNode }) {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
-  if (!url || !isConvexConfigured()) {
+  if (!isConvexConfigured()) {
     return <>{children}</>;
   }
-  return <ConvexAuthProviderInner convexUrl={url}>{children}</ConvexAuthProviderInner>;
+  return <ConvexAuthProviderInner>{children}</ConvexAuthProviderInner>;
 }

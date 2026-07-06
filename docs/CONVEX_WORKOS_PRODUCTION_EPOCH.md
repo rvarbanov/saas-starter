@@ -44,11 +44,25 @@
 | React integration             | `components/convex-auth-provider.tsx` — `ConvexProviderWithAuth` + `getAccessToken()` from WorkOS |
 | Safe client boot              | `lib/convex-config.ts` — only construct client for real `https://*.convex.cloud` URLs             |
 | Smoke API                     | `convex/ping.ts` — `getMessage` (public, no auth)                                                 |
-| Schema                        | `convex/schema.ts` — **empty** (no tables)                                                        |
-| Server-side auth in functions | **None** — no `ctx.auth.getUserIdentity()` usage yet                                              |
+| Schema                        | `convex/schema.ts` — **`users`** table + `by_token`, `by_email`, `by_app_user_id` indexes        |
+| Server-side auth in functions | `convex/users.ts` — `store`, `getMe`; `convex/usersActions.ts` — `updateEmail` (backend only)     |
+| Client provisioning           | `components/use-store-user.ts` + `ConvexUserSync` — upsert on sign-in                             |
 
 
-**Outcome:** Convex runs, the UI can call a public query, and access tokens are passed for future authenticated functions. Backend authorization is **not** enforced in Convex yet.
+**Outcome:** Convex runs, the UI can call a public query, and access tokens are passed for authenticated functions. **Users auto-provision on sign-in** via `users.store` (linked by `tokenIdentifier`). `user_role` / RBAC deferred.
+
+### Users table — link fields (v1)
+
+| Field | Role |
+| ----- | ---- |
+| `tokenIdentifier` | **Auth link** — JWT → user row (`by_token` index) |
+| `workosUserId` | WorkOS `identity.subject` — User Management API calls |
+| `_id` (`Id<"users">`) | Convex FK target for app tables |
+| `appUserId` | UUID v4 portable id for external APIs / migration export |
+
+**Verify (local):** sign in → Convex Data tab shows one `users` row; `make ci` green; with E2E creds, `make e2e` asserts `convex-user-profile` on dashboard/settings.
+
+**Email updates (backend only):** `usersActions.updateEmail` → WorkOS API → `patchEmailInternal`. Requires `WORKOS_API_KEY` on Convex deployment. Passive sync on re-login via `store`. Settings email UI deferred.
 
 ---
 
@@ -72,10 +86,11 @@ Use the subsections below as **epic children** or **epoch checklist items**.
 
 ### C. Convex — application security and data
 
-- Define `**schema.ts`** (tables, indexes) for real features.
-- Implement queries/mutations that use `**ctx.auth.getUserIdentity()`**; return errors or empty results when unauthenticated as appropriate.
+- ~~Define `**schema.ts`** (tables, indexes) for real features.~~ **Done (v1):** `users` table + indexes.
+- ~~Implement queries/mutations that use `**ctx.auth.getUserIdentity()`**~~ **Done (v1):** `users.store`, `users.getMe`, `usersActions.updateEmail`.
 - **Never** accept client-supplied `userId` for authorization; derive identity only server-side in Convex.
 - Add integration tests or manual test plan: signed-in user sees correct data; signed-out or wrong token cannot mutate others’ data.
+- **Deferred:** `user_role` table, Settings email change UI, admin invite flow.
 
 ### D. Cross-cutting “definition of done”
 

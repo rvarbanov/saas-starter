@@ -182,8 +182,8 @@ Sign-out closes the Convex client on `pagehide` before the WorkOS logout redirec
 
 1. Clone / use template → `pnpm install`
 2. Copy `**.secret.example`** → `**.secret**` and replace `replace-me` values. Edit committed `**.env`** for public URLs and ids (`NEXT_PUBLIC_CONVEX_URL`, `WORKOS_CLIENT_ID`, …).
-3. **Convex:** set **`NEXT_PUBLIC_CONVEX_URL`** in **`.env`** to your deployment URL, then run **`pnpm convex:dev`** in a second terminal to push **`convex/`** functions to that deployment.
-4. Run **`make dev`** (`next dev` without Docker) or **`make run-docker`** (Docker Compose) and open [http://localhost:3000](http://localhost:3000).
+3. **Convex:** set **`NEXT_PUBLIC_CONVEX_URL`** in **`.env`** to your deployment URL, then run **`pnpm convex:dev`** in a second terminal to push **`convex/`** functions to that deployment. Set **`WORKOS_CLIENT_ID`** (and **`WORKOS_API_KEY`** for email updates) on the Convex deployment via `npx convex env set …`. **Users auto-provision on sign-in** (`users.store` upserts by WorkOS `tokenIdentifier`).
+4. Run **`make dev-all`** (Next.js + Convex sync in one terminal) or **`make dev`** plus **`make convex-dev`** in a second terminal, then open [http://localhost:3000](http://localhost:3000).
 5. Read **`docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)
 
 **Makefile shortcuts:** `make dev` (daily dev), `make run-docker`, `make start-prod` (production smoke test), `make e2e` (fast, `next dev`), `make e2e-prod` (stricter, `next start`), `make verify` (fmt + lint + typecheck + test + e2e), `make ci` (typecheck + lint + test).

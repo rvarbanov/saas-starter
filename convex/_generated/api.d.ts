@@ -8,7 +8,15 @@
  * @module
  */
 
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_email from "../lib/email.js";
+import type * as lib_identity from "../lib/identity.js";
+import type * as lib_upsertUser from "../lib/upsertUser.js";
+import type * as lib_users from "../lib/users.js";
+import type * as lib_workosApi from "../lib/workosApi.js";
 import type * as ping from "../ping.js";
+import type * as users from "../users.js";
+import type * as usersActions from "../usersActions.js";
 
 import type {
   ApiFromModules,
@@ -17,7 +25,15 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "lib/auth": typeof lib_auth;
+  "lib/email": typeof lib_email;
+  "lib/identity": typeof lib_identity;
+  "lib/upsertUser": typeof lib_upsertUser;
+  "lib/users": typeof lib_users;
+  "lib/workosApi": typeof lib_workosApi;
   ping: typeof ping;
+  users: typeof users;
+  usersActions: typeof usersActions;
 }>;
 
 /**

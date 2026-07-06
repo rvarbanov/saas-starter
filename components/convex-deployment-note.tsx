@@ -22,8 +22,10 @@ export function ConvexDeploymentNote() {
       pushes functions to <strong>that same</strong> deployment (URLs must match). In the Convex
       dashboard → Environment Variables for that deployment, set{" "}
       <code className="rounded bg-muted px-1 py-0.5 text-xs">WORKOS_CLIENT_ID</code> (same value as{" "}
-      <code className="rounded bg-muted px-1 py-0.5 text-xs">.env</code>) so JWT identities resolve
-      for queries.
+      <code className="rounded bg-muted px-1 py-0.5 text-xs">.env</code>) and{" "}
+      <code className="rounded bg-muted px-1 py-0.5 text-xs">WORKOS_API_KEY</code> (from{" "}
+      <code className="rounded bg-muted px-1 py-0.5 text-xs">.secret</code>) so user provisioning can
+      read email from WorkOS when the JWT omits it.
     </p>
   );
 }

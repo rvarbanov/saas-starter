@@ -95,7 +95,7 @@ export default defineConfig({
         webServer: {
           command: webServerCommand,
           url: `${playwrightOrigin}/api/health`,
-          reuseExistingServer: false,
+          reuseExistingServer: !process.env.CI,
           timeout: webServerTimeoutMs,
           gracefulShutdown: { signal: "SIGTERM", timeout: 500 },
         },

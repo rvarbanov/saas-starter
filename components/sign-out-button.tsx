@@ -1,7 +1,7 @@
 "use client";
 
-import { useConvex } from "convex/react";
 import { isConvexConfigured } from "@/lib/convex-config";
+import { closeConvexClient } from "@/lib/convex-client";
 
 const signOutButtonClassName =
   "text-sm font-medium text-primary underline-offset-4 hover:underline";
@@ -17,13 +17,11 @@ function SignOutButtonFallback() {
 }
 
 function SignOutButtonWithConvex() {
-  const convex = useConvex();
-
   const handleSignOut = () => {
     window.addEventListener(
       "pagehide",
       () => {
-        void convex.close();
+        closeConvexClient();
       },
       { once: true },
     );

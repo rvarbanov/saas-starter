@@ -3,7 +3,7 @@
 PNPM ?= pnpm
 DOCKER_COMPOSE ?= docker compose
 
-.PHONY: help install dev start-prod run-docker verify run run-native build start lint fmt format check typecheck \
+.PHONY: help install dev dev-all start-prod run-docker verify run run-native build start lint fmt format check typecheck \
 	test test-coverage e2e e2e-prod e2e-install integration convex-dev convex-codegen ci
 
 help: ## Show available commands
@@ -12,8 +12,11 @@ help: ## Show available commands
 install: ## Install dependencies (pnpm)
 	$(PNPM) install
 
-dev: ## Next.js dev server (native, no Docker)
+dev: ## Next.js dev server (native, no Docker). Also run `make dev-all` or `make convex-dev` in another terminal.
 	$(PNPM) dev:native
+
+dev-all: ## Next.js + Convex dev together (recommended for dashboard user features)
+	@trap 'kill 0' INT TERM; $(PNPM) convex:dev & $(PNPM) dev:native; wait
 
 start-prod: build ## Production build + next start
 	$(PNPM) start
