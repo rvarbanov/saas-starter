@@ -50,7 +50,11 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: quality
+    # Browsers + OS deps are pre-installed; skip `playwright install --with-deps` (slow apt on every run).
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
     steps:
       - uses: actions/checkout@v4
 
@@ -65,9 +69,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install chromium --with-deps
 
       - name: E2E tests
         run: pnpm test:e2e
