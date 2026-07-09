@@ -1,8 +1,8 @@
 type WorkOsUserProfile = {
   email: string;
-  name?: string;
 };
 
+/** Fetch email from WorkOS for provisioning. Does not read or return name fields. */
 export async function fetchWorkOsUserProfile(workosUserId: string): Promise<WorkOsUserProfile> {
   const apiKey = process.env.WORKOS_API_KEY;
   if (!apiKey) {
@@ -38,9 +38,5 @@ export async function fetchWorkOsUserProfile(workosUserId: string): Promise<Work
     throw new Error("WorkOS user has no email");
   }
 
-  const firstName = typeof record.first_name === "string" ? record.first_name.trim() : "";
-  const lastName = typeof record.last_name === "string" ? record.last_name.trim() : "";
-  const name = [firstName, lastName].filter(Boolean).join(" ") || undefined;
-
-  return { email, name };
+  return { email };
 }

@@ -15,15 +15,3 @@ export function extractEmailFromIdentity(identity: UserIdentity): string | undef
 
   return undefined;
 }
-
-/** Prefer explicit name claims when the combined `name` field is absent. */
-export function extractNameFromIdentity(identity: UserIdentity): string | undefined {
-  if (typeof identity.name === "string" && identity.name.trim()) {
-    return identity.name;
-  }
-
-  const given = identity.givenName?.trim();
-  const family = identity.familyName?.trim();
-  const combined = [given, family].filter(Boolean).join(" ");
-  return combined || undefined;
-}
