@@ -18,4 +18,10 @@ test.describe("auth shell", () => {
     await page.goto("/settings");
     await expect(page).not.toHaveURL(/\/settings\/?$/);
   });
+
+  test("unauthenticated user cannot stay on profile", async ({ page }) => {
+    await page.goto("/profile");
+    await expect(page).not.toHaveURL(/\/profile\/?$/);
+  });
 });
+

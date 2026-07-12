@@ -4,7 +4,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
-import { extractEmailFromIdentity, extractNameFromIdentity } from "./lib/identity";
+import { extractEmailFromIdentity } from "./lib/identity";
 import { fetchWorkOsUserProfile } from "./lib/workosApi";
 
 const storeResultValidator = v.object({
@@ -15,6 +15,7 @@ const storeResultValidator = v.object({
 /**
  * Provision the signed-in user in Convex. Fetches email from WorkOS when the
  * access token JWT does not include an `email` claim (default AuthKit behavior).
+ * Does not copy name fields from WorkOS — names are Convex-owned.
  */
 export const provisionUser = action({
   args: {},
@@ -31,12 +32,10 @@ export const provisionUser = action({
     }
 
     let email = extractEmailFromIdentity(identity);
-    let name = extractNameFromIdentity(identity);
 
     if (!email) {
       const profile = await fetchWorkOsUserProfile(workosUserId);
       email = profile.email;
-      name = name ?? profile.name;
     }
 
     if (!email) {
@@ -47,7 +46,6 @@ export const provisionUser = action({
       tokenIdentifier: identity.tokenIdentifier,
       workosUserId,
       email,
-      name,
     });
   },
 });

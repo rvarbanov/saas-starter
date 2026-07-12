@@ -1,10 +1,11 @@
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import { getCurrentUser, getUserByTokenIdentifier } from "./lib/auth";
+import { getCurrentUser, getCurrentUserOrThrow, getUserByTokenIdentifier } from "./lib/auth";
 import { assertValidEmailFormat } from "./lib/email";
-import { extractEmailFromIdentity, extractNameFromIdentity } from "./lib/identity";
+import { extractEmailFromIdentity } from "./lib/identity";
 import { upsertUserFromProfile } from "./lib/upsertUser";
+import { normalizeNames } from "./lib/userNames";
 import { assertEmailAvailable } from "./lib/users";
 
 const storeResultValidator = v.object({
@@ -16,7 +17,6 @@ const authProfileValidator = v.object({
   tokenIdentifier: v.string(),
   workosUserId: v.string(),
   email: v.string(),
-  name: v.optional(v.string()),
 });
 
 export const userDocValidator = v.object({
@@ -25,6 +25,8 @@ export const userDocValidator = v.object({
   tokenIdentifier: v.string(),
   email: v.string(),
   name: v.optional(v.string()),
+  firstName: v.optional(v.string()),
+  lastName: v.optional(v.string()),
   workosUserId: v.string(),
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -37,6 +39,8 @@ function toPublicUserDoc(user: Doc<"users">) {
     tokenIdentifier: user.tokenIdentifier,
     email: user.email,
     name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     workosUserId: user.workosUserId,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -45,7 +49,8 @@ function toPublicUserDoc(user: Doc<"users">) {
 
 /**
  * Upsert when the WorkOS JWT already includes email (JWT template configured).
- * Prefer `usersActions.store` from the client when email is missing from the token.
+ * Prefer `usersActions.provisionUser` from the client when email is missing from the token.
+ * Does not seed name fields from WorkOS/JWT — names are Convex-owned via `updateName`.
  */
 export const store = mutation({
   args: {},
@@ -74,12 +79,11 @@ export const store = mutation({
       tokenIdentifier: identity.tokenIdentifier,
       workosUserId,
       email: rawEmail,
-      name: extractNameFromIdentity(identity),
     });
   },
 });
 
-/** Trusted profile upsert used by `usersActions.store` after WorkOS API lookup. */
+/** Trusted profile upsert used by `usersActions.provisionUser` after WorkOS API email lookup. */
 export const upsertFromAuthProfile = internalMutation({
   args: authProfileValidator,
   returns: storeResultValidator,
@@ -96,6 +100,40 @@ export const getMe = query({
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
     return user ? toPublicUserDoc(user) : null;
+  },
+});
+
+/**
+ * Update the authenticated user's first and last name in Convex only.
+ * Does not call WorkOS.
+ */
+export const updateName = mutation({
+  args: {
+    firstName: v.string(),
+    lastName: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    const normalized = normalizeNames(args.firstName, args.lastName);
+
+    const firstName = normalized.firstName;
+    const lastName = normalized.lastName;
+    const name = normalized.name;
+
+    const unchanged =
+      user.firstName === firstName && user.lastName === lastName && user.name === name;
+    if (unchanged) {
+      return null;
+    }
+
+    await ctx.db.patch("users", user._id, {
+      firstName,
+      lastName,
+      name,
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });
 

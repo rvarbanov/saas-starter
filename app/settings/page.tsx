@@ -18,13 +18,22 @@ export default async function SettingsPage() {
       <h1 className="text-xl font-semibold tracking-tight text-foreground">Account</h1>
       <p className="text-muted-foreground">WorkOS session: {user.email ?? user.id}</p>
       <ConvexUserDisplay />
-      <Link
-        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-        href="/dashboard"
-        prefetch={false}
-      >
-        Back to dashboard
-      </Link>
+      <div className="flex flex-wrap items-center gap-4">
+        <Link
+          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          href="/profile"
+          prefetch={false}
+        >
+          Profile
+        </Link>
+        <Link
+          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          href="/dashboard"
+          prefetch={false}
+        >
+          Back to dashboard
+        </Link>
+      </div>
     </main>
   );
 }

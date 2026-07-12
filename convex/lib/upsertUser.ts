@@ -3,11 +3,11 @@ import type { MutationCtx } from "../_generated/server";
 import { getUserByTokenIdentifier } from "./auth";
 import { assertEmailAvailable, normalizeEmail } from "./users";
 
+/** Auth-linked fields only — WorkOS must not seed profile names into Convex. */
 export type AuthProfile = {
   tokenIdentifier: string;
   workosUserId: string;
   email: string;
-  name?: string;
 };
 
 export type StoreUserResult = {
@@ -25,7 +25,6 @@ export async function upsertUserFromProfile(
   if (existing) {
     const updates: {
       email?: string;
-      name?: string;
       workosUserId?: string;
       updatedAt: number;
     } = { updatedAt: now };
@@ -34,18 +33,11 @@ export async function upsertUserFromProfile(
     if (existing.email !== normalizedEmail) {
       updates.email = await assertEmailAvailable(ctx, profile.email, existing._id);
     }
-    if (existing.name !== profile.name) {
-      updates.name = profile.name;
-    }
     if (existing.workosUserId !== profile.workosUserId) {
       updates.workosUserId = profile.workosUserId;
     }
 
-    if (
-      updates.email !== undefined ||
-      updates.name !== undefined ||
-      updates.workosUserId !== undefined
-    ) {
+    if (updates.email !== undefined || updates.workosUserId !== undefined) {
       await ctx.db.patch("users", existing._id, updates);
     }
 
@@ -58,7 +50,6 @@ export async function upsertUserFromProfile(
     appUserId,
     tokenIdentifier: profile.tokenIdentifier,
     email,
-    name: profile.name,
     workosUserId: profile.workosUserId,
     createdAt: now,
     updatedAt: now,
