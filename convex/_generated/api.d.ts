@@ -12,6 +12,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_email from "../lib/email.js";
 import type * as lib_identity from "../lib/identity.js";
 import type * as lib_upsertUser from "../lib/upsertUser.js";
+import type * as lib_userNames from "../lib/userNames.js";
 import type * as lib_users from "../lib/users.js";
 import type * as lib_workosApi from "../lib/workosApi.js";
 import type * as ping from "../ping.js";
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   "lib/email": typeof lib_email;
   "lib/identity": typeof lib_identity;
   "lib/upsertUser": typeof lib_upsertUser;
+  "lib/userNames": typeof lib_userNames;
   "lib/users": typeof lib_users;
   "lib/workosApi": typeof lib_workosApi;
   ping: typeof ping;
