@@ -4,11 +4,20 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
+import { namesForFormInputs } from "@/convex/lib/userNames";
 import { isConvexConfigured } from "@/lib/convex-config";
 
 type ProfileNameFormProps = {
   /** WorkOS session email shown while Convex user is loading. */
   fallbackEmail?: string | null;
+};
+
+type ProfileUser = {
+  _id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
 };
 
 /** Read-only email + editable first/last name for the signed-in Convex user. */
@@ -28,20 +37,6 @@ function ProfileNameFormInner({ fallbackEmail }: ProfileNameFormProps) {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const ready = !authLoading && isAuthenticated;
   const user = useQuery(api.users.getMe, ready ? {} : "skip");
-  const updateName = useMutation(api.users.updateName);
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-    setFirstName(user.firstName ?? "");
-    setLastName(user.lastName ?? "");
-  }, [user]);
 
   if (!ready || user === undefined) {
     return (
@@ -58,6 +53,36 @@ function ProfileNameFormInner({ fallbackEmail }: ProfileNameFormProps) {
       </p>
     );
   }
+
+  return (
+    <ProfileNameFields
+      fallbackEmail={fallbackEmail}
+      // Remount when the saved Convex names change so inputs show current values.
+      key={`${user._id}:${user.firstName ?? ""}:${user.lastName ?? ""}:${user.name ?? ""}`}
+      user={user}
+    />
+  );
+}
+
+function ProfileNameFields({
+  user,
+  fallbackEmail,
+}: {
+  user: ProfileUser;
+  fallbackEmail?: string | null;
+}) {
+  const updateName = useMutation(api.users.updateName);
+  const initial = namesForFormInputs(user);
+  const [firstName, setFirstName] = useState(initial.firstName);
+  const [lastName, setLastName] = useState(initial.lastName);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const next = namesForFormInputs(user);
+    setFirstName(next.firstName);
+    setLastName(next.lastName);
+  }, [user]);
 
   const email = user.email || fallbackEmail || "—";
 

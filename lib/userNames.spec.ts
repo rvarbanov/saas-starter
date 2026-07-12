@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { MAX_NAME_LENGTH, normalizeNames } from "../convex/lib/userNames";
+import {
+  MAX_NAME_LENGTH,
+  namesForFormInputs,
+  normalizeNames,
+} from "../convex/lib/userNames";
 
 describe("normalizeNames", () => {
   it("trims and joins first and last name", () => {
@@ -35,5 +39,31 @@ describe("normalizeNames", () => {
     const tooLong = "a".repeat(MAX_NAME_LENGTH + 1);
     expect(() => normalizeNames(tooLong, "X")).toThrow(/First name/);
     expect(() => normalizeNames("X", tooLong)).toThrow(/Last name/);
+  });
+});
+
+describe("namesForFormInputs", () => {
+  it("uses first and last when present", () => {
+    expect(
+      namesForFormInputs({ firstName: "Ada", lastName: "Lovelace", name: "Ada Lovelace" }),
+    ).toEqual({ firstName: "Ada", lastName: "Lovelace" });
+  });
+
+  it("keeps a single stored name part", () => {
+    expect(namesForFormInputs({ firstName: "Ada" })).toEqual({
+      firstName: "Ada",
+      lastName: "",
+    });
+  });
+
+  it("splits combined name when first/last are empty", () => {
+    expect(namesForFormInputs({ name: "Ada Lovelace" })).toEqual({
+      firstName: "Ada",
+      lastName: "Lovelace",
+    });
+  });
+
+  it("returns empty strings when no names are stored", () => {
+    expect(namesForFormInputs({})).toEqual({ firstName: "", lastName: "" });
   });
 });
