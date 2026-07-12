@@ -27,3 +27,39 @@ export function normalizeNames(firstName: string, lastName: string): NormalizedN
     name: combined || undefined,
   };
 }
+
+export type NameFormValues = {
+  firstName: string;
+  lastName: string;
+};
+
+/**
+ * Values for profile name inputs. Prefer stored first/last; if those are empty
+ * but combined `name` is present, split on the first space for initial display.
+ */
+export function namesForFormInputs(user: {
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+}): NameFormValues {
+  const first = user.firstName?.trim() ?? "";
+  const last = user.lastName?.trim() ?? "";
+  if (first || last) {
+    return { firstName: first, lastName: last };
+  }
+
+  const combined = user.name?.trim() ?? "";
+  if (!combined) {
+    return { firstName: "", lastName: "" };
+  }
+
+  const space = combined.indexOf(" ");
+  if (space === -1) {
+    return { firstName: combined, lastName: "" };
+  }
+
+  return {
+    firstName: combined.slice(0, space),
+    lastName: combined.slice(space + 1).trim(),
+  };
+}
