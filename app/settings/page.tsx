@@ -13,24 +13,16 @@ export default async function SettingsPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
 
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-6 px-6 py-24">
-      <p className="text-sm font-medium text-muted-foreground">Settings</p>
-      <h1 className="text-xl font-semibold tracking-tight text-foreground">Account</h1>
-      <p className="text-muted-foreground">WorkOS session: {user.email ?? user.id}</p>
+    <main className="page-main">
+      <p className="text-eyebrow">Settings</p>
+      <h1 className="heading-section">Account</h1>
+      <p className="text-body">WorkOS session: {user.email ?? user.id}</p>
       <ConvexUserDisplay />
-      <div className="flex flex-wrap items-center gap-4">
-        <Link
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-          href="/profile"
-          prefetch={false}
-        >
+      <div className="action-row">
+        <Link className="link-primary" href="/profile" prefetch={false}>
           Profile
         </Link>
-        <Link
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-          href="/dashboard"
-          prefetch={false}
-        >
+        <Link className="link-primary" href="/dashboard" prefetch={false}>
           Back to dashboard
         </Link>
       </div>

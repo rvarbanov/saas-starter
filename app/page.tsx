@@ -7,22 +7,17 @@ export const dynamic = "force-dynamic";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col justify-center gap-8 px-6 py-24">
-      <p className="text-sm font-medium text-muted-foreground">SaaS Starter Kit</p>
-      <h1 className="text-4xl font-semibold tracking-tight text-foreground">
-        AI-ready SaaS template
-      </h1>
-      <p className="max-w-xl text-lg text-muted-foreground">
+    <main className="page-main-centered">
+      <p className="text-eyebrow">SaaS Starter Kit</p>
+      <h1 className="heading-hero">AI-ready SaaS template</h1>
+      <p className="text-lead">
         Next.js App Router, Tailwind CSS, shadcn/ui, Convex, and WorkOS AuthKit are wired. Docker
         and CI follow in later milestones—see repository docs for the roadmap.
       </p>
       <ConvexStatus />
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="action-row-tight">
         <AuthHomeCta />
-        <Link
-          className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
-          href="/sign-up"
-        >
+        <Link className="btn-outline" href="/sign-up">
           Sign up
         </Link>
         <ExternalLinkButton
