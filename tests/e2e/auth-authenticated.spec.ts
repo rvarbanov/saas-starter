@@ -20,3 +20,9 @@ test("session persists across dashboard, settings, and home", async ({ page }) =
   await expect(page.getByRole("link", { name: /^Dashboard$/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /^Sign in$/i })).not.toBeVisible();
 });
+
+test("authenticated user visiting sign-up is redirected to dashboard", async ({ page }) => {
+  await page.goto("/sign-up", { waitUntil: "load" });
+  await expect(page).toHaveURL(/\/dashboard\/?$/);
+  await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+});

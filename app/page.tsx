@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AuthHomeCta } from "@/components/auth-home-cta";
 import { ConvexStatus } from "@/components/convex-status";
 import { ExternalLinkButton } from "@/components/external-link-button";
@@ -18,6 +19,12 @@ export default function Home() {
       <ConvexStatus />
       <div className="flex flex-wrap items-center gap-3">
         <AuthHomeCta />
+        <Link
+          className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+          href="/sign-up"
+        >
+          Sign up
+        </Link>
         <ExternalLinkButton
           href="https://github.com/rvarbanov/saas-starter"
           rel="noopener noreferrer"
