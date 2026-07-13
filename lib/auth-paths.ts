@@ -8,6 +8,7 @@ export const AUTHKIT_UNAUTHENTICATED_PATHS = [
   "/callback",
   "/sign-in",
   "/sign-in/redirect",
+  "/sign-up",
 ] as const;
 
 const publicPathSet = new Set<string>(AUTHKIT_UNAUTHENTICATED_PATHS);

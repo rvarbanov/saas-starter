@@ -8,19 +8,22 @@ describe("auth-paths", () => {
     expect(paths.has("/callback")).toBe(true);
     expect(paths.has("/sign-in")).toBe(true);
     expect(paths.has("/sign-in/redirect")).toBe(true);
+    expect(paths.has("/sign-up")).toBe(true);
   });
 
-  it("treats landing, callback, and sign-in flows as public", () => {
+  it("treats landing, callback, and sign-in/sign-up flows as public", () => {
     expect(isAuthKitPublicPath("/")).toBe(true);
     expect(isAuthKitPublicPath("/callback")).toBe(true);
     expect(isAuthKitPublicPath("/sign-in")).toBe(true);
     expect(isAuthKitPublicPath("/sign-in/redirect")).toBe(true);
+    expect(isAuthKitPublicPath("/sign-up")).toBe(true);
   });
 
   it("treats app shell routes as protected", () => {
     expect(isAuthKitPublicPath("/dashboard")).toBe(false);
     expect(isAuthKitPublicPath("/settings")).toBe(false);
     expect(isAuthKitPublicPath("/profile")).toBe(false);
+    expect(isAuthKitPublicPath("/sign-up/start")).toBe(false);
   });
 });
 

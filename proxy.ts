@@ -6,6 +6,7 @@ export default authkitProxy({
     enabled: true,
     unauthenticatedPaths: [...AUTHKIT_UNAUTHENTICATED_PATHS],
   },
+  signUpPaths: ["/sign-up/start"],
 });
 
 export const config = {
