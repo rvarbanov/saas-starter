@@ -16,33 +16,24 @@ export default async function SignUpPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-md flex-col justify-center gap-8 px-6 py-24">
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-muted-foreground">WorkOS AuthKit</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Sign up</h1>
-        <p className="text-muted-foreground">
+    <main className="page-auth">
+      <div className="stack-sm">
+        <p className="text-eyebrow">WorkOS AuthKit</p>
+        <h1 className="heading-page">Sign up</h1>
+        <p className="text-body">
           Continue to the secure WorkOS screen to create an account with your <strong>email</strong>{" "}
           and <strong>password</strong> (and any MFA your organization requires).
         </p>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="stack-md">
         {/* Plain <a>: full navigation to a protected sign-up path so authkitProxy starts OAuth with screen_hint=sign-up */}
-        <a
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
-          href="/sign-up/start"
-        >
+        <a className="btn-primary-lg" href="/sign-up/start">
           Continue to sign up
         </a>
-        <Link
-          className="text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
-          href="/sign-in"
-        >
+        <Link className="link-primary-center" href="/sign-in">
           Sign in
         </Link>
-        <Link
-          className="text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
-          href="/"
-        >
+        <Link className="link-primary-center" href="/">
           Back to home
         </Link>
       </div>

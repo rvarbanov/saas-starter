@@ -24,7 +24,7 @@ type ProfileUser = {
 export function ProfileNameForm({ fallbackEmail }: ProfileNameFormProps) {
   if (!isConvexConfigured()) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-caption">
         Convex is not configured; profile names cannot be edited.
       </p>
     );
@@ -40,7 +40,7 @@ function ProfileNameFormInner({ fallbackEmail }: ProfileNameFormProps) {
 
   if (!ready || user === undefined) {
     return (
-      <p className="min-h-22 text-sm text-muted-foreground" data-testid="profile-loading">
+      <p className="text-loading" data-testid="profile-loading">
         Loading profile…
       </p>
     );
@@ -48,7 +48,7 @@ function ProfileNameFormInner({ fallbackEmail }: ProfileNameFormProps) {
 
   if (user === null) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="profile-missing">
+      <p className="text-caption" data-testid="profile-missing">
         Setting up your account…
       </p>
     );
@@ -100,20 +100,20 @@ function ProfileNameFields({
   }
 
   return (
-    <form className="flex flex-col gap-6" data-testid="profile-name-form" onSubmit={handleSubmit}>
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-foreground">Email</p>
-        <p className="text-muted-foreground" data-testid="profile-email">
+    <form className="form" data-testid="profile-name-form" onSubmit={handleSubmit}>
+      <div className="field-group">
+        <p className="text-label">Email</p>
+        <p className="text-value" data-testid="profile-email">
           {email}
         </p>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5 text-sm" htmlFor="profile-first-name">
-          <span className="font-medium text-foreground">First name</span>
+      <div className="form-fields">
+        <label className="field-label" htmlFor="profile-first-name">
+          <span className="text-label">First name</span>
           <input
             autoComplete="given-name"
-            className="h-9 rounded-lg border border-border bg-background px-3 text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="input"
             id="profile-first-name"
             name="firstName"
             onChange={(event) => setFirstName(event.target.value)}
@@ -122,11 +122,11 @@ function ProfileNameFields({
           />
         </label>
 
-        <label className="flex flex-col gap-1.5 text-sm" htmlFor="profile-last-name">
-          <span className="font-medium text-foreground">Last name</span>
+        <label className="field-label" htmlFor="profile-last-name">
+          <span className="text-label">Last name</span>
           <input
             autoComplete="family-name"
-            className="h-9 rounded-lg border border-border bg-background px-3 text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="input"
             id="profile-last-name"
             name="lastName"
             onChange={(event) => setLastName(event.target.value)}
@@ -137,7 +137,7 @@ function ProfileNameFields({
       </div>
 
       {error ? (
-        <p className="text-sm text-destructive" data-testid="profile-name-error" role="alert">
+        <p className="text-error" data-testid="profile-name-error" role="alert">
           {error}
         </p>
       ) : null}

@@ -9,12 +9,9 @@ import { isConvexConfigured } from "@/lib/convex-config";
 export function ConvexStatus() {
   if (!isConvexConfigured()) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="convex-status-unconfigured">
-        Convex: set{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-xs">NEXT_PUBLIC_CONVEX_URL</code> in{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-xs">.env</code> after{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-xs">npx convex dev</code> (see dashboard
-        URL).
+      <p className="text-caption" data-testid="convex-status-unconfigured">
+        Convex: set <code>NEXT_PUBLIC_CONVEX_URL</code> in <code>.env</code> after{" "}
+        <code>npx convex dev</code> (see dashboard URL).
       </p>
     );
   }
@@ -31,14 +28,14 @@ function ConvexStatusConnected() {
 
   if (!mounted || message === undefined) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="convex-status-loading">
+      <p className="text-caption" data-testid="convex-status-loading">
         Loading Convex…
       </p>
     );
   }
 
   return (
-    <p className="text-sm text-muted-foreground" data-testid="convex-status">
+    <p className="text-caption" data-testid="convex-status">
       {message.message}
     </p>
   );

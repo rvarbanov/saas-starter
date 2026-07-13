@@ -15,7 +15,7 @@ export function ConvexUserDisplay() {
 
 function ConvexUserProfileSkeleton() {
   return (
-    <p className="min-h-22 text-sm text-muted-foreground" data-testid="convex-user-loading">
+    <p className="text-loading" data-testid="convex-user-loading">
       Loading Convex user…
     </p>
   );
@@ -31,17 +31,17 @@ function ConvexUserDisplayInner() {
   }
 
   return (
-    <div className="flex flex-col gap-2 text-muted-foreground" data-testid="convex-user-profile">
+    <div className="stack-sm text-body" data-testid="convex-user-profile">
       <p>
-        <span className="font-medium text-foreground">Email:</span> {user.email}
+        <span className="text-emphasis">Email:</span> {user.email}
       </p>
       <p>
-        <span className="font-medium text-foreground">App user id:</span>{" "}
-        <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{user.appUserId}</code>
+        <span className="text-emphasis">App user id:</span>{" "}
+        <code className="inline-code">{user.appUserId}</code>
       </p>
       {user.name ? (
         <p>
-          <span className="font-medium text-foreground">Name:</span> {user.name}
+          <span className="text-emphasis">Name:</span> {user.name}
         </p>
       ) : null}
     </div>

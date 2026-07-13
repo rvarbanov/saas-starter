@@ -1,0 +1,59 @@
+@layer base {
+  code {
+    @apply rounded bg-muted px-1 py-0.5 text-xs;
+  }
+}
+
+@layer components {
+  .text-eyebrow {
+    @apply text-sm font-medium text-muted-foreground;
+  }
+
+  .text-lead {
+    @apply max-w-xl text-lg text-muted-foreground;
+  }
+
+  .text-body {
+    @apply text-muted-foreground;
+  }
+
+  .text-caption {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .text-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .text-value {
+    @apply text-muted-foreground;
+  }
+
+  .text-loading {
+    @apply min-h-22 text-sm text-muted-foreground;
+  }
+
+  .text-error {
+    @apply text-sm text-destructive;
+  }
+
+  .text-emphasis {
+    @apply font-medium text-foreground;
+  }
+
+  .inline-code {
+    @apply rounded bg-muted px-1.5 py-0.5 text-sm;
+  }
+
+  .heading-hero {
+    @apply text-4xl font-semibold tracking-tight text-foreground;
+  }
+
+  .heading-page {
+    @apply text-2xl font-semibold tracking-tight text-foreground;
+  }
+
+  .heading-section {
+    @apply text-xl font-semibold tracking-tight text-foreground;
+  }
+}
