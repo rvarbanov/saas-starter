@@ -36,7 +36,12 @@ const playwrightWorkers = process.env.PLAYWRIGHT_WORKERS?.trim()
 
 const chromiumProject = {
   name: "chromium",
-  testIgnore: [/auth\.setup\.ts/, /auth-authenticated\.spec\.ts/, /auth-sign-out\.spec\.ts/],
+  testIgnore: [
+    /auth\.setup\.ts/,
+    /auth-authenticated\.spec\.ts/,
+    /auth-sign-out\.spec\.ts/,
+    /dashboard-visual\.spec\.ts/,
+  ],
   use: { ...devices["Desktop Chrome"] },
 };
 
@@ -46,7 +51,7 @@ const projects = hasWorkOsE2eCreds()
       chromiumProject,
       {
         name: "authenticated",
-        testMatch: /auth-authenticated\.spec\.ts/,
+        testMatch: /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts/,
         use: {
           ...devices["Desktop Chrome"],
           storageState: AUTH_STORAGE_PATH,
