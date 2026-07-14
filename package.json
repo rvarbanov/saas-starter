@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "capture:footer": "playwright test global-footer-visual --workers=1",
     "test:integration": "docker compose run --rm app pnpm test",
     "typecheck": "tsc --noEmit",
     "convex:dev": "convex dev",
