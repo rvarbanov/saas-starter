@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AuthHomeCta } from "@/components/auth-home-cta";
 import { ConvexStatus } from "@/components/convex-status";
 import { ExternalLinkButton } from "@/components/external-link-button";
+import { GITHUB_REPO_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default function Home() {
           Sign up
         </Link>
         <ExternalLinkButton
-          href="https://github.com/rvarbanov/saas-starter"
+          href={GITHUB_REPO_URL}
           rel="noopener noreferrer"
           target="_blank"
         >

@@ -2,6 +2,7 @@ import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ConvexAuthProvider } from "@/components/convex-auth-provider";
+import { GlobalFooter } from "@/components/global-footer";
 import { GlobalNav } from "@/components/global-nav";
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default function RootLayout({
           <ConvexAuthProvider>
             <GlobalNav />
             {children}
+            <GlobalFooter />
           </ConvexAuthProvider>
         </AuthKitProvider>
       </body>
