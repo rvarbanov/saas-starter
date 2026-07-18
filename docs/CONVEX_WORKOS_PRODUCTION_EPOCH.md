@@ -75,12 +75,31 @@
 - **Deny (no identity):** throw `"Not authenticated"`.
 - **Enforce in:** Convex only (no extra UI/route role gate for the interim rule).
 - **Writes / admin management:** out of scope; existing self-service APIs unchanged.
-- **Field floor (directory only):** responses must **never** include `tokenIdentifier` or `workosUserId`. Positive columns are owned by RAD-61. `getMe` may keep those fields for self.
+- **Field floor (directory only):** responses must **never** include `tokenIdentifier` or `workosUserId`. Positive columns are owned by RAD-61 (resolved below). `getMe` may keep those fields for self.
 
 **Tracked debt** (soft warning — does **not** formally block shipping the Users list or RAD-61/64):
 
 1. [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role) — Implement RBAC / `user_role` (outside RAD-59; same project).
 2. [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — Restrict directory read to Super admin **or** Manager; Team member → throw `"Unauthorized"`; Manager’s exact row filter deferred until teams/RBAC. Blocked by RAD-69. Neither blocks RAD-61/64.
+
+### Users table columns and affordances (RAD-61)
+
+**Decision:** [RAD-61](https://linear.app/radi-dev/issue/RAD-61/users-table-columns-and-affordances).
+
+**Visible columns** (L→R): First name · Last name · Email · Created at · Updated at (`firstName`, `lastName`, `email`, `createdAt`, `updatedAt`).
+
+**Directory DTO** (list + by-id of others): `_id`, `firstName`, `lastName`, `email`, `createdAt`, `updatedAt` only. (`_id` is row identity — not a visible column.)
+
+**Sort & interim load:**
+
+- Fixed sort: `updatedAt` descending (headers not interactive in v1).
+- Interim hard cap: **50** rows; truncation footer when capped (“Showing the 50 most recently updated users”).
+- Full cursor pagination required later — [RAD-71](https://linear.app/radi-dev/issue/RAD-71/users-list-cursor-pagination).
+- Search/filter deferred — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
+
+**UI affordances (v1):** blank empty name cells; locale absolute datetimes in client local TZ; plain-text email; ellipsis + `title` overflow; no row-click; no actions column; no current-user highlight; page title `Users`; empty “No users yet”; table skeleton loading; “Couldn’t load users” + Retry on error; all five columns on narrow viewports (horizontal scroll OK).
+
+**Unblocks:** [RAD-64](https://linear.app/radi-dev/issue/RAD-64/convex-list-users-api-shape) (function name, args, indexes, exact query contract).
 
 ---
 
