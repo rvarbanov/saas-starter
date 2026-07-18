@@ -64,6 +64,24 @@
 
 **Email updates (backend only):** `usersActions.updateEmail` → WorkOS API → `patchEmailInternal`. Requires `WORKOS_API_KEY` on Convex deployment. Passive sync on re-login via `store`. Settings email UI deferred.
 
+### Users directory authorization (RAD-60)
+
+**Decision:** [RAD-60](https://linear.app/radi-dev/issue/RAD-60/users-list-authorization).
+
+**Interim policy** (unblocks RAD-61 → RAD-64 / authenticated shell Users handoff):
+
+- **Who:** any principal with a valid WorkOS/JWT via `ctx.auth.getUserIdentity()` (Convex `users` row not required).
+- **What:** directory reads — collection list **and** by-id of other users — over all `users` rows in the deployment.
+- **Deny (no identity):** throw `"Not authenticated"`.
+- **Enforce in:** Convex only (no extra UI/route role gate for the interim rule).
+- **Writes / admin management:** out of scope; existing self-service APIs unchanged.
+- **Field floor (directory only):** responses must **never** include `tokenIdentifier` or `workosUserId`. Positive columns are owned by RAD-61. `getMe` may keep those fields for self.
+
+**Tracked debt** (soft warning — does **not** formally block shipping the Users list or RAD-61/64):
+
+1. [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role) — Implement RBAC / `user_role` (outside RAD-59; same project).
+2. [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — Restrict directory read to Super admin **or** Manager; Team member → throw `"Unauthorized"`; Manager’s exact row filter deferred until teams/RBAC. Blocked by RAD-69. Neither blocks RAD-61/64.
+
 ---
 
 ## Production readiness — gaps (issue seeds)
@@ -90,7 +108,7 @@ Use the subsections below as **epic children** or **epoch checklist items**.
 - ~~Implement queries/mutations that use `**ctx.auth.getUserIdentity()`**~~ **Done (v1):** `users.store`, `users.getMe`, `usersActions.updateEmail`.
 - **Never** accept client-supplied `userId` for authorization; derive identity only server-side in Convex.
 - Add integration tests or manual test plan: signed-in user sees correct data; signed-out or wrong token cannot mutate others’ data.
-- **Deferred:** `user_role` table, Settings email change UI, admin invite flow.
+- **Deferred:** `user_role` table ([RAD-69](https://linear.app/radi-dev/issue/RAD-69); directory tighten [RAD-70](https://linear.app/radi-dev/issue/RAD-70)), Settings email change UI, admin invite flow.
 
 ### D. Cross-cutting “definition of done”
 
