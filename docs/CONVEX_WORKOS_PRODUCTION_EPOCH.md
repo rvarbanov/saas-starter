@@ -90,16 +90,40 @@
 
 **Directory DTO** (list + by-id of others): `_id`, `firstName`, `lastName`, `email`, `createdAt`, `updatedAt` only. (`_id` is row identity — not a visible column.)
 
-**Sort & interim load:**
+**Sort & load:**
 
 - Fixed sort: `updatedAt` descending (headers not interactive in v1).
-- Interim hard cap: **50** rows; truncation footer when capped (“Showing the 50 most recently updated users”).
-- Full cursor pagination required later — [RAD-71](https://linear.app/radi-dev/issue/RAD-71/users-list-cursor-pagination).
+- ~~Interim hard cap: **50** rows; truncation footer when capped.~~ **Superseded by [RAD-64](https://linear.app/radi-dev/issue/RAD-64/convex-list-users-api-shape):** cursor pagination from day one (see below). [RAD-71](https://linear.app/radi-dev/issue/RAD-71/users-list-cursor-pagination) canceled as absorbed.
 - Search/filter deferred — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
 
-**UI affordances (v1):** blank empty name cells; locale absolute datetimes in client local TZ; plain-text email; ellipsis + `title` overflow; no row-click; no actions column; no current-user highlight; page title `Users`; empty “No users yet”; table skeleton loading; “Couldn’t load users” + Retry on error; all five columns on narrow viewports (horizontal scroll OK).
+**UI affordances (v1):** blank empty name cells; locale absolute datetimes in client local TZ; plain-text email; ellipsis + `title` overflow; no row-click; no actions column; no current-user highlight; page title `Users`; empty “No users yet”; table skeleton loading; “Couldn’t load users” + Retry on error; all five columns on narrow viewports (horizontal scroll OK). **Pagination chrome:** Load more (append pages until `isDone`) — not the superseded 50-cap truncation footer.
 
-**Unblocks:** [RAD-64](https://linear.app/radi-dev/issue/RAD-64/convex-list-users-api-shape) (function name, args, indexes, exact query contract).
+### Convex list-users API shape (RAD-64)
+
+**Decision:** [RAD-64](https://linear.app/radi-dev/issue/RAD-64/convex-list-users-api-shape).
+
+**Module:** `convex/users.ts` — `api.users.list`, `api.users.get` (alongside `getMe` / `store`). Shared directory validator/mapper; keep `userDocValidator` for self-service (`getMe` may still expose identity link fields).
+
+**Auth (from RAD-60):** JWT via `ctx.auth.getUserIdentity()` only — caller Convex `users` row **not** required. Deny → throw `"Not authenticated"`.
+
+**Directory DTO / returns item** (names optional to match schema):
+
+`_id`, `firstName?`, `lastName?`, `email`, `createdAt`, `updatedAt` — never `tokenIdentifier`, `workosUserId`, `appUserId`, or `name`.
+
+**Index:** add `by_updatedAt` on `["updatedAt"]`. List uses that index + `.order("desc").paginate(...)`.
+
+**`users.list`:**
+
+- **Args:** `{ paginationOpts }` only (no sort/search/filter args; sort hardcoded).
+- **Returns:** `{ page: DirectoryUser[], continueCursor: string, isDone: boolean }` (standard Convex pagination).
+- **Page size:** client `numItems`; server **silent clamp** to max **100**. UI default `initialNumItems: 25`; Load more until `isDone`.
+
+**`users.get`:**
+
+- **Args:** `{ userId: Id<"users"> }`.
+- **Returns:** directory row or `null` if missing (not a throw).
+
+**Tracked debt:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) — search/filter (extends list args later). Implementation of this contract is a later build; this section is the grilled query contract only.
 
 ---
 
