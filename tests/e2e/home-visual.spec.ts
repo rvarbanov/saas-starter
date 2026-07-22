@@ -16,14 +16,21 @@ test.use({
   },
 });
 
-test.describe("global footer visuals", () => {
+test.describe("home visuals", () => {
   test.beforeAll(() => {
     mkdirSync(SCREENSHOT_DIR, { recursive: true });
   });
 
-  test("homepage shows global footer", async ({ page }) => {
+  test("home page shows global nav and footer", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: /AI-ready SaaS template/i })).toBeVisible();
+
+    const nav = page.getByRole("navigation", { name: "Global" });
+    await expect(nav).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Sign in" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Sign up" })).toBeVisible();
+
     await expect(page.getByText(/Copyright © \d{4}/)).toBeVisible();
     const createdBy = page.getByRole("link", { name: /Created by rvarbanov/i });
     await expect(createdBy).toBeVisible();
@@ -31,8 +38,9 @@ test.describe("global footer visuals", () => {
       "href",
       "https://github.com/rvarbanov/saas-starter",
     );
+
     await page.screenshot({
-      path: resolve(SCREENSHOT_DIR, "homepage-global-footer.png"),
+      path: resolve(SCREENSHOT_DIR, "home.png"),
       fullPage: true,
     });
   });
