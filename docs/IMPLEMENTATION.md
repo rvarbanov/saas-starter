@@ -267,7 +267,7 @@ Record the decision (pros/cons for *this* template) in this section or `docs/adr
 
 Align with `**SPECIFICATION.md**`: public, WorkOS flows, dashboard CRUD happy paths (create/update/fetch), admin; record-level requirements for major features.
 
-**Current setup:** Playwright runs **natively** on the host (not inside Docker Compose). `**playwright.config.ts**` starts `**next dev**` via Playwright’s built-in `**webServer**`, waits on `**/api/health**`, and reuses an existing local server when present. Authenticated flows use a **setup project** + `**storageState**` (`**tests/e2e/auth.setup.ts**` → `**playwright/.auth/user.json**`) when `**E2E_WORKOS_EMAIL**` / `**E2E_WORKOS_PASSWORD**` are set. See [Playwright auth](https://playwright.dev/docs/auth) and [webServer](https://playwright.dev/docs/test-webserver).
+**Current setup:** Playwright runs **natively** on the host (not inside Docker Compose). `**playwright.config.ts**` starts `**next dev**` via Playwright’s built-in `**webServer**`, waits on `**/api/health**`, and reuses an existing local server when present. Authenticated flows use a **setup project** + `**storageState**` (`**tests/e2e/auth.setup.ts**` → `**playwright/.auth/user.json**`). The config **requires** `E2E_WORKOS_EMAIL`, `E2E_WORKOS_PASSWORD`, `WORKOS_API_KEY`, and `WORKOS_COOKIE_PASSWORD` (fail-fast if missing). See [Playwright auth](https://playwright.dev/docs/auth) and [webServer](https://playwright.dev/docs/test-webserver).
 
 Docker Compose E2E remains a future option if dev/test parity requires it (`**SPECIFICATION.md**` notes the intentional deviation).
 
@@ -303,7 +303,7 @@ Official: [GitHub Actions quickstart](https://docs.github.com/en/actions/quickst
 
 Secrets: use **GitHub Actions secrets** — never raw `.secret` in CI.
 
-**Smoke CI without real WorkOS/Convex:** GitHub Actions sets placeholder `WORKOS_*` env vars for the E2E job (no `.secret` file in CI). Shell E2E (smoke + auth redirects) runs in CI; full WorkOS login requires GitHub Secrets `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD`. Locally, use **`.secret`** per `**SPECIFICATION.md**`.
+**E2E CI (authenticated):** The e2e job uses the Playwright Docker image (bundled Chromium; do not force `channel: "chrome"`). It wires GitHub Actions secrets `E2E_WORKOS_EMAIL`, `E2E_WORKOS_PASSWORD`, and `WORKOS_API_KEY`, keeps a CI `WORKOS_COOKIE_PASSWORD` (≥32 chars), and relies on committed `.env` for `WORKOS_CLIENT_ID` / public URLs. Locally use **`.secret`**; on Cursor Cloud use environment runtime secrets (process env). `playwright.config.ts` fail-fasts if the required set is missing.
 
 ### 12.2 CD — Vercel
 

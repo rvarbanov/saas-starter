@@ -7,7 +7,8 @@ const SCREENSHOT_DIR = resolve(
 );
 
 test.use({
-  channel: "chrome",
+  // Use Playwright Chromium (CI image / `playwright install chromium`).
+  // Do not set channel: "chrome" — Google Chrome is not installed in the CI Playwright image.
   contextOptions: {
     recordVideo: {
       dir: SCREENSHOT_DIR,

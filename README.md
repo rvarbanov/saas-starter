@@ -157,8 +157,8 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 
 | Project | When | Specs |
 | --- | --- | --- |
-| `chromium` | Always | Smoke + unauthenticated auth shell |
-| `setup` + `authenticated` + `authenticated-sign-out` | `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` set in `.secret` | WorkOS login (once) → read-only session tests (parallel) → sign-out last |
+| `chromium` | Always (after secrets gate) | Smoke + unauthenticated auth shell + visual captures |
+| `setup` + `authenticated` + `authenticated-sign-out` | Always (after secrets gate) | WorkOS login (once) → read-only session tests (parallel) → sign-out last |
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
@@ -170,9 +170,10 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 | `PLAYWRIGHT_WORKERS` | No | CPU-based locally; `2` in CI | Parallel test workers (`1` to force serial) |
 | `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` | No | `120000` | Max wait for dev server readiness |
 | `PLAYWRIGHT_WEB_SERVER` | No | `development` | Set to `production` for `make e2e-prod` (standalone server after build) |
-| `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | No | — | Enable `setup` + `authenticated` projects (set in `.secret`) |
+| `E2E_WORKOS_EMAIL` / `E2E_WORKOS_PASSWORD` | **Yes** for `pnpm test:e2e` | — | WorkOS test user for `setup` + authenticated projects |
+| `WORKOS_API_KEY` / `WORKOS_COOKIE_PASSWORD` | **Yes** for `pnpm test:e2e` | — | AuthKit server boot + login completion |
 
-CI runs shell tests with placeholder `WORKOS_*` env vars. For full authenticated E2E in CI, add `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD` as GitHub Actions secrets.
+`playwright.config.ts` **fail-fasts** if any of those four secrets are missing (local `.secret`, Cursor Cloud env secrets, or GitHub Actions secrets). CI wires `E2E_WORKOS_*` and `WORKOS_API_KEY` from Actions secrets; `WORKOS_CLIENT_ID` comes from committed `.env`; `WORKOS_COOKIE_PASSWORD` may be a CI-only ≥32-char value.
 
 If E2E fails with a port conflict, stop other processes on that port (e.g. `lsof -ti:3000`) before running **`make e2e`** or **`make verify`** (Playwright always starts a fresh dev server for E2E).
 
