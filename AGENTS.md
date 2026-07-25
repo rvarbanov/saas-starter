@@ -12,6 +12,10 @@ When working on Convex code, **always read `convex/_generated/ai/guidelines.md` 
 Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
 <!-- convex-ai-end -->
 
+## Wayfinder handoffs
+
+When implementing a Wayfinder destination from a prior grilling map, read [`docs/handoffs/CONTRACT.md`](docs/handoffs/CONTRACT.md). Execute only from a **`packed`** handoff under `docs/handoffs/` (not from Linear summaries alone).
+
 ## Cursor Cloud specific instructions
 
 Stack: single Next.js 16 app (`saas-starter`) + Convex backend + WorkOS AuthKit. Standard commands live in `package.json` scripts and the `Makefile`; the update script already runs `pnpm install`.
