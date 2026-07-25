@@ -4,6 +4,8 @@ A production-ready template for **SaaS-style** apps: public, dashboard, and admi
 
 **Authoritative docs:** **[INTENT.md](docs/INTENT.md)** · **[SPECIFICATION.md](docs/SPECIFICATION.md)** · **[IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** (detailed setup, SEO, roles, Docker, CI/CD, per-tool links).
 
+**Wayfinder handoffs:** packed build specs live under [`docs/handoffs/`](docs/handoffs/); format and home rules are in [`docs/handoffs/CONTRACT.md`](docs/handoffs/CONTRACT.md).
+
 ---
 
 ## Overview
