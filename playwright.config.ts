@@ -92,6 +92,11 @@ export default defineConfig({
     screenshot: "only-on-failure",
     navigationTimeout: navigationTimeoutMs,
     actionTimeout: actionTimeoutMs,
+    // Optional: PLAYWRIGHT_CHANNEL=chrome uses system Google Chrome (cloud VMs
+    // where bundled Chromium download is unreliable). Leave unset for CI/Docker.
+    ...(process.env.PLAYWRIGHT_CHANNEL?.trim()
+      ? { channel: process.env.PLAYWRIGHT_CHANNEL.trim() }
+      : {}),
   },
   projects,
   ...(runLocalWebServer
