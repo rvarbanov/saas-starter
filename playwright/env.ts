@@ -97,8 +97,35 @@ export function healthCheckUrl(origin = getCanonicalPlaywrightOrigin()): string 
   return `${origin}/api/health`;
 }
 
+/** Env vars required for authenticated Playwright (local `.secret`, Cursor Cloud, or CI secrets). */
+export const REQUIRED_WORKOS_E2E_ENV = [
+  "E2E_WORKOS_EMAIL",
+  "E2E_WORKOS_PASSWORD",
+  "WORKOS_API_KEY",
+  "WORKOS_COOKIE_PASSWORD",
+] as const;
+
+export function missingWorkOsE2eEnv(): string[] {
+  return REQUIRED_WORKOS_E2E_ENV.filter((name) => !process.env[name]?.trim());
+}
+
 export function hasWorkOsE2eCreds(): boolean {
-  return Boolean(process.env.E2E_WORKOS_EMAIL?.trim() && process.env.E2E_WORKOS_PASSWORD?.trim());
+  return missingWorkOsE2eEnv().length === 0;
+}
+
+/**
+ * Fail fast when authenticated e2e secrets are missing.
+ * Same gate for local, Cursor Cloud, and GitHub Actions.
+ */
+export function requireWorkOsE2eEnv(): void {
+  const missing = missingWorkOsE2eEnv();
+  if (missing.length === 0) return;
+
+  const where =
+    "Set them in `.secret` (local), Cursor Cloud environment secrets, or GitHub Actions secrets (wired in `.github/workflows/ci.yml`).";
+  throw new Error(
+    `Playwright e2e requires WorkOS secrets. Missing: ${missing.join(", ")}. ${where}`,
+  );
 }
 
 /** Ensure directory for auth storageState exists before setup writes the file. */

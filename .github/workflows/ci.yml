@@ -75,9 +75,11 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3000
-          # No `.secret` in CI; Next/AuthKit need placeholders for Playwright webServer.
-          WORKOS_CLIENT_ID: client_01CIPlaceholderXXXXXXXXXXXXXXXX
+          # WORKOS_CLIENT_ID comes from committed `.env` (do not override with a placeholder).
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/callback
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-          WORKOS_API_KEY: sk_test_ci_placeholder
+          # Real AuthKit key + e2e user (repo Actions secrets). Cookie password may be CI-only.
+          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
           WORKOS_COOKIE_PASSWORD: "01234567890123456789012345678901"
+          E2E_WORKOS_EMAIL: ${{ secrets.E2E_WORKOS_EMAIL }}
+          E2E_WORKOS_PASSWORD: ${{ secrets.E2E_WORKOS_PASSWORD }}

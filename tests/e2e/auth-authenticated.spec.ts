@@ -17,6 +17,7 @@ test("session persists across dashboard, settings, and home", async ({ page }) =
 
   await page.goto("/", { waitUntil: "load" });
   await expect(page.getByTestId("convex-status")).toBeVisible({ timeout: 15_000 });
+  // Home CTA is auth-aware; GlobalNav still uses a static "Sign in" label → /dashboard.
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: /^Dashboard$/i })).toBeVisible({ timeout: 15_000 });
   await expect(main.getByRole("link", { name: /^Sign in$/i })).not.toBeVisible();

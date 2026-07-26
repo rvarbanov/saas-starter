@@ -4,13 +4,14 @@ import {
   envPositiveInt,
   getCanonicalPlaywrightOrigin,
   getPlaywrightOriginUrl,
-  hasWorkOsE2eCreds,
   isLocalDevHost,
   loadPlaywrightEnv,
   parseOriginForDevServer,
+  requireWorkOsE2eEnv,
 } from "./playwright/env";
 
 loadPlaywrightEnv();
+requireWorkOsE2eEnv();
 
 const playwrightOrigin = getCanonicalPlaywrightOrigin();
 const playwrightOriginUrl = getPlaywrightOriginUrl();
@@ -40,30 +41,28 @@ const chromiumProject = {
   use: { ...devices["Desktop Chrome"] },
 };
 
-const projects = hasWorkOsE2eCreds()
-  ? [
-      { name: "setup", testMatch: /auth\.setup\.ts/ },
-      chromiumProject,
-      {
-        name: "authenticated",
-        testMatch: /auth-authenticated\.spec\.ts/,
-        use: {
-          ...devices["Desktop Chrome"],
-          storageState: AUTH_STORAGE_PATH,
-        },
-        dependencies: ["setup"],
-      },
-      {
-        name: "authenticated-sign-out",
-        testMatch: /auth-sign-out\.spec\.ts/,
-        use: {
-          ...devices["Desktop Chrome"],
-          storageState: AUTH_STORAGE_PATH,
-        },
-        dependencies: ["authenticated"],
-      },
-    ]
-  : [chromiumProject];
+const projects = [
+  { name: "setup", testMatch: /auth\.setup\.ts/ },
+  chromiumProject,
+  {
+    name: "authenticated",
+    testMatch: /auth-authenticated\.spec\.ts/,
+    use: {
+      ...devices["Desktop Chrome"],
+      storageState: AUTH_STORAGE_PATH,
+    },
+    dependencies: ["setup"],
+  },
+  {
+    name: "authenticated-sign-out",
+    testMatch: /auth-sign-out\.spec\.ts/,
+    use: {
+      ...devices["Desktop Chrome"],
+      storageState: AUTH_STORAGE_PATH,
+    },
+    dependencies: ["authenticated"],
+  },
+];
 
 // Authenticated sign-out E2E requires WorkOS Sign-out redirects = NEXT_PUBLIC_APP_URL.
 // TODO(staging): Point PLAYWRIGHT_BASE_URL at a preview/staging deployment and rely on CI/env

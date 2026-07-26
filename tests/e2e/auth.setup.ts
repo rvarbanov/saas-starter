@@ -6,8 +6,8 @@ setup("authenticate via WorkOS", async ({ page }) => {
   const email = process.env.E2E_WORKOS_EMAIL?.trim();
   const password = process.env.E2E_WORKOS_PASSWORD?.trim();
   if (!email || !password) {
-    setup.skip(true, "Set E2E_WORKOS_EMAIL and E2E_WORKOS_PASSWORD in .secret");
-    return;
+    // playwright.config.ts already fail-fasts; keep a clear error if setup is run alone.
+    throw new Error("Set E2E_WORKOS_EMAIL and E2E_WORKOS_PASSWORD for authenticated e2e");
   }
 
   await signInViaWorkOs(page, { email, password });
