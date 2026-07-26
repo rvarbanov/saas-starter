@@ -3,19 +3,8 @@ import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 
 const SCREENSHOT_DIR = resolve(
-  process.env.PLAYWRIGHT_SCREENSHOT_DIR ?? "/opt/cursor/artifacts/screenshots",
+  process.env.PLAYWRIGHT_SCREENSHOT_DIR ?? "test-results/screenshots",
 );
-
-test.use({
-  // Use Playwright Chromium (CI image / `playwright install chromium`).
-  // Do not set channel: "chrome" — Google Chrome is not installed in the CI Playwright image.
-  contextOptions: {
-    recordVideo: {
-      dir: SCREENSHOT_DIR,
-      size: { width: 1280, height: 900 },
-    },
-  },
-});
 
 test.describe("global footer visuals", () => {
   test.beforeAll(() => {
