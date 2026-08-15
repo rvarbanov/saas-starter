@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 export function GlobalNav() {
   return (
@@ -9,7 +10,7 @@ export function GlobalNav() {
         </Link>
         <div className="nav-links">
           {/* Plain <a>: full navigation to protected routes so authkitProxy starts OAuth with one PKCE cookie */}
-          <a className="link-nav" href="/dashboard">
+          <a className="link-nav" href={APP_ROUTES.dashboard}>
             Sign in
           </a>
           <a className="link-nav" href="/sign-up/start">

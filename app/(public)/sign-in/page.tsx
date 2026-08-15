@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 export const metadata = {
   title: "Sign in",
@@ -18,7 +19,7 @@ export default function SignInPage() {
       </div>
       <div className="stack-md">
         {/* Plain <a>: full navigation to a protected route so authkitProxy starts OAuth with one PKCE cookie */}
-        <a className="btn-primary-lg" href="/dashboard">
+        <a className="btn-primary-lg" href={APP_ROUTES.dashboard}>
           Continue to sign in
         </a>
         <Link className="link-primary-center" href="/sign-up">

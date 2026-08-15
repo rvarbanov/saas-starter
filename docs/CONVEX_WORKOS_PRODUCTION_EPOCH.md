@@ -60,7 +60,7 @@
 | `_id` (`Id<"users">`) | Convex FK target for app tables |
 | `appUserId` | UUID v4 portable id for external APIs / migration export |
 
-**Verify (local):** sign in → Convex Data tab shows one `users` row; `make ci` green; with E2E creds, `make e2e` asserts `convex-user-profile` on dashboard/settings.
+**Verify (local):** sign in → Convex Data tab shows one `users` row; `make ci` green; with E2E creds, `make e2e` asserts `convex-user-profile` on dashboard and `/dashboard/settings`.
 
 **Email updates (backend only):** `usersActions.updateEmail` → WorkOS API → `patchEmailInternal`. Requires `WORKOS_API_KEY` on Convex deployment. Passive sync on re-login via `store`. Settings email UI deferred.
 

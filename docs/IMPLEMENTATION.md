@@ -44,8 +44,9 @@ These routes must exist for **SEO**, **trust**, and **compliance** (adjust paths
 
 | Route (example)             | Purpose                                                                                      |
 | --------------------------- | -------------------------------------------------------------------------------------------- |
-| `/dashboard` or `/app`      | Authenticated home; entry to CRUD for the primary resource                                   |
-| `/profile` or `/settings`   | User’s own account/profile                                                                   |
+| `/dashboard`                | Authenticated home; entry to CRUD for the primary resource                                   |
+| `/dashboard/settings`       | Account settings                                                                             |
+| `/dashboard/profile`        | User’s own profile                                                                           |
 | `/team` or `/workspace/...` | **Manager** scope: manage the team(s) they manage (omit if single-tenant MVP defers team UI) |
 | `/work` or `/tasks/...`     | **Team member** scope: work assigned to them (representative list/detail)                    |
 | `/admin/...`                | **Super admin** only: global admin (users, orgs, settings)                                   |

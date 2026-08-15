@@ -59,8 +59,9 @@ Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (*
 
 | Route (examples)           | Purpose                              |
 | -------------------------- | ------------------------------------ |
-| `/dashboard` or `/app`     | Authenticated home + primary CRUD    |
-| `/profile` or `/settings`  | User’s own account                   |
+| `/dashboard`               | Authenticated home + primary CRUD    |
+| `/dashboard/settings`      | Account settings                     |
+| `/dashboard/profile`       | User’s own profile                   |
 | `/team` / workspace routes | **Manager**: manage assigned team(s) |
 | `/work` / assigned work    | **Team member**: own work items      |
 | `/admin/...`               | **Super admin** only                 |

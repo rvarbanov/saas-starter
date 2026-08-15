@@ -1,6 +1,7 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import Link from "next/link";
 import { ProfileNameForm } from "@/components/profile-name-form";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 export const metadata = {
   title: "Profile",
@@ -17,7 +18,7 @@ export default async function ProfilePage() {
       <p className="text-eyebrow">Profile</p>
       <h1 className="heading-section">Your name</h1>
       <ProfileNameForm fallbackEmail={user.email} />
-      <Link className="link-primary" href="/settings" prefetch={false}>
+      <Link className="link-primary" href={APP_ROUTES.settings} prefetch={false}>
         Back to settings
       </Link>
     </main>
