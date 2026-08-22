@@ -20,6 +20,6 @@ _Avoid_: Users directory, members, accounts, getMe, directory
 The name, email, and dates shown for each person in the Users list — not their login identity.
 _Avoid_: Directory DTO, DTO, user doc, profile
 
-**Demo data**:
-Fake metrics and rows on the Coming soon page, used to show the layout. Swapped in code, not live.
-_Avoid_: Coming soon pack, live metrics, dashboard widgets
+**Demo page**:
+The Coming soon page — fake metrics and rows used to show the layout, not live product data.
+_Avoid_: Coming soon pack, demo data, live metrics, dashboard widgets
