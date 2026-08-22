@@ -1,16 +1,42 @@
 # SaaS Starter
 
-Glossary for the public website and the signed-in product. Implementation contracts live in `docs/handoffs/`; this file names the concepts only.
+Glossary for the public site and the signed-in app. Implementation contracts live in `docs/handoffs/`; this file names the concepts only.
 
-## Language
+## Surfaces
 
-**The app**:
-The signed-in product — every page under `/dashboard`, including the sidebar and top bar that stay on screen.
-_Avoid_: Authenticated shell, app chrome, admin shell
+**Public site**:
+The part of the product anyone can browse without signing in.
+_Avoid_: The website, public chrome, marketing layout
 
-**The website**:
-The public site — home, sign-in, and sign-up — with the site header and footer.
-_Avoid_: Public chrome, marketing layout, chrome
+**App**:
+The signed-in web app — the product itself, every page behind auth.
+_Avoid_: Authenticated shell, app chrome, admin shell, the website
+
+**Landing page**:
+A public marketing page that explains the product and drives a sign-up or sign-in click.
+_Avoid_: Public site (the landing pages are only the marketing ones)
+
+**Auth workflow**:
+The public steps that get someone into the app: sign-in, sign-up, and password reset.
+_Avoid_: Login flow (as the only name), auth chrome
+
+## Frame
+
+Public site and app each have their own header, footer, and nav.
+
+**Global header**:
+The bar at the top of the page.
+_Avoid_: Chrome, top bar (as the only name)
+
+**Global footer**:
+The bar at the bottom of the page.
+_Avoid_: Chrome
+
+**Global nav**:
+The persistent links used to move around.
+_Avoid_: Chrome, sidebar (as the only name)
+
+## In the app
 
 **Users list**:
 The table of people on the Users page.
