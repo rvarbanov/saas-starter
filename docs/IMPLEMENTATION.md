@@ -180,7 +180,7 @@ If Docker is temporarily unavailable, native dev may be used only as a fallback 
 - **Typography:** one sans stack (e.g. Geist or project default); limit **font sizes** to a small scale (text-sm / base / lg / xl).  
 - **Spacing:** consistent `gap-*` and `p-*` from Tailwind scale; avoid arbitrary pixel values unless necessary.  
 - **Color:** semantic tokens (`primary`, `destructive`, `muted`) via shadcn; ensure **WCAG contrast** for text.  
-- **Components:** prefer shadcn primitives; customize in `components/ui/` only when needed.  
+- **Components:** prefer shadcn primitives; customize in `components/ui/` only when needed. Generated files stay in `components/ui/`; Biome relaxes a few rules there so `shadcn add` does not fail `pnpm lint`. Locked app-frame inventory: sidebar, card, table, chart, separator, avatar, dropdown-menu, breadcrumb, sheet, badge, tooltip (`lib/ui-inventory.ts`). Do not overwrite `button.tsx` on add.  
 - **Icons:** one library (e.g. Lucide, bundled with shadcn).  
 - **Motion:** subtle only; respect `prefers-reduced-motion`.
 
