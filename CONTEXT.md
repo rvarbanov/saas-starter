@@ -4,6 +4,8 @@ Glossary for the public site and the signed-in app. Implementation contracts liv
 
 ## Surfaces
 
+The kinds of pages someone can be on: public site, app, landing pages, and the auth workflow.
+
 **Public site**:
 The part of the product anyone can browse without signing in.
 _Avoid_: The website, public chrome, marketing layout
@@ -20,9 +22,9 @@ _Avoid_: Public site (the landing pages are only the marketing ones)
 The public steps that get someone into the app: sign-in, sign-up, and password reset.
 _Avoid_: Login flow (as the only name), auth chrome
 
-## Header, footer, and nav
+## Frame
 
-Public site and app each have their own. These stay on screen while the page content changes.
+The header, footer, and nav that stay on screen while the page content changes. Public site and app each have their own.
 
 **Global header**:
 The bar at the top of the page.
