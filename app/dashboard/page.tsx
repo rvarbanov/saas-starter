@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConvexDeploymentNote } from "@/components/convex-deployment-note";
 import { ConvexUserDisplay } from "@/components/convex-user-display";
 import { SignOutButton } from "@/components/sign-out-button";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export default async function DashboardPage() {
       <ConvexUserDisplay />
       <ConvexDeploymentNote />
       <div className="action-row">
-        <Link className="link-primary" href="/settings" prefetch={false}>
+        <Link className="link-primary" href={APP_ROUTES.settings} prefetch={false}>
           Settings
         </Link>
         <Link className="link-primary" href="/" prefetch={false}>

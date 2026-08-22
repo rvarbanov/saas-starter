@@ -11,16 +11,13 @@ test.describe("dashboard visuals", () => {
     mkdirSync(SCREENSHOT_DIR, { recursive: true });
   });
 
-  test("dashboard shows global nav and footer when signed in", async ({ page }) => {
+  test("dashboard is free of marketing chrome when signed in", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 
-    const nav = page.getByRole("navigation", { name: "Global" });
-    await expect(nav).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
-
-    await expect(page.getByText(/Copyright © \d{4}/)).toBeVisible();
-    await expect(page.getByRole("link", { name: /Created by rvarbanov/i })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Global" })).toHaveCount(0);
+    await expect(page.getByText(/Copyright © \d{4}/)).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Created by rvarbanov/i })).toHaveCount(0);
 
     await page.screenshot({
       path: resolve(SCREENSHOT_DIR, "dashboard.png"),

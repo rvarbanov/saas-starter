@@ -21,8 +21,10 @@ describe("auth-paths", () => {
 
   it("treats app shell routes as protected", () => {
     expect(isAuthKitPublicPath("/dashboard")).toBe(false);
-    expect(isAuthKitPublicPath("/settings")).toBe(false);
-    expect(isAuthKitPublicPath("/profile")).toBe(false);
+    expect(isAuthKitPublicPath("/dashboard/settings")).toBe(false);
+    expect(isAuthKitPublicPath("/dashboard/profile")).toBe(false);
+    expect(isAuthKitPublicPath("/dashboard/users")).toBe(false);
+    expect(isAuthKitPublicPath("/dashboard/coming-soon")).toBe(false);
     expect(isAuthKitPublicPath("/sign-up/start")).toBe(false);
   });
 });

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import Link from "next/link";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 /** Home CTA driven by client session so it stays correct after in-app navigation. */
 export function AuthHomeCta() {
@@ -17,7 +18,7 @@ export function AuthHomeCta() {
 
   if (user) {
     return (
-      <Link className="btn-primary" href="/dashboard" prefetch={false}>
+      <Link className="btn-primary" href={APP_ROUTES.dashboard} prefetch={false}>
         Dashboard
       </Link>
     );

@@ -1,6 +1,7 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 export const metadata = {
   title: "Sign up",
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function SignUpPage() {
   const { user } = await withAuth();
   if (user) {
-    redirect("/dashboard");
+    redirect(APP_ROUTES.dashboard);
   }
 
   return (

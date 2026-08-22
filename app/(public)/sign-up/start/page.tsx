@@ -1,5 +1,6 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
+import { APP_ROUTES } from "@/lib/app-routes";
 
 export const dynamic = "force-dynamic";
 
@@ -10,5 +11,5 @@ export const dynamic = "force-dynamic";
  */
 export default async function SignUpStartPage() {
   await withAuth({ ensureSignedIn: true });
-  redirect("/dashboard");
+  redirect(APP_ROUTES.dashboard);
 }

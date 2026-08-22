@@ -64,14 +64,14 @@ test.describe("auth shell", () => {
     await expect(page).not.toHaveURL(/\/dashboard\/?$/);
   });
 
-  test("unauthenticated user cannot stay on settings", async ({ page }) => {
-    await page.goto("/settings");
-    await expect(page).not.toHaveURL(/\/settings\/?$/);
+  test("unauthenticated user cannot stay on dashboard settings", async ({ page }) => {
+    await page.goto("/dashboard/settings");
+    await expect(page).not.toHaveURL(/\/dashboard\/settings\/?$/);
   });
 
-  test("unauthenticated user cannot stay on profile", async ({ page }) => {
-    await page.goto("/profile");
-    await expect(page).not.toHaveURL(/\/profile\/?$/);
+  test("unauthenticated user cannot stay on dashboard profile", async ({ page }) => {
+    await page.goto("/dashboard/profile");
+    await expect(page).not.toHaveURL(/\/dashboard\/profile\/?$/);
   });
 });
 
