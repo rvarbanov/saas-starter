@@ -20,9 +20,9 @@ _Avoid_: Public site (the landing pages are only the marketing ones)
 The public steps that get someone into the app: sign-in, sign-up, and password reset.
 _Avoid_: Login flow (as the only name), auth chrome
 
-## Frame
+## Header, footer, and nav
 
-Public site and app each have their own header, footer, and nav.
+Public site and app each have their own. These stay on screen while the page content changes.
 
 **Global header**:
 The bar at the top of the page.
