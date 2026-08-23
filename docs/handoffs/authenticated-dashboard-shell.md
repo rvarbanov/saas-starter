@@ -181,9 +181,11 @@ RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEM
 
 **App Global footer**
 
-- The app has a **Global footer** (glossary: same term as the public site’s bottom bar). It is not the public-site `GlobalFooter` component.
+- The app has a **Global footer** (glossary: same term as the public site’s bottom bar).
 - Lives **inside** the inset, below the Content area.
-- Copy and extra links: see Open / deferred (soft default until grilled).
+- **Same words** as today’s public-site footer: `Copyright © {year}` · `Created by rvarbanov` (GitHub, `GITHUB_REPO_URL`). No extra nav.
+- Do **not** mount `components/global-footer.tsx` on App routes. New app footer markup.
+- E2E E still means the **public-site** Global footer is absent on `/dashboard/*`, not that copyright text is forbidden.
 
 **shadcn for this slice only:**  
 `pnpm exec shadcn add sidebar separator avatar dropdown-menu breadcrumb sheet tooltip`  
@@ -297,7 +299,6 @@ Map-level checklist and Acceptance below stay the **full destination**.
 ## Open / deferred
 
 - **Page copy (pack soft default):** preserve existing dashboard/settings/profile body copy inside the Content area; do not invent rewrites unless a later grill says otherwise.
-- **App Global footer contents (soft default):** copyright year + “Created by rvarbanov” GitHub link, same words as today’s public-site footer. No extra nav. Do not mount `components/global-footer.tsx` on App routes (that is the public-site footer). Override this default in a later grill if the App footer should differ.
 - **Lucide icons:** locked in RAD-77 (`LayoutDashboard` / `Users` / `Sparkles`).
 - **Coming soon mock values:** build invents concrete arrays from the locked schema (RAD-62); do not invent alternate layouts or a runtime pack switcher.
 - **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — outside this handoff.
