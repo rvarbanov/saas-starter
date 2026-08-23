@@ -122,7 +122,7 @@ Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 - Brand label: **SaaS Starter Kit** → `/dashboard`.
 - Active state: exact match on Dashboard; prefix match elsewhere.
 - Desktop sidebar collapsible; **default expanded**. Mobile: Sheet.
-- Avatar menu (avatar-only trigger): Profile → Settings → separator → Sign out. Profile and Settings are **menu-only** (not sidebar links).
+- Avatar menu (avatar-only trigger **in the Global header**): Profile → Settings → separator → Sign out. Profile and Settings are **menu-only** (not Global nav links).
 - Breadcrumbs: `Dashboard` + leaf.
 - Strip page-body duplicates of shell actions (e.g. redundant sign-out / nav) in the later build.
 - Exact Lucide icons: **locked by RAD-77** (was a pack soft default).
@@ -162,11 +162,21 @@ RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEM
 
 **Avatar menu**
 
+- **One trigger only**, on the right of the app Global header. Not in the Global nav.
 - Avatar-only trigger. **Initials**, no photo.
 - Initials from Convex first + last, else `name`, else email local-part, else `?`.
 - Open panel: **name + email** above the actions (omit name if missing). Then Profile → Settings → separator → Sign out. No extra rows.
-- Identity does **not** repeat in a Global nav footer.
-- **Sign out** reuses today’s Convex-close + `GET /sign-out` behavior (extract from `SignOutButton` if needed). Remove the page-body Sign out control. No second Sign out in the Global nav.
+- **Sign out** reuses today’s Convex-close + `GET /sign-out` behavior (extract from `SignOutButton` if needed). Remove the page-body Sign out control.
+
+**Global nav contains (and only this)**
+
+- Brand: **SaaS Starter Kit** → `/dashboard`
+- Dashboard → `/dashboard`
+- Users → `/dashboard/users`
+- Coming soon → `/dashboard/coming-soon`
+- Collapse rail / mobile Sheet chrome as already locked
+
+**Global nav does not contain:** Avatar menu, user card, Profile, Settings, or Sign out. Do not add a shadcn `SidebarFooter` account block. The app **Global footer** (copyright + GitHub) is a different thing — it sits under the Content area, not in the nav.
 
 **Stubs (until Users list / Demo page tickets replace the bodies)**
 
@@ -249,9 +259,10 @@ Ticket: [RAD-77](https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sideb
 1. Add slice shadcn set: `pnpm exec shadcn add sidebar separator avatar dropdown-menu breadcrumb sheet tooltip` (dry-run first; protect `button.tsx`).
 2. Add `app/dashboard/layout.tsx` with the App frame (inset Global nav + in-inset Global header + Content area + in-inset Global footer) and layout-only `withAuth({ ensureSignedIn: true })`.
 3. Wire Global nav IA + Avatar menu + breadcrumbs per RAD-66 + RAD-77; brand **SaaS Starter Kit**; landmarks `app-sidebar` / `app-topbar`.
-4. Add stub pages `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` per the RAD-77 stub table.
-5. Strip page-body Sign out and redundant in-body nav on dashboard / settings / profile. Leave those pages’ existing body copy.
-6. Update E2E that this slice actually touches: sign-out via Avatar menu (J); App Global nav + Global header visible and public-site frame absent on `/dashboard/*` (E); sidebar tour over stubs (F); Avatar menu → Settings / Profile (G); unauthenticated cannot stay on the five App paths including stubs (C). Quality gates: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
+4. Add the app Global footer inside the inset (copyright + GitHub credit; do not mount `components/global-footer.tsx`).
+5. Add stub pages `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` per the RAD-77 stub table.
+6. Strip page-body Sign out and redundant in-body nav on dashboard / settings / profile. Leave those pages’ existing body copy.
+7. Update E2E that this slice actually touches: sign-out via Avatar menu (J); App Global nav + Global header visible and public-site frame absent on `/dashboard/*` (E); sidebar tour over stubs (F); Avatar menu → Settings / Profile (G); unauthenticated cannot stay on the five App paths including stubs (C). Quality gates: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 **Do not (in RAD-77)**
 

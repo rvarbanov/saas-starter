@@ -45,8 +45,8 @@ The page body inside the app’s frame — the part that changes as you move bet
 _Avoid_: main, inset, page-main
 
 **Avatar menu**:
-The account menu opened from the app’s Global header. It holds Profile, Settings, and Sign out.
-_Avoid_: user menu, account dropdown
+The account menu. It opens from one control, in the app’s Global header. It holds Profile, Settings, and Sign out.
+_Avoid_: user menu, account dropdown, sidebar account
 
 **Users list**:
 The table of people on the Users page.
