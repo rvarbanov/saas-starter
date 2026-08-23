@@ -2,12 +2,15 @@
 
 - **Map:** https://linear.app/radi-dev/issue/RAD-59/wayfinder-authenticated-dashboard-shell-handoff
 - **Packed:** 2026-08-14
+- **Re-packed:** 2026-08-23
 - **Status:** packed
-- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73
+- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77
 
 ## Destination
 
-A later build session implements an authenticated app shell: sidebar + slim top bar on `/dashboard/*`, Users directory backed by Convex `users.list` / `users.get`, and a static Coming soon demo (KPIs / chart / table). When this handoff’s Acceptance criteria pass, the destination of the Wayfinder map is met for the build — this packed file is decision-complete; it does not implement UI.
+A later build session implements the **App** frame (Global nav + Global header + Content area) on `/dashboard/*`, the Users list backed by Convex `users.list` / `users.get`, and the Demo page (KPIs / chart / table). When this handoff’s Acceptance criteria pass, the destination of the Wayfinder map is met for the build — this packed file is decision-complete; it does not implement UI.
+
+**RAD-77 is a build slice**, not the map destination. See [Build slice: RAD-77](#build-slice-rad-77). Do not treat “implement this handoff” as “ship the Users list and Demo page” when the ticket is RAD-77.
 
 ## Out of scope
 
@@ -122,7 +125,63 @@ Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 - Avatar menu (avatar-only trigger): Profile → Settings → separator → Sign out. Profile and Settings are **menu-only** (not sidebar links).
 - Breadcrumbs: `Dashboard` + leaf.
 - Strip page-body duplicates of shell actions (e.g. redundant sign-out / nav) in the later build.
-- Exact Lucide icons: soft default — build picks sensible icons (see Open / deferred).
+- Exact Lucide icons: **locked by RAD-77** (was a pack soft default).
+
+### App Global header and Global nav leftovers (RAD-77)
+
+Language follows [`CONTEXT.md`](../../CONTEXT.md). The signed-in product is the **App**. Its frame is the app **Global header** + **Global nav** (sidebar-shaped) + **Content area**. The app has no **Global footer**. Do not use “authenticated shell,” “public chrome,” or “top bar” as product names. Landmarks `data-testid="app-sidebar"` (Global nav root) and `data-testid="app-topbar"` (Global header) stay as implementation testids.
+
+RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEMENTATION.md) (no Work / Team / Admin rows).
+
+**Already on `main` (not this slice):** `app/(public)/` public-site frame; `/dashboard/settings` and `/dashboard/profile`; [`lib/app-routes.ts`](../../lib/app-routes.ts).
+
+**Inset and collapse**
+
+- Inset: Global nav flush left; Content area in a rounded inset panel.
+- Desktop Global nav `collapsible="icon"` (narrow icon rail when collapsed). **Default expanded.** Collapse persisted in a cookie (shadcn `SidebarProvider` default). Keyboard **⌘B / Ctrl+B**.
+- Mobile: Sheet (RAD-66). Collapse / Sheet stay out of map Acceptance E2E.
+
+**App Global header**
+
+- Lives **inside** the inset (not full-bleed above the Global nav).
+- Left: sidebar trigger + breadcrumbs. Right: Avatar menu. Trigger visible on desktop and mobile.
+- Sticky within the inset.
+
+**Breadcrumbs**
+
+- `/dashboard` → single crumb **Dashboard** (not a link).
+- Nested → Dashboard (link to `/dashboard`) + leaf (not a link).
+- Leaves: **Settings**, **Profile**, **Users**, **Coming soon**. No Home crumb. Do not use page H1s as crumbs.
+
+**Icons and brand**
+
+- Dashboard → `LayoutDashboard`
+- Users → `Users`
+- Coming soon → `Sparkles`
+- Brand: text **SaaS Starter Kit** only (no logo asset) → `/dashboard`.
+
+**Avatar menu**
+
+- Avatar-only trigger. **Initials**, no photo.
+- Initials from Convex first + last, else `name`, else email local-part, else `?`.
+- Open panel: **name + email** above the actions (omit name if missing). Then Profile → Settings → separator → Sign out. No extra rows.
+- Identity does **not** repeat in a Global nav footer.
+- **Sign out** reuses today’s Convex-close + `GET /sign-out` behavior (extract from `SignOutButton` if needed). Remove the page-body Sign out control. No second Sign out in the Global nav.
+
+**Stubs (until Users list / Demo page tickets replace the bodies)**
+
+| Route | Heading | Body line |
+| --- | --- | --- |
+| `/dashboard/users` | `Users` | `User directory is not wired up yet.` |
+| `/dashboard/coming-soon` | `Coming soon` | `Demo metrics land in a later ticket.` |
+
+- Do **not** use the RAD-62 Demo page subtitle or KPI / chart / table on the stub.
+- Landmark is the heading. No extra stub testids.
+- Preserve existing dashboard / settings / profile **body copy** in the Content area (pack soft default). Strip redundant in-body nav / Sign out (RAD-66).
+
+**shadcn for this slice only:**  
+`pnpm exec shadcn add sidebar separator avatar dropdown-menu breadcrumb sheet tooltip`  
+(dry-run first; protect `button.tsx`). Do **not** add `card` / `table` / `chart` / `badge` in RAD-77 — those wait for the Users list and Demo page.
 
 ### Handoff spec format and home (RAD-68)
 
@@ -173,14 +232,36 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), avatar menu items, and existing
 
 **Secrets (mandatory):** every environment that runs E2E — including local — must have `E2E_WORKOS_EMAIL` and `E2E_WORKOS_PASSWORD` (plus existing WorkOS cookie/API secrets per AGENTS.md). If missing, E2E **fails** (no omitting/skipping authenticated projects). Build updates Playwright config/setup to enforce this.
 
+## Build slice: RAD-77
+
+Ticket: [RAD-77](https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar) — App Global header + Global nav + Content area only.
+
+**Do**
+
+1. Add slice shadcn set: `pnpm exec shadcn add sidebar separator avatar dropdown-menu breadcrumb sheet tooltip` (dry-run first; protect `button.tsx`).
+2. Add `app/dashboard/layout.tsx` with the App frame (inset Global nav + in-inset Global header + Content area) and layout-only `withAuth({ ensureSignedIn: true })`.
+3. Wire Global nav IA + Avatar menu + breadcrumbs per RAD-66 + RAD-77; brand **SaaS Starter Kit**; landmarks `app-sidebar` / `app-topbar`.
+4. Add stub pages `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` per the RAD-77 stub table.
+5. Strip page-body Sign out and redundant in-body nav on dashboard / settings / profile. Leave those pages’ existing body copy.
+6. Update E2E that this slice actually touches: sign-out via Avatar menu (J); App Global nav + Global header visible and public-site frame absent on `/dashboard/*` (E); sidebar tour over stubs (F); Avatar menu → Settings / Profile (G); unauthenticated cannot stay on the five App paths including stubs (C). Quality gates: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
+
+**Do not (in RAD-77)**
+
+- Convex `users.list` / `users.get`, Users list table, Demo page packs / chart / table
+- Map E2E **H** and **I**
+- Re-do `app/(public)/`, nest settings/profile, or add `lib/app-routes.ts` (already on `main`)
+- Add Work / Team / Admin to the Global nav
+
+Map-level checklist and Acceptance below stay the **full destination**.
+
 ## Build checklist
 
-1. Add shadcn components: `pnpm exec shadcn add sidebar card table chart separator avatar dropdown-menu breadcrumb sheet badge tooltip` (dry-run first; protect `button.tsx`).
-2. Move public/marketing/auth routes under `app/(public)/` so GlobalNav/Footer apply only there; keep shell free of marketing chrome.
-3. Add `app/dashboard/layout.tsx` with shell chrome (sidebar + slim top bar) and layout-only `withAuth({ ensureSignedIn: true })`.
-4. Create nested routes: `app/dashboard/page.tsx` (home), `app/dashboard/settings/page.tsx`, `app/dashboard/profile/page.tsx`, `app/dashboard/users/page.tsx`, `app/dashboard/coming-soon/page.tsx`.
-5. Delete top-level `app/settings/` and `app/profile/`; update all imports, links, docs, and tests — **no** legacy redirects.
-6. Add `lib/app-routes.ts` with the closed shell path set; keep `lib/auth-paths.ts` aligned with AuthKit public paths / proxy.
+1. Add shadcn components: `pnpm exec shadcn add sidebar card table chart separator avatar dropdown-menu breadcrumb sheet badge tooltip` (dry-run first; protect `button.tsx`). RAD-77 adds the chrome subset first; Users list / Demo page add the rest.
+2. ~~Move public/marketing/auth routes under `app/(public)/`~~ **Done on `main`.**
+3. Add `app/dashboard/layout.tsx` with the App frame (Global nav + Global header + Content area) and layout-only `withAuth({ ensureSignedIn: true })`.
+4. Nested `/dashboard/settings` and `/dashboard/profile` **done on `main`**. Still create `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` (stubs in RAD-77; full bodies later).
+5. ~~Delete top-level `app/settings/` and `app/profile/`~~ **Done on `main`** — **no** legacy redirects.
+6. ~~Add `lib/app-routes.ts`~~ **Done on `main`.** Keep `lib/auth-paths.ts` aligned with AuthKit public paths / proxy.
 7. Schema + Convex: add `by_updatedAt` on `users`; implement `api.users.list` and `api.users.get` in `convex/users.ts` per RAD-64 (directory DTO + auth from RAD-60/61).
 8. Build Users page: table columns/affordances per RAD-61; `usePaginatedQuery` with `initialNumItems: 25`; Load more until `isDone`; testids `users-directory-table` / `users-load-more`.
 9. Add `lib/coming-soon/` packs (default SaaS analytics + three code-swap packs); wire Coming soon page (KPI → chart → table) with testids and range/paging controls per RAD-62 / RAD-73.
@@ -191,7 +272,17 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), avatar menu items, and existing
 
 ## Acceptance criteria
 
-- [ ] **Product:** Closed route set live under `/dashboard/*` with shell chrome (no GlobalNav/Footer on shell); Users directory matches RAD-60/61/64; Coming soon matches RAD-62; Profile/Settings via avatar menu only.
+### RAD-77 slice
+
+- [ ] **Product:** App frame on `/dashboard/*` (Global nav + Global header + Content area; no public-site Global header / Global nav / Global footer). Settings and Profile via Avatar menu only. Users and Coming soon are stubs per RAD-77. Page-body Sign out gone.
+- [ ] `pnpm typecheck`
+- [ ] `pnpm lint`
+- [ ] `pnpm test`
+- [ ] **E2E:** Scenarios **C, E, F, G, J** from RAD-73 (stubs satisfy F’s page landmarks). Not H or I.
+
+### Map destination (full shell)
+
+- [ ] **Product:** Closed route set live under `/dashboard/*` with the App frame (no public-site frame on App routes); Users list matches RAD-60/61/64; Demo page matches RAD-62; Profile/Settings via Avatar menu only.
 - [ ] `pnpm typecheck`
 - [ ] `pnpm lint`
 - [ ] `pnpm test`
@@ -199,8 +290,8 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), avatar menu items, and existing
 
 ## Open / deferred
 
-- **Page copy (pack soft default):** preserve existing dashboard/settings/profile body copy inside the new content area; do not invent rewrites unless a later grill says otherwise.
-- **Lucide icons (pack soft default):** build picks sensible Lucide icons for Dashboard / Users / Coming soon; do not invent a locked icon map in this handoff.
+- **Page copy (pack soft default):** preserve existing dashboard/settings/profile body copy inside the Content area; do not invent rewrites unless a later grill says otherwise.
+- **Lucide icons:** locked in RAD-77 (`LayoutDashboard` / `Users` / `Sparkles`).
 - **Coming soon mock values:** build invents concrete arrays from the locked schema (RAD-62); do not invent alternate layouts or a runtime pack switcher.
 - **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — outside this handoff.
 - **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
@@ -220,4 +311,6 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), avatar menu items, and existing
   - https://linear.app/radi-dev/issue/RAD-66/sidebar-ia-and-chrome
   - https://linear.app/radi-dev/issue/RAD-68/handoff-spec-format-and-home
   - https://linear.app/radi-dev/issue/RAD-73/e2e-expectations-for-shell-build
+  - https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar
 - Format contract: [`docs/handoffs/CONTRACT.md`](./CONTRACT.md)
+- Glossary: [`CONTEXT.md`](../../CONTEXT.md)
