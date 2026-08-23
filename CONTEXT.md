@@ -24,14 +24,14 @@ _Avoid_: Login flow (as the only name), auth chrome
 
 ## Frame
 
-The header, footer, and nav that stay on screen while the page content changes. The public site has all three. The app has a Global header and Global nav only — no Global footer.
+The header, footer, and nav that stay on screen while the page content changes. Public site and app each have all three.
 
 **Global header**:
 The bar at the top of the page.
 _Avoid_: Chrome, top bar (as the only name)
 
 **Global footer**:
-The bar at the bottom of the page.
+The bar at the bottom of the page. The public site and the app each have one.
 _Avoid_: Chrome
 
 **Global nav**:

@@ -8,7 +8,7 @@
 
 ## Destination
 
-A later build session implements the **App** frame (Global nav + Global header + Content area) on `/dashboard/*`, the Users list backed by Convex `users.list` / `users.get`, and the Demo page (KPIs / chart / table). When this handoff’s Acceptance criteria pass, the destination of the Wayfinder map is met for the build — this packed file is decision-complete; it does not implement UI.
+A later build session implements the **App** frame (Global nav + Global header + Global footer + Content area) on `/dashboard/*`, the Users list backed by Convex `users.list` / `users.get`, and the Demo page (KPIs / chart / table). When this handoff’s Acceptance criteria pass, the destination of the Wayfinder map is met for the build — this packed file is decision-complete; it does not implement UI.
 
 **RAD-77 is a build slice**, not the map destination. See [Build slice: RAD-77](#build-slice-rad-77). Do not treat “implement this handoff” as “ship the Users list and Demo page” when the ticket is RAD-77.
 
@@ -129,7 +129,7 @@ Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 
 ### App Global header and Global nav leftovers (RAD-77)
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md). The signed-in product is the **App**. Its frame is the app **Global header** + **Global nav** (sidebar-shaped) + **Content area**. The app has no **Global footer**. Do not use “authenticated shell,” “public chrome,” or “top bar” as product names. Landmarks `data-testid="app-sidebar"` (Global nav root) and `data-testid="app-topbar"` (Global header) stay as implementation testids.
+Language follows [`CONTEXT.md`](../../CONTEXT.md). The signed-in product is the **App**. Its frame is the app **Global header** + **Global nav** (sidebar-shaped) + **Global footer** + **Content area**. Do not use “authenticated shell,” “public chrome,” or “top bar” as product names. Landmarks `data-testid="app-sidebar"` (Global nav root) and `data-testid="app-topbar"` (Global header) stay as implementation testids.
 
 RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEMENTATION.md) (no Work / Team / Admin rows).
 
@@ -178,6 +178,12 @@ RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEM
 - Do **not** use the RAD-62 Demo page subtitle or KPI / chart / table on the stub.
 - Landmark is the heading. No extra stub testids.
 - Preserve existing dashboard / settings / profile **body copy** in the Content area (pack soft default). Strip redundant in-body nav / Sign out (RAD-66).
+
+**App Global footer**
+
+- The app has a **Global footer** (glossary: same term as the public site’s bottom bar). It is not the public-site `GlobalFooter` component.
+- Lives **inside** the inset, below the Content area.
+- Copy and extra links: see Open / deferred (soft default until grilled).
 
 **shadcn for this slice only:**  
 `pnpm exec shadcn add sidebar separator avatar dropdown-menu breadcrumb sheet tooltip`  
@@ -234,12 +240,12 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), avatar menu items, and existing
 
 ## Build slice: RAD-77
 
-Ticket: [RAD-77](https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar) — App Global header + Global nav + Content area only.
+Ticket: [RAD-77](https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar) — App Global header + Global nav + Global footer + Content area.
 
 **Do**
 
 1. Add slice shadcn set: `pnpm exec shadcn add sidebar separator avatar dropdown-menu breadcrumb sheet tooltip` (dry-run first; protect `button.tsx`).
-2. Add `app/dashboard/layout.tsx` with the App frame (inset Global nav + in-inset Global header + Content area) and layout-only `withAuth({ ensureSignedIn: true })`.
+2. Add `app/dashboard/layout.tsx` with the App frame (inset Global nav + in-inset Global header + Content area + in-inset Global footer) and layout-only `withAuth({ ensureSignedIn: true })`.
 3. Wire Global nav IA + Avatar menu + breadcrumbs per RAD-66 + RAD-77; brand **SaaS Starter Kit**; landmarks `app-sidebar` / `app-topbar`.
 4. Add stub pages `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` per the RAD-77 stub table.
 5. Strip page-body Sign out and redundant in-body nav on dashboard / settings / profile. Leave those pages’ existing body copy.
@@ -258,7 +264,7 @@ Map-level checklist and Acceptance below stay the **full destination**.
 
 1. Add shadcn components: `pnpm exec shadcn add sidebar card table chart separator avatar dropdown-menu breadcrumb sheet badge tooltip` (dry-run first; protect `button.tsx`). RAD-77 adds the chrome subset first; Users list / Demo page add the rest.
 2. ~~Move public/marketing/auth routes under `app/(public)/`~~ **Done on `main`.**
-3. Add `app/dashboard/layout.tsx` with the App frame (Global nav + Global header + Content area) and layout-only `withAuth({ ensureSignedIn: true })`.
+3. Add `app/dashboard/layout.tsx` with the App frame (Global nav + Global header + Global footer + Content area) and layout-only `withAuth({ ensureSignedIn: true })`.
 4. Nested `/dashboard/settings` and `/dashboard/profile` **done on `main`**. Still create `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` (stubs in RAD-77; full bodies later).
 5. ~~Delete top-level `app/settings/` and `app/profile/`~~ **Done on `main`** — **no** legacy redirects.
 6. ~~Add `lib/app-routes.ts`~~ **Done on `main`.** Keep `lib/auth-paths.ts` aligned with AuthKit public paths / proxy.
@@ -274,7 +280,7 @@ Map-level checklist and Acceptance below stay the **full destination**.
 
 ### RAD-77 slice
 
-- [ ] **Product:** App frame on `/dashboard/*` (Global nav + Global header + Content area; no public-site Global header / Global nav / Global footer). Settings and Profile via Avatar menu only. Users and Coming soon are stubs per RAD-77. Page-body Sign out gone.
+- [ ] **Product:** App frame on `/dashboard/*` (Global nav + Global header + Global footer + Content area; no public-site Global header / Global nav / Global footer). Settings and Profile via Avatar menu only. Users and Coming soon are stubs per RAD-77. Page-body Sign out gone.
 - [ ] `pnpm typecheck`
 - [ ] `pnpm lint`
 - [ ] `pnpm test`
@@ -291,6 +297,7 @@ Map-level checklist and Acceptance below stay the **full destination**.
 ## Open / deferred
 
 - **Page copy (pack soft default):** preserve existing dashboard/settings/profile body copy inside the Content area; do not invent rewrites unless a later grill says otherwise.
+- **App Global footer contents (soft default):** copyright year + “Created by rvarbanov” GitHub link, same words as today’s public-site footer. No extra nav. Do not mount `components/global-footer.tsx` on App routes (that is the public-site footer). Override this default in a later grill if the App footer should differ.
 - **Lucide icons:** locked in RAD-77 (`LayoutDashboard` / `Users` / `Sparkles`).
 - **Coming soon mock values:** build invents concrete arrays from the locked schema (RAD-62); do not invent alternate layouts or a runtime pack switcher.
 - **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — outside this handoff.
