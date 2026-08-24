@@ -1,7 +1,7 @@
 "use client";
 
 import { type LucideIcon, LayoutDashboard, Sparkles, Users } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
 import {
   Sidebar,
@@ -16,30 +16,16 @@ import {
 import { APP_NAV_ITEMS, isAppNavActive } from "@/lib/app-nav";
 import { APP_ROUTES } from "@/lib/app-routes";
 
-/** Plain `<a>` so pre-hydration clicks still navigate; `next/link` intercepts and can drop them. */
+/** Native `<a>` — ignore Base UI's merged button onClick so href navigation is not preventDefaulted. */
 function AppNavLink({
   href,
   title,
   children,
-  onClick,
+  onClick: _onClick,
   ...props
 }: ComponentProps<"a"> & { href: string; title?: string }) {
-  const router = useRouter();
   return (
-    <a
-      {...props}
-      href={href}
-      title={title}
-      data-app-nav={title ?? href}
-      onClick={(event) => {
-        onClick?.(event);
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-          return;
-        }
-        event.preventDefault();
-        router.push(href);
-      }}
-    >
+    <a {...props} href={href} title={title} data-app-nav={title ?? href}>
       {children}
     </a>
   );
