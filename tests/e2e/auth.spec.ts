@@ -73,5 +73,15 @@ test.describe("auth shell", () => {
     await page.goto("/dashboard/profile");
     await expect(page).not.toHaveURL(/\/dashboard\/profile\/?$/);
   });
+
+  test("unauthenticated user cannot stay on dashboard users", async ({ page }) => {
+    await page.goto("/dashboard/users");
+    await expect(page).not.toHaveURL(/\/dashboard\/users\/?$/);
+  });
+
+  test("unauthenticated user cannot stay on dashboard coming soon", async ({ page }) => {
+    await page.goto("/dashboard/coming-soon");
+    await expect(page).not.toHaveURL(/\/dashboard\/coming-soon\/?$/);
+  });
 });
 

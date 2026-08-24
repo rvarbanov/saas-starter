@@ -10,12 +10,13 @@ test("sign out ends session and returns home", async ({ browser, baseURL }) => {
     await page.goto("/dashboard", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 
+    await page.getByRole("button", { name: /^Account$/i }).click();
     await Promise.all([
       page.waitForURL((url) => url.origin === appOrigin && url.pathname === "/", {
         timeout: 60_000,
         waitUntil: "load",
       }),
-      page.getByRole("button", { name: /^Sign out$/i }).click(),
+      page.getByRole("menuitem", { name: /^Sign out$/i }).click(),
     ]);
     await expect(page.getByRole("link", { name: /^Sign in$/i })).toBeVisible();
 

@@ -15,9 +15,15 @@ test.describe("dashboard visuals", () => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 
+    await expect(page.getByTestId("app-sidebar")).toBeVisible();
+    await expect(page.getByTestId("app-topbar")).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Global" })).toHaveCount(0);
-    await expect(page.getByText(/Copyright © \d{4}/)).toHaveCount(0);
-    await expect(page.getByRole("link", { name: /Created by rvarbanov/i })).toHaveCount(0);
+    await expect(page.locator("footer.site-footer")).toHaveCount(0);
+    await expect(page.getByTestId("app-footer")).toBeVisible();
+    await expect(page.getByTestId("app-footer").getByText(/Copyright © \d{4}/)).toBeVisible();
+    await expect(
+      page.getByTestId("app-footer").getByRole("link", { name: /Created by rvarbanov/i }),
+    ).toBeVisible();
 
     await page.screenshot({
       path: resolve(SCREENSHOT_DIR, "dashboard.png"),

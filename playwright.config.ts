@@ -43,6 +43,7 @@ const chromiumProject = {
     /auth-sign-out\.spec\.ts/,
     /dashboard-visual\.spec\.ts/,
     /dashboard-routes\.spec\.ts/,
+    /shell\.spec\.ts/,
   ],
   use: { ...devices["Desktop Chrome"] },
 };
@@ -52,7 +53,8 @@ const projects = [
   chromiumProject,
   {
     name: "authenticated",
-    testMatch: /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts|dashboard-routes\.spec\.ts/,
+    testMatch:
+      /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts|dashboard-routes\.spec\.ts|shell\.spec\.ts/,
     use: {
       ...devices["Desktop Chrome"],
       storageState: AUTH_STORAGE_PATH,

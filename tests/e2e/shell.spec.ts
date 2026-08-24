@@ -1,0 +1,62 @@
+import { expect, test, type Page } from "@playwright/test";
+import { APP_ROUTES } from "../../lib/app-routes";
+
+function expectPath(page: Page, pathname: string) {
+  return expect(page).toHaveURL((url) => {
+    const current = url.pathname.replace(/\/$/, "") || "/";
+    const expected = pathname.replace(/\/$/, "") || "/";
+    return current === expected;
+  });
+}
+
+async function openAccountMenu(page: Page) {
+  await page.getByRole("button", { name: /^Account$/i }).click();
+}
+
+test("E: dashboard shows the App frame and not the public-site frame", async ({ page }) => {
+  await page.goto(APP_ROUTES.dashboard, { waitUntil: "load" });
+  await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+  await expect(page.getByTestId("app-sidebar")).toBeVisible();
+  await expect(page.getByTestId("app-topbar")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Global" })).toHaveCount(0);
+  await expect(page.locator("footer.site-footer")).toHaveCount(0);
+  await expect(page.getByTestId("app-footer")).toBeVisible();
+});
+
+test("F: Global nav tours Dashboard, Users, Coming soon", async ({ page }) => {
+  await page.goto(APP_ROUTES.dashboard, { waitUntil: "load" });
+  await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "App" });
+  await expect(nav).toBeVisible();
+
+  await nav.getByRole("link", { name: /^Users$/i }).click();
+  await expectPath(page, APP_ROUTES.users);
+  await expect(page.getByRole("heading", { name: /^Users$/i })).toBeVisible();
+
+  await nav.getByRole("link", { name: /^Coming soon$/i }).click();
+  await expectPath(page, APP_ROUTES.comingSoon);
+  await expect(page.getByRole("heading", { name: /^Coming soon$/i })).toBeVisible();
+
+  await nav.getByRole("link", { name: /^Dashboard$/i }).click();
+  await expectPath(page, APP_ROUTES.dashboard);
+  await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+});
+
+test("G: Avatar menu opens Settings and Profile; those are not Global nav links", async ({
+  page,
+}) => {
+  await page.goto(APP_ROUTES.dashboard, { waitUntil: "load" });
+  const nav = page.getByRole("navigation", { name: "App" });
+  await expect(nav.getByRole("link", { name: /^Settings$/i })).toHaveCount(0);
+  await expect(nav.getByRole("link", { name: /^Profile$/i })).toHaveCount(0);
+
+  await openAccountMenu(page);
+  await page.getByRole("menuitem", { name: /^Settings$/i }).click();
+  await expectPath(page, APP_ROUTES.settings);
+  await expect(page.getByRole("heading", { name: /^Account$/i })).toBeVisible();
+
+  await openAccountMenu(page);
+  await page.getByRole("menuitem", { name: /^Profile$/i }).click();
+  await expectPath(page, APP_ROUTES.profile);
+  await expect(page.getByRole("heading", { name: /^Your name$/i })).toBeVisible();
+});
