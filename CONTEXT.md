@@ -24,14 +24,14 @@ _Avoid_: Login flow (as the only name), auth chrome
 
 ## Frame
 
-The header, footer, and nav that stay on screen while the page content changes. Public site and app each have their own.
+The header, footer, and nav that stay on screen while the page content changes. Public site and app each have all three.
 
 **Global header**:
 The bar at the top of the page.
 _Avoid_: Chrome, top bar (as the only name)
 
 **Global footer**:
-The bar at the bottom of the page.
+The bar at the bottom of the page. The public site and the app each have one.
 _Avoid_: Chrome
 
 **Global nav**:
@@ -39,6 +39,14 @@ The persistent links used to move around.
 _Avoid_: Chrome, sidebar (as the only name)
 
 ## In the app
+
+**Content area**:
+The page body inside the app’s frame — the part that changes as you move between app pages.
+_Avoid_: main, inset, page-main
+
+**Avatar menu**:
+The account menu. It opens from one control, in the app’s Global header. It holds Profile, Settings, and Sign out.
+_Avoid_: user menu, account dropdown, sidebar account
 
 **Users list**:
 The table of people on the Users page.
