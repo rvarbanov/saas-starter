@@ -3,6 +3,7 @@
 import { type LucideIcon, LayoutDashboard, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ComponentProps } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +16,19 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_NAV_ITEMS, isAppNavActive } from "@/lib/app-nav";
 import { APP_ROUTES } from "@/lib/app-routes";
+
+function AppNavLink({
+  href,
+  title,
+  children,
+  ...props
+}: ComponentProps<typeof Link> & { href: string; title?: string }) {
+  return (
+    <Link {...props} href={href} title={title}>
+      {children}
+    </Link>
+  );
+}
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   [APP_ROUTES.dashboard]: LayoutDashboard,
@@ -30,7 +44,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href={APP_ROUTES.dashboard} />} size="lg">
+            <SidebarMenuButton render={<AppNavLink href={APP_ROUTES.dashboard} />} size="lg">
               <span className="truncate font-semibold">SaaS Starter Kit</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -47,7 +61,7 @@ export function AppSidebar() {
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
                         isActive={isAppNavActive(pathname, item.href, item.match)}
-                        render={<Link href={item.href} title={item.title} />}
+                        render={<AppNavLink href={item.href} title={item.title} />}
                       >
                         {Icon ? <Icon /> : null}
                         <span>{item.title}</span>
