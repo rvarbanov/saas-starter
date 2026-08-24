@@ -1,7 +1,6 @@
 "use client";
 
 import { type LucideIcon, LayoutDashboard, Sparkles, Users } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ComponentProps } from "react";
 import {
@@ -17,16 +16,17 @@ import {
 import { APP_NAV_ITEMS, isAppNavActive } from "@/lib/app-nav";
 import { APP_ROUTES } from "@/lib/app-routes";
 
+/** Plain `<a>` so pre-hydration clicks still navigate; `next/link` intercepts and can drop them. */
 function AppNavLink({
   href,
   title,
   children,
   onClick,
   ...props
-}: ComponentProps<typeof Link> & { href: string; title?: string }) {
+}: ComponentProps<"a"> & { href: string; title?: string }) {
   const router = useRouter();
   return (
-    <Link
+    <a
       {...props}
       href={href}
       title={title}
@@ -41,7 +41,7 @@ function AppNavLink({
       }}
     >
       {children}
-    </Link>
+    </a>
   );
 }
 

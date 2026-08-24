@@ -25,6 +25,7 @@ test("E: dashboard shows the App frame and not the public-site frame", async ({ 
 
 test("F: Global nav tours Dashboard, Users, Coming soon", async ({ page }) => {
   await page.goto(APP_ROUTES.dashboard, { waitUntil: "load" });
+  await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
   const nav = page.getByRole("navigation", { name: "App" });
   await expect(nav).toBeVisible();
 
