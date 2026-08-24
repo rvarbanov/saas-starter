@@ -47,8 +47,7 @@ export function AppSidebar() {
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
                         isActive={isAppNavActive(pathname, item.href, item.match)}
-                        tooltip={item.title}
-                        render={<Link href={item.href} />}
+                        render={<Link href={item.href} title={item.title} />}
                       >
                         {Icon ? <Icon /> : null}
                         <span>{item.title}</span>

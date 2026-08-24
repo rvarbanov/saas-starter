@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -47,15 +48,19 @@ export function AvatarMenu() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-56">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col gap-0.5">
-            {name ? <span className="text-sm font-medium text-foreground">{name}</span> : null}
-            {email ? <span className="text-xs">{email}</span> : null}
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col gap-0.5">
+              {name ? <span className="text-sm font-medium text-foreground">{name}</span> : null}
+              {email ? <span className="text-xs">{email}</span> : null}
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href={APP_ROUTES.profile} />}>Profile</DropdownMenuItem>
-        <DropdownMenuItem render={<Link href={APP_ROUTES.settings} />}>Settings</DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link href={APP_ROUTES.profile} />}>Profile</DropdownMenuItem>
+          <DropdownMenuItem render={<Link href={APP_ROUTES.settings} />}>Settings</DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOutFromApp}>Sign out</DropdownMenuItem>
       </DropdownMenuContent>
