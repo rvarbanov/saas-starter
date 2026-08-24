@@ -3,7 +3,7 @@
 import { type LucideIcon, LayoutDashboard, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ComponentProps, MouseEvent } from "react";
+import type { ComponentProps } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,10 +16,6 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_NAV_ITEMS, isAppNavActive } from "@/lib/app-nav";
 import { APP_ROUTES } from "@/lib/app-routes";
-
-function isModifiedClick(event: MouseEvent<HTMLAnchorElement>): boolean {
-  return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
-}
 
 function AppNavLink({
   href,
@@ -34,9 +30,10 @@ function AppNavLink({
       {...props}
       href={href}
       title={title}
+      data-app-nav={title ?? href}
       onClick={(event) => {
         onClick?.(event);
-        if (isModifiedClick(event)) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
           return;
         }
         event.preventDefault();
