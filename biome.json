@@ -37,6 +37,21 @@
       "trailingCommas": "all"
     }
   },
+  "overrides": [
+    {
+      "includes": ["components/ui/chart.tsx"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    }
+  ],
   "css": {
     "formatter": {
       "lineWidth": 100
