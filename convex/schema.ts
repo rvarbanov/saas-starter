@@ -21,5 +21,6 @@ export default defineSchema({
   })
     .index("by_token", ["tokenIdentifier"])
     .index("by_email", ["email"])
-    .index("by_app_user_id", ["appUserId"]),
+    .index("by_app_user_id", ["appUserId"])
+    .index("by_updatedAt", ["updatedAt"]),
 });

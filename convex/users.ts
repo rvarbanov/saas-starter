@@ -1,9 +1,17 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import { getCurrentUser, getCurrentUserOrThrow, getUserByTokenIdentifier } from "./lib/auth";
+import {
+  getCurrentUser,
+  getCurrentUserOrThrow,
+  getUserByTokenIdentifier,
+  requireIdentity,
+} from "./lib/auth";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
+import { listedUserValidator, listedUsersPageValidator, toListedUser } from "./lib/listedUser";
+import { clampPaginationNumItems } from "./lib/pagination";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { normalizeNames } from "./lib/userNames";
 import { assertEmailAvailable } from "./lib/users";
@@ -90,6 +98,50 @@ export const upsertFromAuthProfile = internalMutation({
   handler: async (ctx, args) => {
     assertValidEmailFormat(args.email);
     return await upsertUserFromProfile(ctx, args);
+  },
+});
+
+/**
+ * Paginated Users list. JWT required; caller need not have a Convex `users` row.
+ * Sort is fixed `updatedAt` descending. `numItems` is silently capped at 100.
+ */
+export const list = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: listedUsersPageValidator,
+  handler: async (ctx, args) => {
+    await requireIdentity(ctx);
+
+    const result = await ctx.db
+      .query("users")
+      .withIndex("by_updatedAt")
+      .order("desc")
+      .paginate({
+        ...args.paginationOpts,
+        numItems: clampPaginationNumItems(args.paginationOpts.numItems),
+      });
+
+    return {
+      page: result.page.map(toListedUser),
+      continueCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
+  },
+});
+
+/**
+ * Listed user by id. JWT required; missing row returns null (does not throw).
+ */
+export const get = query({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.union(listedUserValidator, v.null()),
+  handler: async (ctx, args) => {
+    await requireIdentity(ctx);
+    const user = await ctx.db.get("users", args.userId);
+    return user ? toListedUser(user) : null;
   },
 });
 
