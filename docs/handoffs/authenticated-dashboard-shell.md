@@ -277,6 +277,27 @@ Ticket: [RAD-77](https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sideb
 
 Map-level checklist and Acceptance below stay the **full destination**.
 
+## Build slice: RAD-78
+
+Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page) — Users list API + Users page.
+
+**Do**
+
+1. Add schema index `by_updatedAt` on `["updatedAt"]`. Implement `api.users.list` and `api.users.get` in `convex/users.ts` (keep the packed `get` name).
+2. Auth: JWT via `ctx.auth.getUserIdentity()` only. Caller does **not** need a Convex `users` row. Deny → `"Not authenticated"`. RBAC out of scope.
+3. Listed user fields only: `_id`, `firstName?`, `lastName?`, `email`, `createdAt`, `updatedAt`. Keep `userDocValidator` for `getMe`.
+4. `users.list`: args `{ paginationOpts }` only; `updatedAt` desc; silent clamp `numItems` ≤ 100; returns `{ page, continueCursor, isDone }`.
+5. `users.get`: args `{ userId }`; Listed user or `null` if missing.
+6. Users page: one `useQuery` with `{ paginationOpts: { numItems: 25, cursor: null } }`. No Load more, no `users-load-more`.
+7. Table columns L→R: First name · Last name · Email · Created at · Updated at. Empty `"No users found"`. Error: inline server message, or `"Something went wrong"` if none. No Retry, no toast. Landmark `users-directory-table`. Dates: `dateStyle: "medium"`, `timeStyle: "short"`.
+8. Vitest: mapper / auth deny / clamp (pure helpers) plus `convex-test` for `list` / `get`. E2E **H**. Quality gates: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
+
+**Do not (in RAD-78)**
+
+- Load more, Retry, toast, search/filter, RBAC
+- Rename `api.users.get` → `api.users.getById` ([RAD-81](https://linear.app/radi-dev/issue/RAD-81/rename-apiusersget-to-apiusersgetbyid))
+- Demo page (RAD-79)
+
 ## Build checklist
 
 1. Add shadcn components: `pnpm exec shadcn add sidebar card table chart separator avatar dropdown-menu breadcrumb sheet badge tooltip` (dry-run first; protect `button.tsx`). RAD-77 adds the frame subset first; Users list / Demo page add the rest.
@@ -320,6 +341,8 @@ Map-level checklist and Acceptance below stay the **full destination**.
 - **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
 - **RAD-71** canceled (cursor pagination absorbed into RAD-64).
 - **E2E deferred (do not invent for Acceptance):** Users Load more interaction; mobile Sheet / collapse; desktop Global nav collapse affordance; Demo page module-switching; `make e2e-prod` as Acceptance.
+- **Users list Load more UI:** API stays paginated (RAD-64); RAD-78 UI loads the first 25 rows only. Load more is later work.
+- **Rename `users.get`:** [RAD-81](https://linear.app/radi-dev/issue/RAD-81/rename-apiusersget-to-apiusersgetbyid).
 
 ## Sources
 
