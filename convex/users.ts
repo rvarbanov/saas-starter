@@ -133,7 +133,7 @@ export const list = query({
 /**
  * Listed user by id. JWT required; missing row returns null (does not throw).
  */
-export const get = query({
+export const getById = query({
   args: {
     userId: v.id("users"),
   },
