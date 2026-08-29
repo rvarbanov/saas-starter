@@ -31,13 +31,22 @@ export default defineConfig({
     testTimeout: 10_000,
     clearMocks: true,
     restoreMocks: true,
-    projects: [
+        projects: [
       defineProject({
         ...sharedProjectResolve,
         test: {
           name: "unit",
           include: ["lib/**/*.spec.ts"],
           environment: "node",
+          exclude: [...sharedTestExclude],
+        },
+      }),
+      defineProject({
+        ...sharedProjectResolve,
+        test: {
+          name: "convex",
+          include: ["convex/**/*.test.ts"],
+          environment: "edge-runtime",
           exclude: [...sharedTestExclude],
         },
       }),
