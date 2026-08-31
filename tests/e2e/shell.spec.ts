@@ -72,7 +72,7 @@ test("H: Users list shows the table, column headers, and at least one row", asyn
   await expect(table.getByRole("columnheader", { name: "Created at" })).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "Updated at" })).toBeVisible();
   await expect(table.locator("tbody tr")).not.toHaveCount(0);
-  await expect(table.getByRole("cell", { name: /@/ })).toBeVisible();
+  await expect(table.getByRole("cell", { name: /@/ }).first()).toBeVisible();
 });
 
 test("I: Demo page shows title, chart, table, 30d range, and next page", async ({ page }) => {
