@@ -48,6 +48,14 @@ _Avoid_: main, inset, page-main
 The account menu. It opens from one control, in the app’s Global header. It holds Profile, Settings, and Sign out.
 _Avoid_: user menu, account dropdown, sidebar account
 
+**User**:
+A registered person (signed up / created). They have a Convex `users` record. The Users list is a list of Users.
+_Avoid_: Principal, account, member, directory user
+
+**Visitor**:
+Someone who is not signed in right now. They can only use the Public site. A User who has signed out is a Visitor until they sign in again.
+_Avoid_: anonymous user, guest, public user
+
 **Users list**:
 The table of people on the Users page.
 _Avoid_: Users directory, members, accounts, getMe, directory
