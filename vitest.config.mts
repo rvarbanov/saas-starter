@@ -31,7 +31,7 @@ export default defineConfig({
     testTimeout: 10_000,
     clearMocks: true,
     restoreMocks: true,
-        projects: [
+    projects: [
       defineProject({
         ...sharedProjectResolve,
         test: {

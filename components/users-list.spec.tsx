@@ -53,4 +53,31 @@ describe("UsersList", () => {
     expect(screen.getByRole("columnheader", { name: "Updated at" })).toBeInTheDocument();
     expect(screen.getByText("No users found")).toBeInTheDocument();
   });
+
+  it("renders a listed user row", async () => {
+    useConvexAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    } as ReturnType<typeof useConvexAuth>);
+    useQueryMock.mockReturnValue({
+      page: [
+        {
+          _id: "users:row1",
+          firstName: "Ada",
+          lastName: "Lovelace",
+          email: "ada@example.com",
+          createdAt: 1_700_000_000_000,
+          updatedAt: 1_700_000_000_000,
+        },
+      ],
+      continueCursor: "",
+      isDone: true,
+    });
+
+    await renderUsersList();
+
+    expect(screen.getByText("Ada")).toBeInTheDocument();
+    expect(screen.getByText("Lovelace")).toBeInTheDocument();
+    expect(screen.getByText("ada@example.com")).toBeInTheDocument();
+  });
 });

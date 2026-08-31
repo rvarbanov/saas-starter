@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
+import type { ListUser } from "@/convex/lib/listUser";
 import { LIST_USERS_PAGE_SIZE } from "@/convex/lib/pagination";
 import { isConvexConfigured } from "@/lib/convex-config";
 
@@ -90,6 +91,30 @@ function UsersListSkeleton() {
   );
 }
 
+function UsersListEmpty() {
+  return (
+    <UsersTableShell>
+      <TableRow>
+        <TableCell className="text-muted-foreground" colSpan={COLUMN_HEADERS.length}>
+          No users found
+        </TableCell>
+      </TableRow>
+    </UsersTableShell>
+  );
+}
+
+function ListedUserRow({ user }: { user: ListUser }) {
+  return (
+    <TableRow>
+      <EllipsisCell value={user.firstName ?? ""} />
+      <EllipsisCell value={user.lastName ?? ""} />
+      <EllipsisCell value={user.email} />
+      <EllipsisCell value={formatListedUserDate(user.createdAt)} />
+      <EllipsisCell value={formatListedUserDate(user.updatedAt)} />
+    </TableRow>
+  );
+}
+
 function UsersListInner() {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const ready = !authLoading && isAuthenticated;
@@ -107,32 +132,14 @@ function UsersListInner() {
   }
 
   if (result.page.length === 0) {
-    return (
-      <UsersTableShell>
-        <TableRow>
-          <TableCell className="text-muted-foreground" colSpan={COLUMN_HEADERS.length}>
-            No users found
-          </TableCell>
-        </TableRow>
-      </UsersTableShell>
-    );
+    return <UsersListEmpty />;
   }
 
   return (
     <UsersTableShell>
-      {result.page.map((user) => {
-        const created = formatListedUserDate(user.createdAt);
-        const updated = formatListedUserDate(user.updatedAt);
-        return (
-          <TableRow key={user._id}>
-            <EllipsisCell value={user.firstName ?? ""} />
-            <EllipsisCell value={user.lastName ?? ""} />
-            <EllipsisCell value={user.email} />
-            <EllipsisCell value={created} />
-            <EllipsisCell value={updated} />
-          </TableRow>
-        );
-      })}
+      {result.page.map((user) => (
+        <ListedUserRow key={user._id} user={user} />
+      ))}
     </UsersTableShell>
   );
 }
@@ -140,9 +147,7 @@ function UsersListInner() {
 /** Users list table for `/dashboard/users`. First page of 25 only. */
 export function UsersList() {
   if (!isConvexConfigured()) {
-    return (
-      <p className="text-caption">Convex is not configured; the Users list cannot load.</p>
-    );
+    return <p className="text-caption">Convex is not configured; the Users list cannot load.</p>;
   }
 
   return (
