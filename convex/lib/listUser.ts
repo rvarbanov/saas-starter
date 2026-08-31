@@ -1,7 +1,7 @@
 import { type Infer, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 
-export const listedUserValidator = v.object({
+export const listUserValidator = v.object({
   _id: v.id("users"),
   firstName: v.optional(v.string()),
   lastName: v.optional(v.string()),
@@ -10,17 +10,17 @@ export const listedUserValidator = v.object({
   updatedAt: v.number(),
 });
 
-export type ListedUser = Infer<typeof listedUserValidator>;
+export type ListUser = Infer<typeof listUserValidator>;
 
-export const listedUsersPageValidator = v.object({
-  page: v.array(listedUserValidator),
+export const listUsersPageValidator = v.object({
+  page: v.array(listUserValidator),
   continueCursor: v.string(),
   isDone: v.boolean(),
 });
 
 /** Projection for the Users list — never identity-link fields or combined `name`. */
-export function toListedUser(user: Doc<"users">): ListedUser {
-  const listed: ListedUser = {
+export function toListUser(user: Doc<"users">): ListUser {
+  const listUser: ListUser = {
     _id: user._id,
     email: user.email,
     createdAt: user.createdAt,
@@ -28,11 +28,11 @@ export function toListedUser(user: Doc<"users">): ListedUser {
   };
 
   if (user.firstName !== undefined) {
-    listed.firstName = user.firstName;
+    listUser.firstName = user.firstName;
   }
   if (user.lastName !== undefined) {
-    listed.lastName = user.lastName;
+    listUser.lastName = user.lastName;
   }
 
-  return listed;
+  return listUser;
 }

@@ -65,7 +65,7 @@ A later build session implements the **App** frame (Global nav + Global header +
 Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 
 - **Surface:** `api.users.list` (paginated Users list), `api.users.getById` (by-id Listed user read).
-- **Shared:** Listed-user validator/mapper; keep `userDocValidator` for self-service (`getMe` may still expose identity link fields).
+- **Shared:** `listUserValidator` / `toListUser`; keep `userDocValidator` for self-service (`getMe` may still expose identity link fields).
 - **Auth:** same as RAD-60 — JWT via `ctx.auth.getUserIdentity()` only; deny → `"Not authenticated"`.
 - **Listed user / returns item** (names optional to match schema): `_id`, `firstName?`, `lastName?`, `email`, `createdAt`, `updatedAt`. Never `tokenIdentifier`, `workosUserId`, `appUserId`, or `name`.
 - **Index:** add `by_updatedAt` on `["updatedAt"]`. List: that index + `.order("desc").paginate(...)`.

@@ -10,7 +10,7 @@ import {
 } from "./lib/auth";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
-import { listedUserValidator, listedUsersPageValidator, toListedUser } from "./lib/listedUser";
+import { listUserValidator, listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { normalizeNames } from "./lib/userNames";
@@ -109,7 +109,7 @@ export const list = query({
   args: {
     paginationOpts: paginationOptsValidator,
   },
-  returns: listedUsersPageValidator,
+  returns: listUsersPageValidator,
   handler: async (ctx, args) => {
     await requireIdentity(ctx);
 
@@ -123,7 +123,7 @@ export const list = query({
       });
 
     return {
-      page: result.page.map(toListedUser),
+      page: result.page.map(toListUser),
       continueCursor: result.continueCursor,
       isDone: result.isDone,
     };
@@ -137,11 +137,11 @@ export const getById = query({
   args: {
     userId: v.id("users"),
   },
-  returns: v.union(listedUserValidator, v.null()),
+  returns: v.union(listUserValidator, v.null()),
   handler: async (ctx, args) => {
     await requireIdentity(ctx);
     const user = await ctx.db.get("users", args.userId);
-    return user ? toListedUser(user) : null;
+    return user ? toListUser(user) : null;
   },
 });
 
