@@ -7,7 +7,7 @@ This packed file is the **App** frame handoff. The filename and map title stay (
 - **Re-packed:** 2026-08-24
 - **Re-packed:** 2026-08-29 (RAD-82 Users list API slice)
 - **Status:** packed
-- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77, RAD-82
+- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77, RAD-82, RAD-78
 
 ## Destination
 
@@ -16,6 +16,8 @@ A later build session implements the **App** frame (Global nav + Global header +
 **RAD-77 is a build slice**, not the map destination. See [Build slice: RAD-77](#build-slice-rad-77). Do not treat “implement this handoff” as “ship the Users list and Demo page” when the ticket is RAD-77.
 
 **RAD-82 is a build slice** for Convex `users.list` / `users.getById` only. See [Build slice: RAD-82](#build-slice-rad-82). Do not treat that ticket as the Users page, Load more, or E2E **H**.
+
+**RAD-78 is a build slice** for the Users page on top of RAD-82. See [Build slice: RAD-78](#build-slice-rad-78).
 
 ## Out of scope
 
@@ -316,6 +318,27 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 - `npx convex deploy` unless this is an intentional production deploy
 - Demo page (RAD-79)
 
+## Build slice: RAD-78
+
+Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page) — Users list API + Users page.
+
+**Do**
+
+1. ~~Schema `by_updatedAt` + `api.users.list` / `api.users.getById`~~ **Done on `main`** ([RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist) / [#25](https://github.com/rvarbanov/saas-starter/pull/25)).
+2. Auth: JWT via `ctx.auth.getUserIdentity()` only. Caller does **not** need a Convex `users` row. Deny → `"Not authenticated"`. RBAC out of scope. (Enforced in Convex on `main`.)
+3. Listed user fields only: `_id`, `firstName?`, `lastName?`, `email`, `createdAt`, `updatedAt`. Keep `userDocValidator` for `getMe`.
+4. `users.list`: args `{ paginationOpts }` only; `updatedAt` desc; silent clamp `numItems` ≤ 100; returns `{ page, continueCursor, isDone }`.
+5. `users.getById`: args `{ userId }`; Listed user or `null` if missing. (Packed name was `get`; rename shipped in RAD-82.)
+6. Users page: one `useQuery` with `{ paginationOpts: { numItems: 25, cursor: null } }`. No Load more, no `users-load-more`.
+7. Table columns L→R: First name · Last name · Email · Created at · Updated at. Empty `"No users found"`. Error: inline server message, or `"Something went wrong"` if none. No Retry, no toast. Landmark `users-directory-table`. Dates: `dateStyle: "medium"`, `timeStyle: "short"`.
+8. Vitest: mapper / auth deny / clamp plus `convex-test` for `list` / `getById` — **on `main`**. This slice: Users page tests + E2E **H**. Quality gates: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
+
+**Do not (in RAD-78)**
+
+- Load more, Retry, toast, search/filter, RBAC
+- Re-implement Convex `users.list` / `users.getById` (RAD-82)
+- Demo page (RAD-79)
+
 ## Build checklist
 
 1. Add shadcn components: `pnpm exec shadcn add sidebar card table chart separator avatar dropdown-menu breadcrumb sheet badge tooltip` (dry-run first; protect `button.tsx`). RAD-77 adds the frame subset first; Users list / Demo page add the rest.
@@ -325,7 +348,7 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 5. ~~Delete top-level `app/settings/` and `app/profile/`~~ **Done on `main`** — **no** legacy redirects.
 6. ~~Add `lib/app-routes.ts`~~ **Done on `main`.** Keep `lib/auth-paths.ts` aligned with AuthKit public paths / proxy.
 7. ~~Schema + Convex: add `by_updatedAt` on `users`; implement `api.users.list` and `api.users.getById` in `convex/users.ts` per RAD-64 (Listed user + auth from RAD-60/61).~~ **Done on `main` (RAD-82, #25).**
-8. Build Users page: table columns/affordances per RAD-61; `usePaginatedQuery` with `initialNumItems: 25`; Load more until `isDone`; testids `users-directory-table` / `users-load-more`. **RAD-78.**
+8. ~~Build Users page: first 25 rows via `useQuery` and `users-directory-table`; no Load more.~~ **Done on `main` (RAD-78, #23).**
 9. Add `lib/coming-soon/` modules (default SaaS analytics + three code-swap modules); wire Demo page (KPI → chart → table) with testids and range/paging controls per RAD-62 / RAD-73.
 10. Wire Global nav IA + Avatar menu + breadcrumbs per RAD-66; brand **SaaS Starter Kit**; strip duplicate frame actions from page bodies.
 11. Preserve existing dashboard/settings/profile **body copy** inside the Content area (soft default).
@@ -371,6 +394,7 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 - **RAD-82 live push:** human runs `convex dev` when the agent asks; not a merge gate for the RAD-82 PR.
 - **RAD-81:** rename `api.users.get` → `api.users.getById` — **done in #25**.
 - **Auth user with no App user row:** provisioning race / failure; out of scope (no extra person-kind, no extra deny path).
+- **Users list Load more UI:** API stays paginated (RAD-64); RAD-78 UI loads the first 25 rows only. Load more is later work.
 
 ## Sources
 
@@ -387,5 +411,6 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
   - https://linear.app/radi-dev/issue/RAD-73/e2e-expectations-for-shell-build
   - https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar
   - https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist
+  - https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page
 - Format contract: [`docs/handoffs/CONTRACT.md`](./CONTRACT.md)
 - Glossary: [`CONTEXT.md`](../../CONTEXT.md)

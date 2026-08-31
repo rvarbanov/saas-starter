@@ -61,6 +61,20 @@ test("G: Avatar menu opens Settings and Profile; those are not Global nav links"
   await expect(page.getByRole("heading", { name: /^Your name$/i })).toBeVisible();
 });
 
+test("H: Users list shows the table, column headers, and at least one row", async ({ page }) => {
+  await page.goto(APP_ROUTES.users, { waitUntil: "load" });
+  await expect(page.getByRole("heading", { name: /^Users$/i })).toBeVisible();
+  const table = page.getByTestId("users-directory-table");
+  await expect(table).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "First name" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Last name" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Email" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Created at" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Updated at" })).toBeVisible();
+  await expect(table.locator("tbody tr")).not.toHaveCount(0);
+  await expect(table.getByRole("cell", { name: /@/ }).first()).toBeVisible();
+});
+
 test("I: Demo page shows title, chart, table, 30d range, and next page", async ({ page }) => {
   await page.goto(APP_ROUTES.comingSoon, { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: /^Coming soon$/i })).toBeVisible();
