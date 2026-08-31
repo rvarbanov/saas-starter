@@ -280,7 +280,7 @@ Makefile targets (see root `Makefile`; legacy aliases `run`, `run-native`, `star
 - `make run-docker` — Docker Compose (`docker compose up --build`).
 - `make start-prod` — production build + `next start` (prefetch/caching smoke test).
 - `make verify` — format, lint, typecheck, unit tests, and E2E.
-- `make ci` — typecheck, lint, unit tests (CI quality job, no E2E).
+- `make ci` — typecheck, lint, format check, unit tests (CI quality job, no E2E).
 
 pnpm equivalents: `pnpm dev:native`, `pnpm dev`, `pnpm build && pnpm start`, `pnpm test`, `pnpm test:e2e`.
 
