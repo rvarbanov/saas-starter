@@ -24,9 +24,7 @@ type ProfileUser = {
 export function ProfileNameForm({ fallbackEmail }: ProfileNameFormProps) {
   if (!isConvexConfigured()) {
     return (
-      <p className="text-caption">
-        Convex is not configured; profile names cannot be edited.
-      </p>
+      <p className="text-caption">Convex is not configured; profile names cannot be edited.</p>
     );
   }
 

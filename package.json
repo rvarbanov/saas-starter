@@ -14,6 +14,7 @@
     "check": "biome check .",
     "lint": "biome lint .",
     "format": "biome format --write .",
+    "format:check": "biome format .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
+    "@edge-runtime/vm": "^5.0.0",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
@@ -51,9 +53,11 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.2",
+    "convex-test": "^0.0.54",
     "happy-dom": "^20.8.9",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vite": "^8.2.2",
     "vitest": "^4.1.2"
   }
 }

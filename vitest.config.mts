@@ -43,6 +43,15 @@ export default defineConfig({
       }),
       defineProject({
         ...sharedProjectResolve,
+        test: {
+          name: "convex",
+          include: ["convex/**/*.test.ts"],
+          environment: "edge-runtime",
+          exclude: [...sharedTestExclude],
+        },
+      }),
+      defineProject({
+        ...sharedProjectResolve,
         plugins: [react()],
         test: {
           name: "components",
