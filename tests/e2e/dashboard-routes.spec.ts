@@ -32,7 +32,10 @@ test("walks Settings and Profile via the Avatar menu", async ({ page }) => {
   ).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("navigation", { name: "Global" })).toHaveCount(0);
 
-  await page.getByRole("navigation", { name: "App" }).getByRole("link", { name: /^Dashboard$/i }).click();
+  await page
+    .getByRole("navigation", { name: "App" })
+    .getByRole("link", { name: /^Dashboard$/i })
+    .click();
   await expectPath(page, APP_ROUTES.dashboard);
   await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
 });

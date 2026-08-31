@@ -28,4 +28,3 @@ describe("auth-paths", () => {
     expect(isAuthKitPublicPath("/sign-up/start")).toBe(false);
   });
 });
-
