@@ -10,7 +10,7 @@ This packed file is the **App** frame handoff. The filename and map title stay (
 
 ## Destination
 
-A later build session implements the **App** frame (Global nav + Global header + Global footer + Content area) on `/dashboard/*`, the Users list backed by Convex `users.list` / `users.get`, and the Demo page (KPIs / chart / table). When this handoff’s Acceptance criteria pass, the destination of the Wayfinder map is met for the build — this packed file is decision-complete; it does not implement UI.
+A later build session implements the **App** frame (Global nav + Global header + Global footer + Content area) on `/dashboard/*`, the Users list backed by Convex `users.list` / `users.getById`, and the Demo page (KPIs / chart / table). When this handoff’s Acceptance criteria pass, the destination of the Wayfinder map is met for the build — this packed file is decision-complete; it does not implement UI.
 
 **RAD-77 is a build slice**, not the map destination. See [Build slice: RAD-77](#build-slice-rad-77). Do not treat “implement this handoff” as “ship the Users list and Demo page” when the ticket is RAD-77.
 
@@ -64,8 +64,8 @@ A later build session implements the **App** frame (Global nav + Global header +
 
 Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 
-- **Surface:** `api.users.list` (paginated Users list), `api.users.get` (by-id Listed user read).
-- **Shared:** Listed-user validator/mapper; keep `userDocValidator` for self-service (`getMe` may still expose identity link fields).
+- **Surface:** `api.users.list` (paginated Users list), `api.users.getById` (by-id Listed user read).
+- **Shared:** `listUserValidator` / `toListUser`; keep `userDocValidator` for self-service (`getMe` may still expose identity link fields).
 - **Auth:** same as RAD-60 — JWT via `ctx.auth.getUserIdentity()` only; deny → `"Not authenticated"`.
 - **Listed user / returns item** (names optional to match schema): `_id`, `firstName?`, `lastName?`, `email`, `createdAt`, `updatedAt`. Never `tokenIdentifier`, `workosUserId`, `appUserId`, or `name`.
 - **Index:** add `by_updatedAt` on `["updatedAt"]`. List: that index + `.order("desc").paginate(...)`.
@@ -80,7 +80,7 @@ Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 | **Page size** | Silent clamp `numItems` ≤ **100**; UI default `initialNumItems: 25` |
 | **UI** | **Load more** until `isDone` |
 
-**`users.get`**
+**`users.getById`**
 
 | | |
 | --- | --- |
@@ -270,7 +270,7 @@ Ticket: [RAD-77](https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sideb
 
 **Do not (in RAD-77)**
 
-- Convex `users.list` / `users.get`, Users list table, Demo page modules / chart / table
+- Convex `users.list` / `users.getById`, Users list table, Demo page modules / chart / table
 - Map E2E **H** and **I**
 - Re-do `app/(public)/`, nest settings/profile, or add `lib/app-routes.ts` (already on `main`)
 - Add Work / Team / Admin to the Global nav
@@ -285,7 +285,7 @@ Map-level checklist and Acceptance below stay the **full destination**.
 4. Nested `/dashboard/settings` and `/dashboard/profile` **done on `main`**. Still create `app/dashboard/users/page.tsx` and `app/dashboard/coming-soon/page.tsx` (stubs in RAD-77; full bodies later).
 5. ~~Delete top-level `app/settings/` and `app/profile/`~~ **Done on `main`** — **no** legacy redirects.
 6. ~~Add `lib/app-routes.ts`~~ **Done on `main`.** Keep `lib/auth-paths.ts` aligned with AuthKit public paths / proxy.
-7. Schema + Convex: add `by_updatedAt` on `users`; implement `api.users.list` and `api.users.get` in `convex/users.ts` per RAD-64 (Listed user + auth from RAD-60/61).
+7. Schema + Convex: add `by_updatedAt` on `users`; implement `api.users.list` and `api.users.getById` in `convex/users.ts` per RAD-64 (Listed user + auth from RAD-60/61).
 8. Build Users page: table columns/affordances per RAD-61; `usePaginatedQuery` with `initialNumItems: 25`; Load more until `isDone`; testids `users-directory-table` / `users-load-more`.
 9. Add `lib/coming-soon/` modules (default SaaS analytics + three code-swap modules); wire Demo page (KPI → chart → table) with testids and range/paging controls per RAD-62 / RAD-73.
 10. Wire Global nav IA + Avatar menu + breadcrumbs per RAD-66; brand **SaaS Starter Kit**; strip duplicate frame actions from page bodies.

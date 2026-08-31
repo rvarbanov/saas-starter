@@ -21,11 +21,7 @@ export default function Home() {
         <Link className="btn-outline" href="/sign-up">
           Sign up
         </Link>
-        <ExternalLinkButton
-          href={GITHUB_REPO_URL}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <ExternalLinkButton href={GITHUB_REPO_URL} rel="noopener noreferrer" target="_blank">
           View on GitHub
         </ExternalLinkButton>
       </div>

@@ -84,4 +84,3 @@ test.describe("auth shell", () => {
     await expect(page).not.toHaveURL(/\/dashboard\/coming-soon\/?$/);
   });
 });
-
