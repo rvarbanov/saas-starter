@@ -3,7 +3,7 @@
 PNPM ?= pnpm
 DOCKER_COMPOSE ?= docker compose
 
-.PHONY: help install dev dev-all start-prod run-docker verify run run-native build start lint fmt format check typecheck \
+.PHONY: help install dev dev-all start-prod run-docker verify run run-native build start lint fmt format format-check check typecheck \
 	test test-coverage e2e e2e-prod e2e-install integration convex-dev convex-codegen ci
 
 help: ## Show available commands
@@ -43,6 +43,9 @@ fmt: format ## Alias for format
 format: ## Format code with Biome
 	$(PNPM) format
 
+format-check: ## Fail if Biome format is dirty (CI quality)
+	$(PNPM) format:check
+
 check: ## Lint + format check with Biome
 	$(PNPM) check
 
@@ -73,4 +76,4 @@ convex-dev: ## Sync convex/ to dev deployment (watch + codegen)
 convex-codegen: ## Regenerate convex/_generated
 	$(PNPM) convex:codegen
 
-ci: typecheck lint test ## Run the same checks as CI quality job
+ci: typecheck lint format-check test ## Run the same checks as CI quality job

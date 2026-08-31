@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MAX_NAME_LENGTH,
-  namesForFormInputs,
-  normalizeNames,
-} from "../convex/lib/userNames";
+import { MAX_NAME_LENGTH, namesForFormInputs, normalizeNames } from "../convex/lib/userNames";
 
 describe("normalizeNames", () => {
   it("trims and joins first and last name", () => {

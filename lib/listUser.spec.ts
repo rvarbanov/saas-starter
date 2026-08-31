@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Doc } from "../convex/_generated/dataModel";
-import { toListedUser } from "../convex/lib/listedUser";
+import { toListUser } from "../convex/lib/listUser";
 
 function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
   return {
@@ -19,9 +19,9 @@ function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
   };
 }
 
-describe("toListedUser", () => {
+describe("toListUser", () => {
   it("keeps Listed user fields and omits identity-link fields and name", () => {
-    expect(toListedUser(fakeUser())).toEqual({
+    expect(toListUser(fakeUser())).toEqual({
       _id: "jd7users000000000000000000",
       firstName: "Ada",
       lastName: "Lovelace",
@@ -33,7 +33,7 @@ describe("toListedUser", () => {
 
   it("omits missing name parts", () => {
     expect(
-      toListedUser(
+      toListUser(
         fakeUser({
           firstName: undefined,
           lastName: undefined,

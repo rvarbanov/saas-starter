@@ -95,11 +95,11 @@ describe("users.list", () => {
   });
 });
 
-describe("users.get", () => {
+describe("users.getById", () => {
   it("throws Not authenticated without a JWT", async () => {
     const t = testClient();
     const userId = await insertUser(t, { email: "ada@example.com", updatedAt: 1 });
-    await expect(t.query(api.users.get, { userId })).rejects.toThrow("Not authenticated");
+    await expect(t.query(api.users.getById, { userId })).rejects.toThrow("Not authenticated");
   });
 
   it("returns null when the user is missing", async () => {
@@ -117,7 +117,7 @@ describe("users.get", () => {
       return id;
     });
 
-    await expect(t.withIdentity(identity).query(api.users.get, { userId })).resolves.toBeNull();
+    await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
   });
 
   it("returns a Listed user by id", async () => {
@@ -129,7 +129,7 @@ describe("users.get", () => {
       firstName: "Ada",
     });
 
-    await expect(t.withIdentity(identity).query(api.users.get, { userId })).resolves.toEqual({
+    await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toEqual({
       _id: userId,
       firstName: "Ada",
       email: "ada@example.com",

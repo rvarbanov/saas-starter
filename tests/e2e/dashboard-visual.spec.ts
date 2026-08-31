@@ -2,9 +2,7 @@ import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 
-const SCREENSHOT_DIR = resolve(
-  process.env.PLAYWRIGHT_SCREENSHOT_DIR ?? "test-results/screenshots",
-);
+const SCREENSHOT_DIR = resolve(process.env.PLAYWRIGHT_SCREENSHOT_DIR ?? "test-results/screenshots");
 
 test.describe("dashboard visuals", () => {
   test.beforeAll(() => {
