@@ -48,20 +48,24 @@ _Avoid_: main, inset, page-main
 The account menu. It opens from one control, in the app’s Global header. It holds Profile, Settings, and Sign out.
 _Avoid_: user menu, account dropdown, sidebar account
 
-**User**:
-A registered person (signed up / created). They have a Convex `users` record. The Users list is a list of Users.
-_Avoid_: Principal, account, member, directory user
+**Auth user**:
+A person created at sign-up whose identity is used only to authenticate.
+_Avoid_: WorkOS user (as the product name), principal, User (when you mean this)
+
+**App user**:
+A person created after the Auth user and linked to them. This record holds their product data. The Users list is a list of App users.
+_Avoid_: Convex user (as the product name), directory user, member, User (when you mean this)
 
 **Visitor**:
-Someone who is not signed in right now. They can only use the Public site. A User who has signed out is a Visitor until they sign in again.
+Someone who is not signed in right now. They can only use the Public site. An Auth user or App user who has signed out is a Visitor until they sign in again.
 _Avoid_: anonymous user, guest, public user
 
 **Users list**:
-The table of people on the Users page.
+The table of App users on the Users page.
 _Avoid_: Users directory, members, accounts, getMe, directory
 
 **Listed user**:
-The name, email, and dates shown for each person in the Users list — not their login identity.
+The name, email, and dates shown for an App user in the Users list — not the Auth user identity.
 _Avoid_: Directory DTO, DTO, user doc, profile
 
 **Demo page**:
