@@ -31,10 +31,18 @@ test("session persists across all App paths and home", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByTestId("convex-status")).toBeVisible({ timeout: 15_000 });
-  // Home CTA is auth-aware; GlobalNav still uses a static "Sign in" label → /dashboard.
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: /^Dashboard$/i })).toBeVisible({ timeout: 15_000 });
   await expect(main.getByRole("link", { name: /^Sign in$/i })).not.toBeVisible();
+
+  const nav = page.getByRole("navigation", { name: "Global" });
+  await expect(nav.getByRole("link", { name: /^Dashboard$/i })).toBeVisible({ timeout: 15_000 });
+  await expect(nav.getByRole("link", { name: /^Dashboard$/i })).toHaveAttribute(
+    "href",
+    "/dashboard",
+  );
+  await expect(nav.getByRole("link", { name: /^Sign in$/i })).not.toBeVisible();
+  await expect(nav.getByRole("link", { name: /^Sign up$/i })).not.toBeVisible();
 });
 
 test("authenticated user visiting sign-up is redirected to dashboard", async ({ page }) => {
