@@ -414,5 +414,6 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
   - https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar
   - https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist
   - https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page
+  - https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80
 - Format contract: [`docs/handoffs/CONTRACT.md`](./CONTRACT.md)
 - Glossary: [`CONTEXT.md`](../../CONTEXT.md)
