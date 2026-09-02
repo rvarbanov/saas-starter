@@ -18,7 +18,10 @@ test("sign out ends session and returns home", async ({ browser, baseURL }) => {
       }),
       page.getByRole("menuitem", { name: /^Sign out$/i }).click(),
     ]);
-    await expect(page.getByRole("link", { name: /^Sign in$/i })).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Global" });
+    await expect(nav.getByRole("link", { name: /^Sign in$/i })).toBeVisible();
+    await expect(nav.getByRole("link", { name: /^Sign up$/i })).toBeVisible();
+    await expect(nav.getByRole("link", { name: /^Dashboard$/i })).not.toBeVisible();
 
     await page.goto("/dashboard");
     await expect(page).not.toHaveURL(/\/dashboard\/?$/);
