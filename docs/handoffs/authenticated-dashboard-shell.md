@@ -6,8 +6,9 @@ This packed file is the **App** frame handoff. The filename and map title stay (
 - **Packed:** 2026-08-14
 - **Re-packed:** 2026-08-24
 - **Re-packed:** 2026-08-29 (RAD-82 Users list API slice)
+- **Re-packed:** 2026-09-02 (RAD-83 Scenario J path set)
 - **Status:** packed
-- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77, RAD-82, RAD-78
+- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77, RAD-82, RAD-78, RAD-83
 
 ## Destination
 
@@ -261,7 +262,7 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), Avatar menu items, and existing
 | G | Avatar menu → Settings and Profile (URLs + landmarks); Settings/Profile are **not** Global nav links. |
 | H | Users list: `users-directory-table` visible; column headers First/Last/Email/Created at/Updated at; ≥1 data row. **Load more interaction not in E2E.** |
 | I | Demo page: title + subtitle; `coming-soon-chart` + `coming-soon-table`; toggle range to **30d**; one click `coming-soon-table-next`. |
-| J | Update-in-place existing authenticated coverage: Convex profile; session across App paths + home; authenticated `/sign-up` → `/dashboard`; sign-out **via Avatar menu**. |
+| J | Update-in-place existing authenticated coverage: Convex profile; session across **all five** App paths + home (`/dashboard` → `/dashboard/settings` → `/dashboard/profile` → `/dashboard/users` → `/dashboard/coming-soon` → `/`; URL + one landmark per hop); authenticated `/sign-up` → `/dashboard`; sign-out **via Avatar menu**. Scenario **D** stays distributed (setup login + authenticated proofs; no separate labeled D test). |
 
 **Organization & bar:**
 
