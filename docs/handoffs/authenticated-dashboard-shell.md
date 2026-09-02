@@ -6,8 +6,9 @@ This packed file is the **App** frame handoff. The filename and map title stay (
 - **Packed:** 2026-08-14
 - **Re-packed:** 2026-08-24
 - **Re-packed:** 2026-08-29 (RAD-82 Users list API slice)
+- **Re-packed:** 2026-09-02 (RAD-83 Scenario J path set)
 - **Status:** packed
-- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77, RAD-82, RAD-78
+- **Source children:** RAD-67, RAD-60, RAD-61, RAD-64, RAD-65, RAD-62, RAD-66, RAD-68, RAD-73, RAD-77, RAD-82, RAD-78, RAD-83
 
 ## Destination
 
@@ -261,7 +262,7 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), Avatar menu items, and existing
 | G | Avatar menu → Settings and Profile (URLs + landmarks); Settings/Profile are **not** Global nav links. |
 | H | Users list: `users-directory-table` visible; column headers First/Last/Email/Created at/Updated at; ≥1 data row. **Load more interaction not in E2E.** |
 | I | Demo page: title + subtitle; `coming-soon-chart` + `coming-soon-table`; toggle range to **30d**; one click `coming-soon-table-next`. |
-| J | Update-in-place existing authenticated coverage: Convex profile; session across App paths + home; authenticated `/sign-up` → `/dashboard`; sign-out **via Avatar menu**. |
+| J | Update-in-place existing authenticated coverage: Convex profile; session across **all five** App paths + home (`/dashboard` → `/dashboard/settings` → `/dashboard/profile` → `/dashboard/users` → `/dashboard/coming-soon` → `/`; URL + one landmark per hop); authenticated `/sign-up` → `/dashboard`; sign-out **via Avatar menu**. Scenario **D** stays distributed (setup login + authenticated proofs; no separate labeled D test). |
 
 **Organization & bar:**
 
@@ -380,7 +381,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 - [x] `pnpm typecheck`
 - [x] `pnpm lint`
 - [x] `pnpm test`
-- [x] **E2E:** Scenarios **A–J** from RAD-73 covered in repo (`tests/e2e/shell.spec.ts` E–I; auth specs A–D/J); required testids present; secrets mandatory (fail if missing). **Acceptance bar: `pnpm test:e2e` / `make e2e` green on RAD-80.** Scenario J session walk stays four stops (dashboard / settings / profile / home); expand/clarify in [RAD-83](https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80).
+- [x] **E2E:** Scenarios **A–J** from RAD-73 covered in repo (`tests/e2e/shell.spec.ts` E–I; auth specs A–D/J); required testids present; secrets mandatory (fail if missing). **Acceptance bar: `pnpm test:e2e` / `make e2e`.** Scenario J session walk is all **five** App routes + home (RAD-83).
 
 ## Open / deferred
 
@@ -391,7 +392,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 - **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
 - **RAD-71** canceled (cursor pagination absorbed into RAD-64).
 - **E2E deferred (do not invent for Acceptance):** Users Load more interaction; mobile Sheet / collapse; desktop Global nav collapse affordance; Demo page module-switching; `make e2e-prod` as Acceptance.
-- **Session path grill:** [RAD-83](https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80) — whether Scenario J must walk all five App routes (+ home).
+- **Session path grill:** [RAD-83](https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80) — **resolved:** Scenario J walks all five App routes + home (URL + one landmark per hop); D stays distributed.
 - **RAD-82 live push:** human runs `convex dev` when the agent asks; not a merge gate for the RAD-82 PR.
 - **RAD-81:** rename `api.users.get` → `api.users.getById` — **done in #25**.
 - **Auth user with no App user row:** provisioning race / failure; out of scope (no extra person-kind, no extra deny path).
@@ -413,5 +414,6 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
   - https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar
   - https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist
   - https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page
+  - https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80
 - Format contract: [`docs/handoffs/CONTRACT.md`](./CONTRACT.md)
 - Glossary: [`CONTEXT.md`](../../CONTEXT.md)
