@@ -1,8 +1,15 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import {
+  requireSuperAdminOrManager,
+  userIsManager,
+  userIsSuperAdmin,
+  userIsSuperAdminOrManager,
+  userIsTeamMemberOnly,
+} from "./lib/auth";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -21,16 +28,19 @@ async function insertUser(
     createdAt?: number;
     firstName?: string;
     lastName?: string;
+    tokenIdentifier?: string;
+    roles?: Array<"super_admin" | "manager" | "team_member">;
   },
 ): Promise<Id<"users">> {
   return await t.run(async (ctx) => {
     return await ctx.db.insert("users", {
       appUserId: crypto.randomUUID(),
-      tokenIdentifier: `https://example.test|${fields.email}`,
+      tokenIdentifier: fields.tokenIdentifier ?? `https://example.test|${fields.email}`,
       email: fields.email,
       workosUserId: fields.email,
       ...(fields.firstName !== undefined ? { firstName: fields.firstName } : {}),
       ...(fields.lastName !== undefined ? { lastName: fields.lastName } : {}),
+      ...(fields.roles !== undefined ? { roles: fields.roles } : {}),
       createdAt: fields.createdAt ?? fields.updatedAt,
       updatedAt: fields.updatedAt,
     });
@@ -77,6 +87,7 @@ describe("users.list", () => {
     expect(result.page[0]).not.toHaveProperty("workosUserId");
     expect(result.page[0]).not.toHaveProperty("appUserId");
     expect(result.page[0]).not.toHaveProperty("name");
+    expect(result.page[0]).not.toHaveProperty("roles");
     expect(result.isDone).toBe(true);
   });
 
@@ -136,5 +147,118 @@ describe("users.getById", () => {
       createdAt: 4,
       updatedAt: 5,
     });
+  });
+});
+
+describe("users.getMe + roles", () => {
+  it("returns null when unauthenticated", async () => {
+    const t = testClient();
+    await expect(t.query(api.users.getMe, {})).resolves.toBeNull();
+  });
+
+  it("returns empty roles when none are assigned", async () => {
+    const t = testClient();
+    // convex-test tokenIdentifier is `${issuer}|${subject}`
+    await insertUser(t, {
+      email: "me@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://example.test|caller",
+    });
+
+    const me = await t.withIdentity(identity).query(api.users.getMe, {});
+    expect(me?.email).toBe("me@example.com");
+    expect(me?.roles).toEqual([]);
+  });
+
+  it("returns roles after internal setRoles (multi-role)", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "admin@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://example.test|caller",
+      roles: [],
+    });
+
+    await t.mutation(internal.users.setRoles, {
+      userId,
+      roles: ["super_admin", "manager", "super_admin"],
+    });
+
+    const me = await t.withIdentity(identity).query(api.users.getMe, {});
+    expect(me?.roles).toEqual(["super_admin", "manager"]);
+  });
+});
+
+describe("role authorization helpers", () => {
+  it("distinguishes Super admin, Manager, and Team member-only", async () => {
+    const t = testClient();
+    const teamOnlyId = await insertUser(t, {
+      email: "member@example.com",
+      updatedAt: 1,
+      roles: ["team_member"],
+    });
+    const managerId = await insertUser(t, {
+      email: "mgr@example.com",
+      updatedAt: 2,
+      roles: ["manager", "team_member"],
+    });
+    const superId = await insertUser(t, {
+      email: "root@example.com",
+      updatedAt: 3,
+      roles: ["super_admin"],
+    });
+
+    await t.run(async (ctx) => {
+      const teamOnly = await ctx.db.get("users", teamOnlyId);
+      const manager = await ctx.db.get("users", managerId);
+      const superAdmin = await ctx.db.get("users", superId);
+      if (!teamOnly || !manager || !superAdmin) {
+        throw new Error("fixture users missing");
+      }
+
+      expect(userIsTeamMemberOnly(teamOnly)).toBe(true);
+      expect(userIsSuperAdminOrManager(teamOnly)).toBe(false);
+
+      expect(userIsManager(manager)).toBe(true);
+      expect(userIsSuperAdminOrManager(manager)).toBe(true);
+      expect(userIsTeamMemberOnly(manager)).toBe(false);
+
+      expect(userIsSuperAdmin(superAdmin)).toBe(true);
+      expect(userIsSuperAdminOrManager(superAdmin)).toBe(true);
+      expect(userIsTeamMemberOnly(superAdmin)).toBe(false);
+    });
+  });
+
+  it("requireSuperAdminOrManager throws Unauthorized for Team member-only", async () => {
+    const t = testClient();
+    await insertUser(t, {
+      email: "member@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://example.test|caller",
+      roles: ["team_member"],
+    });
+
+    await expect(
+      t.withIdentity(identity).run(async (ctx) => {
+        await requireSuperAdminOrManager(ctx);
+      }),
+    ).rejects.toThrow("Unauthorized");
+  });
+
+  it("requireSuperAdminOrManager allows Manager", async () => {
+    const t = testClient();
+    await insertUser(t, {
+      email: "mgr@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://example.test|caller",
+      roles: ["manager"],
+    });
+
+    await expect(
+      t.withIdentity(identity).run(async (ctx) => {
+        const user = await requireSuperAdminOrManager(ctx);
+        return user.email;
+      }),
+    ).resolves.toBe("mgr@example.com");
   });
 });
