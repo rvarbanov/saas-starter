@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
@@ -21,16 +21,19 @@ async function insertUser(
     createdAt?: number;
     firstName?: string;
     lastName?: string;
+    tokenIdentifier?: string;
+    roles?: Array<"super_admin" | "manager" | "team_member">;
   },
 ): Promise<Id<"users">> {
   return await t.run(async (ctx) => {
     return await ctx.db.insert("users", {
       appUserId: crypto.randomUUID(),
-      tokenIdentifier: `https://example.test|${fields.email}`,
+      tokenIdentifier: fields.tokenIdentifier ?? `https://example.test|${fields.email}`,
       email: fields.email,
       workosUserId: fields.email,
       ...(fields.firstName !== undefined ? { firstName: fields.firstName } : {}),
       ...(fields.lastName !== undefined ? { lastName: fields.lastName } : {}),
+      ...(fields.roles !== undefined ? { roles: fields.roles } : {}),
       createdAt: fields.createdAt ?? fields.updatedAt,
       updatedAt: fields.updatedAt,
     });
@@ -77,6 +80,7 @@ describe("users.list", () => {
     expect(result.page[0]).not.toHaveProperty("workosUserId");
     expect(result.page[0]).not.toHaveProperty("appUserId");
     expect(result.page[0]).not.toHaveProperty("name");
+    expect(result.page[0]).not.toHaveProperty("roles");
     expect(result.isDone).toBe(true);
   });
 
@@ -136,5 +140,44 @@ describe("users.getById", () => {
       createdAt: 4,
       updatedAt: 5,
     });
+  });
+});
+
+describe("users.getMe + roles", () => {
+  it("returns null when unauthenticated", async () => {
+    const t = testClient();
+    await expect(t.query(api.users.getMe, {})).resolves.toBeNull();
+  });
+
+  it("returns empty roles when none are assigned", async () => {
+    const t = testClient();
+    // convex-test tokenIdentifier is `${issuer}|${subject}`
+    await insertUser(t, {
+      email: "me@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://example.test|caller",
+    });
+
+    const me = await t.withIdentity(identity).query(api.users.getMe, {});
+    expect(me?.email).toBe("me@example.com");
+    expect(me?.roles).toEqual([]);
+  });
+
+  it("returns roles after internal setRoles (multi-role)", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "admin@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://example.test|caller",
+      roles: [],
+    });
+
+    await t.mutation(internal.users.setRoles, {
+      userId,
+      roles: ["super_admin", "manager", "super_admin"],
+    });
+
+    const me = await t.withIdentity(identity).query(api.users.getMe, {});
+    expect(me?.roles).toEqual(["super_admin", "manager"]);
   });
 });

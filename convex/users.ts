@@ -12,6 +12,7 @@ import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUserValidator, listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
+import { normalizeRoles, rolesValidator, uniqueRoles } from "./lib/roles";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { normalizeNames } from "./lib/userNames";
 import { assertEmailAvailable } from "./lib/users";
@@ -36,6 +37,8 @@ export const userDocValidator = v.object({
   firstName: v.optional(v.string()),
   lastName: v.optional(v.string()),
   workosUserId: v.string(),
+  /** Always present on the public self DTO; empty when none assigned. */
+  roles: rolesValidator,
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -50,6 +53,7 @@ function toPublicUserDoc(user: Doc<"users">) {
     firstName: user.firstName,
     lastName: user.lastName,
     workosUserId: user.workosUserId,
+    roles: normalizeRoles(user.roles),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -152,6 +156,31 @@ export const getMe = query({
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
     return user ? toPublicUserDoc(user) : null;
+  },
+});
+
+/**
+ * Replace the role set for a user (v1 manual assignment).
+ * Call from the Convex dashboard / scripts — not exposed to clients.
+ */
+export const setRoles = internalMutation({
+  args: {
+    userId: v.id("users"),
+    roles: rolesValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get("users", args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const roles = uniqueRoles(args.roles);
+    await ctx.db.patch("users", args.userId, {
+      roles,
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });
 
