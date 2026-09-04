@@ -47,17 +47,3 @@ export function isSuperAdmin(roles: readonly Role[] | undefined): boolean {
 export function isManager(roles: readonly Role[] | undefined): boolean {
   return hasRole(roles, "manager");
 }
-
-/** Union check used by directory gating (RAD-70) and similar privileged reads. */
-export function isSuperAdminOrManager(roles: readonly Role[] | undefined): boolean {
-  return hasAnyRole(roles, ["super_admin", "manager"]);
-}
-
-/**
- * True when the caller has Team member and neither Super admin nor Manager.
- * Empty role sets are not Team member-only.
- */
-export function isTeamMemberOnly(roles: readonly Role[] | undefined): boolean {
-  const normalized = normalizeRoles(roles);
-  return hasRole(normalized, "team_member") && !isSuperAdminOrManager(normalized);
-}

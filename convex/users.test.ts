@@ -3,7 +3,6 @@ import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { isManager, isSuperAdmin, isSuperAdminOrManager, isTeamMemberOnly } from "./lib/roles";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -180,46 +179,5 @@ describe("users.getMe + roles", () => {
 
     const me = await t.withIdentity(identity).query(api.users.getMe, {});
     expect(me?.roles).toEqual(["super_admin", "manager"]);
-  });
-});
-
-describe("role authorization helpers", () => {
-  it("distinguishes Super admin, Manager, and Team member-only on stored users", async () => {
-    const t = testClient();
-    const teamOnlyId = await insertUser(t, {
-      email: "member@example.com",
-      updatedAt: 1,
-      roles: ["team_member"],
-    });
-    const managerId = await insertUser(t, {
-      email: "mgr@example.com",
-      updatedAt: 2,
-      roles: ["manager", "team_member"],
-    });
-    const superId = await insertUser(t, {
-      email: "root@example.com",
-      updatedAt: 3,
-      roles: ["super_admin"],
-    });
-
-    await t.run(async (ctx) => {
-      const teamOnly = await ctx.db.get("users", teamOnlyId);
-      const manager = await ctx.db.get("users", managerId);
-      const superAdmin = await ctx.db.get("users", superId);
-      if (!teamOnly || !manager || !superAdmin) {
-        throw new Error("fixture users missing");
-      }
-
-      expect(isTeamMemberOnly(teamOnly.roles)).toBe(true);
-      expect(isSuperAdminOrManager(teamOnly.roles)).toBe(false);
-
-      expect(isManager(manager.roles)).toBe(true);
-      expect(isSuperAdminOrManager(manager.roles)).toBe(true);
-      expect(isTeamMemberOnly(manager.roles)).toBe(false);
-
-      expect(isSuperAdmin(superAdmin.roles)).toBe(true);
-      expect(isSuperAdminOrManager(superAdmin.roles)).toBe(true);
-      expect(isTeamMemberOnly(superAdmin.roles)).toBe(false);
-    });
   });
 });
