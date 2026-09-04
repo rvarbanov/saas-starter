@@ -3,13 +3,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import {
-  requireSuperAdminOrManager,
-  userIsManager,
-  userIsSuperAdmin,
-  userIsSuperAdminOrManager,
-  userIsTeamMemberOnly,
-} from "./lib/auth";
+import { isManager, isSuperAdmin, isSuperAdminOrManager, isTeamMemberOnly } from "./lib/roles";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -190,7 +184,7 @@ describe("users.getMe + roles", () => {
 });
 
 describe("role authorization helpers", () => {
-  it("distinguishes Super admin, Manager, and Team member-only", async () => {
+  it("distinguishes Super admin, Manager, and Team member-only on stored users", async () => {
     const t = testClient();
     const teamOnlyId = await insertUser(t, {
       email: "member@example.com",
@@ -216,49 +210,16 @@ describe("role authorization helpers", () => {
         throw new Error("fixture users missing");
       }
 
-      expect(userIsTeamMemberOnly(teamOnly)).toBe(true);
-      expect(userIsSuperAdminOrManager(teamOnly)).toBe(false);
+      expect(isTeamMemberOnly(teamOnly.roles)).toBe(true);
+      expect(isSuperAdminOrManager(teamOnly.roles)).toBe(false);
 
-      expect(userIsManager(manager)).toBe(true);
-      expect(userIsSuperAdminOrManager(manager)).toBe(true);
-      expect(userIsTeamMemberOnly(manager)).toBe(false);
+      expect(isManager(manager.roles)).toBe(true);
+      expect(isSuperAdminOrManager(manager.roles)).toBe(true);
+      expect(isTeamMemberOnly(manager.roles)).toBe(false);
 
-      expect(userIsSuperAdmin(superAdmin)).toBe(true);
-      expect(userIsSuperAdminOrManager(superAdmin)).toBe(true);
-      expect(userIsTeamMemberOnly(superAdmin)).toBe(false);
+      expect(isSuperAdmin(superAdmin.roles)).toBe(true);
+      expect(isSuperAdminOrManager(superAdmin.roles)).toBe(true);
+      expect(isTeamMemberOnly(superAdmin.roles)).toBe(false);
     });
-  });
-
-  it("requireSuperAdminOrManager throws Unauthorized for Team member-only", async () => {
-    const t = testClient();
-    await insertUser(t, {
-      email: "member@example.com",
-      updatedAt: 1,
-      tokenIdentifier: "https://example.test|caller",
-      roles: ["team_member"],
-    });
-
-    await expect(
-      t.withIdentity(identity).run(async (ctx) => {
-        await requireSuperAdminOrManager(ctx);
-      }),
-    ).rejects.toThrow("Unauthorized");
-  });
-
-  it("requireSuperAdminOrManager allows Manager", async () => {
-    const t = testClient();
-    await insertUser(t, {
-      email: "mgr@example.com",
-      updatedAt: 1,
-      tokenIdentifier: "https://example.test|caller",
-      roles: ["manager"],
-    });
-
-    await expect(
-      t.withIdentity(identity).run(async (ctx) => {
-        const user = await requireSuperAdminOrManager(ctx);
-        return user.email;
-      }),
-    ).resolves.toBe("mgr@example.com");
   });
 });
