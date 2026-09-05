@@ -13,6 +13,7 @@ function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
     firstName: "Ada",
     lastName: "Lovelace",
     workosUserId: "user_1",
+    roles: ["manager"],
     createdAt: 10,
     updatedAt: 20,
     ...overrides,
@@ -20,29 +21,32 @@ function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
 }
 
 describe("toListUser", () => {
-  it("keeps Listed user fields and omits identity-link fields and name", () => {
+  it("keeps Listed user fields including roles and omits identity-link fields and name", () => {
     expect(toListUser(fakeUser())).toEqual({
       _id: "jd7users000000000000000000",
       firstName: "Ada",
       lastName: "Lovelace",
       email: "ada@example.com",
+      roles: ["manager"],
       createdAt: 10,
       updatedAt: 20,
     });
   });
 
-  it("omits missing name parts", () => {
+  it("normalizes missing roles to an empty array and omits missing name parts", () => {
     expect(
       toListUser(
         fakeUser({
           firstName: undefined,
           lastName: undefined,
           name: undefined,
+          roles: undefined,
         }),
       ),
     ).toEqual({
       _id: "jd7users000000000000000000",
       email: "ada@example.com",
+      roles: [],
       createdAt: 10,
       updatedAt: 20,
     });

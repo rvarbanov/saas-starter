@@ -1,11 +1,13 @@
 import { type Infer, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
+import { normalizeRoles, rolesValidator } from "./roles";
 
 export const listUserValidator = v.object({
   _id: v.id("users"),
   firstName: v.optional(v.string()),
   lastName: v.optional(v.string()),
   email: v.string(),
+  roles: rolesValidator,
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -23,6 +25,7 @@ export function toListUser(user: Doc<"users">): ListUser {
   const listUser: ListUser = {
     _id: user._id,
     email: user.email,
+    roles: normalizeRoles(user.roles),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
