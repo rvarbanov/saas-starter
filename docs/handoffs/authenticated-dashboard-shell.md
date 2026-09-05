@@ -389,7 +389,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 - **Lucide icons:** locked in RAD-77 (`LayoutDashboard` / `Users` / `Sparkles`).
 - **Demo page mock values:** build invents concrete arrays from the locked schema (RAD-62); do not invent alternate layouts or a runtime module switcher.
 - **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — outside this handoff.
-- **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) — **shipped** (this build).
+- **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) — **shipped** (this build). E2E **H2** needs the live Convex deployment to include this PR’s `users.list` args (human `pnpm convex:dev` / CI `CONVEX_DEPLOY_KEY` + `pnpm convex:backfill-search-text`); until then H2 soft-skips when the deployment rejects `search`.
 - **RAD-71** canceled (cursor pagination absorbed into RAD-64).
 - **E2E deferred (do not invent for Acceptance):** Users Load more interaction; mobile Sheet / collapse; desktop Global nav collapse affordance; Demo page module-switching; `make e2e-prod` as Acceptance.
 - **Session path grill:** [RAD-83](https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80) — **resolved:** Scenario J walks all five App routes + home (URL + one landmark per hop); D stays distributed.

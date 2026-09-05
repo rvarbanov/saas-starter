@@ -57,6 +57,10 @@ export function usersListErrorMessage(error: unknown): string {
   return "Something went wrong";
 }
 
+/** Empty-state copy when the directory has no rows (virgin vs constrained). */
+export const USERS_LIST_EMPTY_VIRGIN = "No users found";
+export const USERS_LIST_EMPTY_CONSTRAINED = "No users match";
+
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -91,11 +95,20 @@ function UsersTableShell({ children }: { children: ReactNode }) {
   );
 }
 
-class UsersListErrorBoundary extends Component<{ children: ReactNode }, { error: unknown }> {
+class UsersListErrorBoundary extends Component<
+  { children: ReactNode; resetKey: string },
+  { error: unknown }
+> {
   state: { error: unknown } = { error: null };
 
   static getDerivedStateFromError(error: unknown): { error: unknown } {
     return { error };
+  }
+
+  override componentDidUpdate(prevProps: Readonly<{ resetKey: string }>): void {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.error != null) {
+      this.setState({ error: null });
+    }
   }
 
   render(): ReactNode {
@@ -127,7 +140,7 @@ function UsersListEmpty({ constrained }: { constrained: boolean }) {
     <UsersTableShell>
       <TableRow>
         <TableCell className="text-muted-foreground" colSpan={COLUMN_HEADERS.length}>
-          {constrained ? "No users match" : "No users found"}
+          {constrained ? USERS_LIST_EMPTY_CONSTRAINED : USERS_LIST_EMPTY_VIRGIN}
         </TableCell>
       </TableRow>
     </UsersTableShell>
@@ -260,28 +273,36 @@ function UsersListInner() {
     );
   };
 
+  const filterResetKey = [
+    activeSearch ?? "",
+    (activeRoles ?? []).join(","),
+    createdWithinDays ?? "",
+  ].join("|");
+
   return (
-    <div>
-      <UsersListToolbar
-        createdWithinDays={createdWithinDays}
-        onCreatedWithinDaysChange={setCreatedWithinDays}
-        onSearchChange={setSearchInput}
-        onToggleRole={toggleRole}
-        search={searchInput}
-        selectedRoles={selectedRoles}
-      />
-      {!ready || result === undefined ? (
-        <UsersListSkeleton />
-      ) : result.page.length === 0 ? (
-        <UsersListEmpty constrained={constrained} />
-      ) : (
-        <UsersTableShell>
-          {result.page.map((user) => (
-            <ListedUserRow key={user._id} user={user} />
-          ))}
-        </UsersTableShell>
-      )}
-    </div>
+    <UsersListErrorBoundary resetKey={filterResetKey}>
+      <div>
+        <UsersListToolbar
+          createdWithinDays={createdWithinDays}
+          onCreatedWithinDaysChange={setCreatedWithinDays}
+          onSearchChange={setSearchInput}
+          onToggleRole={toggleRole}
+          search={searchInput}
+          selectedRoles={selectedRoles}
+        />
+        {!ready || result === undefined ? (
+          <UsersListSkeleton />
+        ) : result.page.length === 0 ? (
+          <UsersListEmpty constrained={constrained} />
+        ) : (
+          <UsersTableShell>
+            {result.page.map((user) => (
+              <ListedUserRow key={user._id} user={user} />
+            ))}
+          </UsersTableShell>
+        )}
+      </div>
+    </UsersListErrorBoundary>
   );
 }
 
@@ -291,9 +312,5 @@ export function UsersList() {
     return <p className="text-caption">Convex is not configured; the Users list cannot load.</p>;
   }
 
-  return (
-    <UsersListErrorBoundary>
-      <UsersListInner />
-    </UsersListErrorBoundary>
-  );
+  return <UsersListInner />;
 }
