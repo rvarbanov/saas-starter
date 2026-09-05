@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { useConvexAuth, useQuery } from "convex/react";
-import { describe, expect, it, vi } from "vitest";
-import { usersListErrorMessage } from "./users-list";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { formatListedUserRoles, usersListErrorMessage } from "./users-list";
 
 vi.mock("@/lib/convex-config", () => ({
   isConvexConfigured: () => true,
@@ -15,9 +15,13 @@ vi.mock("convex/react", () => ({
 const useConvexAuthMock = vi.mocked(useConvexAuth);
 const useQueryMock = vi.mocked(useQuery);
 
+afterEach(() => {
+  cleanup();
+});
+
 async function renderUsersList() {
   const { UsersList } = await import("./users-list");
-  render(<UsersList />);
+  return render(<UsersList />);
 }
 
 describe("usersListErrorMessage", () => {
@@ -31,8 +35,14 @@ describe("usersListErrorMessage", () => {
   });
 });
 
+describe("formatListedUserRoles", () => {
+  it("formats known roles for display", () => {
+    expect(formatListedUserRoles(["super_admin", "team_member"])).toBe("Super admin, Team member");
+  });
+});
+
 describe("UsersList", () => {
-  it("renders column headers and empty copy", async () => {
+  it("renders toolbar, column headers, and empty copy", async () => {
     useConvexAuthMock.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
@@ -45,16 +55,19 @@ describe("UsersList", () => {
 
     await renderUsersList();
 
+    expect(screen.getByTestId("users-directory-toolbar")).toBeInTheDocument();
+    expect(screen.getByTestId("users-search-input")).toBeInTheDocument();
     expect(screen.getByTestId("users-directory-table")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "First name" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Last name" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Email" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Roles" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Created at" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Updated at" })).toBeInTheDocument();
     expect(screen.getByText("No users found")).toBeInTheDocument();
   });
 
-  it("renders a listed user row", async () => {
+  it("renders a listed user row including roles", async () => {
     useConvexAuthMock.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
@@ -66,6 +79,7 @@ describe("UsersList", () => {
           firstName: "Ada",
           lastName: "Lovelace",
           email: "ada@example.com",
+          roles: ["manager"],
           createdAt: 1_700_000_000_000,
           updatedAt: 1_700_000_000_000,
         },
@@ -76,8 +90,10 @@ describe("UsersList", () => {
 
     await renderUsersList();
 
-    expect(screen.getByText("Ada")).toBeInTheDocument();
-    expect(screen.getByText("Lovelace")).toBeInTheDocument();
-    expect(screen.getByText("ada@example.com")).toBeInTheDocument();
+    const table = screen.getByTestId("users-directory-table");
+    expect(table).toHaveTextContent("Ada");
+    expect(table).toHaveTextContent("Lovelace");
+    expect(table).toHaveTextContent("ada@example.com");
+    expect(table).toHaveTextContent("Manager");
   });
 });
