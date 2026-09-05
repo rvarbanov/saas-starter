@@ -64,7 +64,7 @@ A later build session implements the **App** frame (Global nav + Global header +
 - **~~Interim 50-row hard cap + truncation footer~~** — **superseded by RAD-64** (cursor pagination from day one). [RAD-71](https://linear.app/radi-dev/issue/RAD-71/users-list-cursor-pagination) canceled as absorbed.
 - **UI (v1):** blank empty name cells; locale absolute datetimes in client TZ; plain-text email; ellipsis + `title` overflow; no row-click; no actions column; no current-user highlight; page title `Users`; empty `"No users yet"`; table skeleton loading; `"Couldn't load users"` + Retry on error; all five columns on narrow viewports (horizontal scroll OK).
 - **Pagination UI:** Load more (append until `isDone`) — not the superseded 50-cap footer.
-- **Search/filter:** deferred — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
+- **Search/filter:** shipped — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) (server-backed search + role/created filters; no Load more).
 
 ### Convex list-users API shape (RAD-64)
 
@@ -80,7 +80,7 @@ Implement later in `convex/users.ts` (alongside existing `getMe` / `store`).
 
 | | |
 | --- | --- |
-| **Args** | `{ paginationOpts }` only (no sort/search/filter) |
+| **Args** | `{ paginationOpts, search?, roles?, createdWithinDays? }` (RAD-72) |
 | **Sort** | Fixed `updatedAt` desc (server-side) |
 | **Returns** | `{ page, continueCursor, isDone }` (standard Convex pagination) |
 | **Page size** | Silent clamp `numItems` ≤ **100**; UI default `initialNumItems: 25` |
@@ -389,7 +389,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 - **Lucide icons:** locked in RAD-77 (`LayoutDashboard` / `Users` / `Sparkles`).
 - **Demo page mock values:** build invents concrete arrays from the locked schema (RAD-62); do not invent alternate layouts or a runtime module switcher.
 - **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — outside this handoff.
-- **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
+- **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) — **shipped** (this build).
 - **RAD-71** canceled (cursor pagination absorbed into RAD-64).
 - **E2E deferred (do not invent for Acceptance):** Users Load more interaction; mobile Sheet / collapse; desktop Global nav collapse affordance; Demo page module-switching; `make e2e-prod` as Acceptance.
 - **Session path grill:** [RAD-83](https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80) — **resolved:** Scenario J walks all five App routes + home (URL + one landmark per hop); D stays distributed.

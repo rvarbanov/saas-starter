@@ -64,15 +64,32 @@ test("G: Avatar menu opens Settings and Profile; those are not Global nav links"
 test("H: Users list shows the table, column headers, and at least one row", async ({ page }) => {
   await page.goto(APP_ROUTES.users, { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: /^Users$/i })).toBeVisible();
+  await expect(page.getByTestId("users-directory-toolbar")).toBeVisible();
   const table = page.getByTestId("users-directory-table");
   await expect(table).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "First name" })).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "Last name" })).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "Email" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Roles" })).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "Created at" })).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "Updated at" })).toBeVisible();
   await expect(table.locator("tbody tr")).not.toHaveCount(0);
   await expect(table.getByRole("cell", { name: /@/ }).first()).toBeVisible();
+});
+
+test("H2: Users search finds a known email and nonsense shows No users match", async ({ page }) => {
+  await page.goto(APP_ROUTES.users, { waitUntil: "load" });
+  const table = page.getByTestId("users-directory-table");
+  await expect(table).toBeVisible();
+  const email = await table.getByRole("cell", { name: /@/ }).first().innerText();
+  const needle = email.slice(0, Math.min(8, email.length));
+
+  const search = page.getByTestId("users-search-input");
+  await search.fill(needle);
+  await expect(table.getByRole("cell", { name: email })).toBeVisible();
+
+  await search.fill("zzznomatchzzzxxyyzz");
+  await expect(page.getByText("No users match")).toBeVisible();
 });
 
 test("I: Demo page shows title, chart, table, 30d range, and next page", async ({ page }) => {
