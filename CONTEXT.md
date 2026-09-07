@@ -68,6 +68,14 @@ _Avoid_: Users directory, members, accounts, getMe, directory
 The name, email, and dates shown for an App user in the Users list — not the Auth user identity.
 _Avoid_: Directory DTO, DTO, user doc, profile
 
+**User detail**:
+The app page for one App user opened from the Users list (manager path). Distinct from Profile (self, Avatar menu).
+_Avoid_: User profile, profile page (when you mean this), App user page
+
+**Profile**:
+The signed-in person’s own account page in the app, reached from the Avatar menu — not User detail.
+_Avoid_: User detail, settings (Settings is a different page)
+
 **Demo page**:
 The Coming soon page — fake metrics and rows used to show the layout, not live product data.
 _Avoid_: Coming soon pack, demo data, live metrics, dashboard widgets
