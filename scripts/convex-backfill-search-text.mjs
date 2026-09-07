@@ -6,6 +6,17 @@
  */
 import { spawnSync } from "node:child_process";
 
+function parseConvexJson(stdout) {
+  const text = (stdout || "").trim();
+  // Convex CLI may pretty-print the return value across multiple lines.
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error(`No JSON object in convex run output:\n${text}`);
+  }
+  return JSON.parse(text.slice(start, end + 1));
+}
+
 function runBackfill(cursor) {
   const args = [
     "exec",
@@ -24,14 +35,10 @@ function runBackfill(cursor) {
     process.stderr.write(result.stderr || result.stdout || "convex run failed\n");
     process.exit(result.status ?? 1);
   }
-  const stdout = (result.stdout || "").trim();
-  // Convex CLI prints the JSON return value on the last non-empty line.
-  const lines = stdout.split("\n").filter((line) => line.trim() !== "");
-  const last = lines.at(-1) ?? "";
   try {
-    return JSON.parse(last);
-  } catch {
-    process.stderr.write(`Could not parse convex run output:\n${stdout}\n`);
+    return parseConvexJson(result.stdout || "");
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
     process.exit(1);
   }
 }
