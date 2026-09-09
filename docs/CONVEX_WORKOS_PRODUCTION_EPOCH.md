@@ -94,7 +94,7 @@
 
 - Fixed sort: `updatedAt` descending (headers not interactive in v1).
 - ~~Interim hard cap: **50** rows; truncation footer when capped.~~ **Superseded by [RAD-64](https://linear.app/radi-dev/issue/RAD-64/convex-list-users-api-shape):** cursor pagination from day one (see below). [RAD-71](https://linear.app/radi-dev/issue/RAD-71/users-list-cursor-pagination) canceled as absorbed.
-- Search/filter deferred — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
+- Search/filter shipped — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter).
 
 **UI affordances (v1):** blank empty name cells; locale absolute datetimes in client local TZ; plain-text email; ellipsis + `title` overflow; no row-click; no actions column; no current-user highlight; page title `Users`; empty “No users yet”; table skeleton loading; “Couldn’t load users” + Retry on error; all five columns on narrow viewports (horizontal scroll OK). **Pagination chrome:** Load more (append pages until `isDone`) — not the superseded 50-cap truncation footer.
 
@@ -114,7 +114,7 @@
 
 **`users.list`:**
 
-- **Args:** `{ paginationOpts }` only (no sort/search/filter args; sort hardcoded).
+- **Args:** `{ paginationOpts }` plus optional `search`, `roles`, `createdWithinDays` (RAD-72). Sort hardcoded `updatedAt` desc when not searching.
 - **Returns:** `{ page: DirectoryUser[], continueCursor: string, isDone: boolean }` (standard Convex pagination).
 - **Page size:** client `numItems`; server **silent clamp** to max **100**. UI default `initialNumItems: 25`; Load more until `isDone`.
 
@@ -123,7 +123,7 @@
 - **Args:** `{ userId: Id<"users"> }`.
 - **Returns:** directory row or `null` if missing (not a throw).
 
-**Tracked debt:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) — search/filter (extends list args later). Implementation of this contract is a later build; this section is the grilled query contract only.
+**RAD-72 shipped:** search/filter extends list args (`search`, `roles`, `createdWithinDays`) with `searchText` + `search_text` search index; directory DTO includes `roles`.
 
 ---
 

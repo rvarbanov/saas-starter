@@ -25,11 +25,19 @@ export default defineSchema({
      * Provisioning does not assign a default role.
      */
     roles: v.optional(rolesValidator),
+    /**
+     * Denormalized lowercase firstName + lastName + email for directory search.
+     * Optional during backfill; writers always set it going forward.
+     */
+    searchText: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_token", ["tokenIdentifier"])
     .index("by_email", ["email"])
     .index("by_app_user_id", ["appUserId"])
-    .index("by_updatedAt", ["updatedAt"]),
+    .index("by_updatedAt", ["updatedAt"])
+    .searchIndex("search_text", {
+      searchField: "searchText",
+    }),
 });

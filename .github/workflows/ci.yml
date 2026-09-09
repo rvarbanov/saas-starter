@@ -73,6 +73,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Keep the live Convex deployment in sync with this PR so Users search e2e
+      # (H2) exercises the new users.list args. No-op when the secret is unset.
+      - name: Deploy Convex functions
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: |
+          if [ -z "${CONVEX_DEPLOY_KEY}" ]; then
+            echo "CONVEX_DEPLOY_KEY unset — skipping convex deploy."
+            echo "H2 will soft-skip if the live deployment still rejects search args."
+            exit 0
+          fi
+          pnpm exec convex deploy --yes
+          pnpm convex:backfill-search-text
+
       - name: E2E tests
         run: pnpm test:e2e
         env:

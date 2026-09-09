@@ -1,6 +1,7 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { getUserByTokenIdentifier } from "./auth";
+import { buildSearchText } from "./searchText";
 import { assertEmailAvailable, normalizeEmail } from "./users";
 
 /** Auth-linked fields only — WorkOS must not seed profile names into Convex. */
@@ -26,6 +27,7 @@ export async function upsertUserFromProfile(
     const updates: {
       email?: string;
       workosUserId?: string;
+      searchText?: string;
       updatedAt: number;
     } = { updatedAt: now };
 
@@ -37,7 +39,25 @@ export async function upsertUserFromProfile(
       updates.workosUserId = profile.workosUserId;
     }
 
-    if (updates.email !== undefined || updates.workosUserId !== undefined) {
+    if (updates.email !== undefined) {
+      updates.searchText = buildSearchText({
+        firstName: existing.firstName,
+        lastName: existing.lastName,
+        email: updates.email,
+      });
+    } else if (existing.searchText === undefined) {
+      updates.searchText = buildSearchText({
+        firstName: existing.firstName,
+        lastName: existing.lastName,
+        email: existing.email,
+      });
+    }
+
+    if (
+      updates.email !== undefined ||
+      updates.workosUserId !== undefined ||
+      updates.searchText !== undefined
+    ) {
       await ctx.db.patch("users", existing._id, updates);
     }
 
@@ -53,6 +73,7 @@ export async function upsertUserFromProfile(
     workosUserId: profile.workosUserId,
     // Explicit empty set — provisioning does not assign Team member or any role.
     roles: [],
+    searchText: buildSearchText({ email }),
     createdAt: now,
     updatedAt: now,
   });

@@ -12,10 +12,43 @@ import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUserValidator, listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
-import { normalizeRoles, rolesValidator, uniqueRoles } from "./lib/roles";
+import { hasAnyRole, normalizeRoles, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
+import { buildSearchText } from "./lib/searchText";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { normalizeNames } from "./lib/userNames";
 import { assertEmailAvailable } from "./lib/users";
+
+const createdWithinDaysValidator = v.union(v.literal(7), v.literal(30), v.literal(90));
+
+function normalizeListSearch(search: string | undefined): string | undefined {
+  if (search === undefined) {
+    return undefined;
+  }
+  const trimmed = search.trim();
+  return trimmed.length >= 2 ? trimmed : undefined;
+}
+
+function matchesListFilters(
+  user: Doc<"users">,
+  filters: {
+    roles: Role[] | undefined;
+    createdWithinDays: 7 | 30 | 90 | undefined;
+    now: number;
+  },
+): boolean {
+  if (filters.roles !== undefined && filters.roles.length > 0) {
+    if (!hasAnyRole(user.roles, filters.roles)) {
+      return false;
+    }
+  }
+  if (filters.createdWithinDays !== undefined) {
+    const cutoff = filters.now - filters.createdWithinDays * 24 * 60 * 60 * 1000;
+    if (user.createdAt < cutoff) {
+      return false;
+    }
+  }
+  return true;
+}
 
 const storeResultValidator = v.object({
   _id: v.id("users"),
@@ -107,27 +140,49 @@ export const upsertFromAuthProfile = internalMutation({
 
 /**
  * Paginated Users list. JWT required; caller need not have a Convex `users` row.
- * Sort is fixed `updatedAt` descending. `numItems` is silently capped at 100.
+ * Sort is `updatedAt` descending when not searching; search relevance when searching.
+ * Optional `search` / `roles` / `createdWithinDays` are AND-combined (server-side).
+ * Role/date filters may yield sparse pages. `numItems` is silently capped at 100.
  */
 export const list = query({
   args: {
     paginationOpts: paginationOptsValidator,
+    search: v.optional(v.string()),
+    roles: v.optional(rolesValidator),
+    createdWithinDays: v.optional(createdWithinDaysValidator),
   },
   returns: listUsersPageValidator,
   handler: async (ctx, args) => {
     await requireIdentity(ctx);
 
-    const result = await ctx.db
-      .query("users")
-      .withIndex("by_updatedAt")
-      .order("desc")
-      .paginate({
-        ...args.paginationOpts,
-        numItems: clampPaginationNumItems(args.paginationOpts.numItems),
-      });
+    const paginationOpts = {
+      ...args.paginationOpts,
+      numItems: clampPaginationNumItems(args.paginationOpts.numItems),
+    };
+    const search = normalizeListSearch(args.search);
+    const now = Date.now();
+    const filters = {
+      roles: args.roles,
+      createdWithinDays: args.createdWithinDays,
+      now,
+    };
+
+    const result =
+      search !== undefined
+        ? await ctx.db
+            .query("users")
+            .withSearchIndex("search_text", (q) => q.search("searchText", search))
+            .paginate(paginationOpts)
+        : await ctx.db
+            .query("users")
+            .withIndex("by_updatedAt")
+            .order("desc")
+            .paginate(paginationOpts);
+
+    const page = result.page.filter((user) => matchesListFilters(user, filters));
 
     return {
-      page: result.page.map(toListUser),
+      page: page.map(toListUser),
       continueCursor: result.continueCursor,
       isDone: result.isDone,
     };
@@ -212,6 +267,7 @@ export const updateName = mutation({
       firstName,
       lastName,
       name,
+      searchText: buildSearchText({ firstName, lastName, email: user.email }),
       updatedAt: Date.now(),
     });
     return null;
@@ -265,8 +321,53 @@ export const patchEmailInternal = internalMutation({
 
     await ctx.db.patch("users", user._id, {
       email: normalized,
+      searchText: buildSearchText({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: normalized,
+      }),
       updatedAt: Date.now(),
     });
     return null;
+  },
+});
+
+/**
+ * Backfill `searchText` on existing users (idempotent, batched).
+ * Run via `npx convex run users:backfillSearchText` until `isDone`.
+ */
+export const backfillSearchText = internalMutation({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: v.object({
+    patched: v.number(),
+    continueCursor: v.string(),
+    isDone: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const result = await ctx.db.query("users").paginate({
+      ...args.paginationOpts,
+      numItems: clampPaginationNumItems(args.paginationOpts.numItems),
+    });
+
+    let patched = 0;
+    for (const user of result.page) {
+      const searchText = buildSearchText({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+      if (user.searchText !== searchText) {
+        await ctx.db.patch("users", user._id, { searchText });
+        patched += 1;
+      }
+    }
+
+    return {
+      patched,
+      continueCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
   },
 });
