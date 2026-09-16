@@ -1,6 +1,7 @@
 "use client";
 
 import { useConvexAuth, useQuery } from "convex/react";
+import Link from "next/link";
 import { Component, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,9 @@ import { api } from "@/convex/_generated/api";
 import type { ListUser } from "@/convex/lib/listUser";
 import { LIST_USERS_PAGE_SIZE } from "@/convex/lib/pagination";
 import { ROLE_VALUES, type Role } from "@/convex/lib/roles";
+import { userDetailPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
+import { ROLE_LABELS } from "@/lib/role-labels";
 
 const COLUMN_HEADERS = [
   "First name",
@@ -30,12 +33,6 @@ const COLUMN_HEADERS = [
 const SKELETON_ROW_IDS = ["sk-1", "sk-2", "sk-3", "sk-4", "sk-5"] as const;
 const CREATED_WITHIN_PRESETS = [7, 30, 90] as const;
 type CreatedWithinDays = (typeof CREATED_WITHIN_PRESETS)[number];
-
-const ROLE_LABELS: Record<Role, string> = {
-  super_admin: "Super admin",
-  manager: "Manager",
-  team_member: "Team member",
-};
 
 const listedUserDateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -149,9 +146,14 @@ function UsersListEmpty({ constrained }: { constrained: boolean }) {
 
 function ListedUserRow({ user }: { user: ListUser }) {
   const rolesLabel = formatListedUserRoles(user.roles);
+  const href = userDetailPath(user._id);
+  const label = `Open ${user.email}`;
   return (
-    <TableRow>
-      <EllipsisCell value={user.firstName ?? ""} />
+    <TableRow className="relative cursor-pointer hover:bg-muted/50">
+      <TableCell className="max-w-48 truncate" title={user.firstName ?? ""}>
+        <Link aria-label={label} className="absolute inset-0 z-10" href={href} />
+        <span className="relative z-0">{user.firstName ?? ""}</span>
+      </TableCell>
       <EllipsisCell value={user.lastName ?? ""} />
       <EllipsisCell value={user.email} />
       <EllipsisCell value={rolesLabel} />

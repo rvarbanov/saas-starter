@@ -44,6 +44,7 @@ const chromiumProject = {
     /dashboard-visual\.spec\.ts/,
     /dashboard-routes\.spec\.ts/,
     /shell\.spec\.ts/,
+    /user-detail\.spec\.ts/,
   ],
   use: { ...devices["Desktop Chrome"] },
 };
@@ -54,7 +55,7 @@ const projects = [
   {
     name: "authenticated",
     testMatch:
-      /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts|dashboard-routes\.spec\.ts|shell\.spec\.ts/,
+      /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts|dashboard-routes\.spec\.ts|shell\.spec\.ts|user-detail\.spec\.ts/,
     use: {
       ...devices["Desktop Chrome"],
       storageState: AUTH_STORAGE_PATH,

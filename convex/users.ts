@@ -10,13 +10,23 @@ import {
 } from "./lib/auth";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
-import { listUserValidator, listUsersPageValidator, toListUser } from "./lib/listUser";
+import { listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
-import { hasAnyRole, normalizeRoles, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
+import {
+  assertAssignableRoles,
+  hasAnyRole,
+  mergeRolesPreservingSuperAdmin,
+  type Role,
+  rolesValidator,
+  uniqueRoles,
+} from "./lib/roles";
 import { buildSearchText } from "./lib/searchText";
 import { upsertUserFromProfile } from "./lib/upsertUser";
+import { toPublicUserDoc, userDocValidator } from "./lib/userDoc";
 import { normalizeNames } from "./lib/userNames";
 import { assertEmailAvailable } from "./lib/users";
+
+export { toPublicUserDoc, userDocValidator } from "./lib/userDoc";
 
 const createdWithinDaysValidator = v.union(v.literal(7), v.literal(30), v.literal(90));
 
@@ -60,37 +70,6 @@ const authProfileValidator = v.object({
   workosUserId: v.string(),
   email: v.string(),
 });
-
-export const userDocValidator = v.object({
-  _id: v.id("users"),
-  appUserId: v.string(),
-  tokenIdentifier: v.string(),
-  email: v.string(),
-  name: v.optional(v.string()),
-  firstName: v.optional(v.string()),
-  lastName: v.optional(v.string()),
-  workosUserId: v.string(),
-  /** Always present on the public self DTO; empty when none assigned. */
-  roles: rolesValidator,
-  createdAt: v.number(),
-  updatedAt: v.number(),
-});
-
-function toPublicUserDoc(user: Doc<"users">) {
-  return {
-    _id: user._id,
-    appUserId: user.appUserId,
-    tokenIdentifier: user.tokenIdentifier,
-    email: user.email,
-    name: user.name,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    workosUserId: user.workosUserId,
-    roles: normalizeRoles(user.roles),
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-  };
-}
 
 /**
  * Upsert when the WorkOS JWT already includes email (JWT template configured).
@@ -190,17 +169,19 @@ export const list = query({
 });
 
 /**
- * Listed user by id. JWT required; missing row returns null (does not throw).
+ * User detail read: full public App user doc (same shape as `getMe`).
+ * JWT required; missing row returns null (does not throw).
+ * Listed-user floor remains on `api.users.list` only.
  */
 export const getById = query({
   args: {
     userId: v.id("users"),
   },
-  returns: v.union(listUserValidator, v.null()),
+  returns: v.union(v.null(), userDocValidator),
   handler: async (ctx, args) => {
     await requireIdentity(ctx);
     const user = await ctx.db.get("users", args.userId);
-    return user ? toListUser(user) : null;
+    return user ? toPublicUserDoc(user) : null;
   },
 });
 
@@ -295,6 +276,64 @@ export const normalizeEmailForAction = internalQuery({
   returns: v.string(),
   handler: async (ctx, args) => {
     return await assertEmailAvailable(ctx, args.email, args.excludeUserId);
+  },
+});
+
+/** Load user by Convex id for authenticated actions. */
+export const getUserByIdForAction = internalQuery({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.union(v.null(), userDocValidator),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get("users", args.userId);
+    return user ? toPublicUserDoc(user) : null;
+  },
+});
+
+/**
+ * Patch another App user after User detail Save validation (and optional WorkOS email update).
+ * Roles: assignable subset replace with `super_admin` preserved when already present.
+ */
+export const patchUserDetailInternal = internalMutation({
+  args: {
+    userId: v.id("users"),
+    firstName: v.string(),
+    lastName: v.string(),
+    email: v.string(),
+    roles: rolesValidator,
+  },
+  returns: userDocValidator,
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get("users", args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const assignable = assertAssignableRoles(args.roles);
+    const roles = mergeRolesPreservingSuperAdmin(user.roles, assignable);
+    const normalizedNames = normalizeNames(args.firstName, args.lastName);
+    const normalizedEmail = await assertEmailAvailable(ctx, args.email, args.userId);
+
+    await ctx.db.patch("users", args.userId, {
+      firstName: normalizedNames.firstName,
+      lastName: normalizedNames.lastName,
+      name: normalizedNames.name,
+      email: normalizedEmail,
+      roles,
+      searchText: buildSearchText({
+        firstName: normalizedNames.firstName,
+        lastName: normalizedNames.lastName,
+        email: normalizedEmail,
+      }),
+      updatedAt: Date.now(),
+    });
+
+    const updated = await ctx.db.get("users", args.userId);
+    if (!updated) {
+      throw new Error("User not found");
+    }
+    return toPublicUserDoc(updated);
   },
 });
 
