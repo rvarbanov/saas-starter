@@ -225,8 +225,19 @@ function UserDetailEditor({ user, isOwnDetail }: { user: PublicUser; isOwnDetail
 
   return (
     <div className="page-main" data-testid="user-detail-page">
-      <h1 className="heading-page">{title}</h1>
-      <form className="form mt-4" data-testid="user-detail-form" onSubmit={handleSave}>
+      <form className="form" data-testid="user-detail-form" onSubmit={handleSave}>
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <h1 className="heading-page">{title}</h1>
+          <div className="flex shrink-0 gap-2">
+            <Button disabled={freeze || !dirty} type="submit">
+              {saving ? "Saving…" : "Save"}
+            </Button>
+            <Button disabled={freeze} onClick={cancelEdit} type="button" variant="outline">
+              Cancel
+            </Button>
+          </div>
+        </div>
+
         <div className="form-fields">
           <label className="field-label" htmlFor="user-detail-first-name">
             <span className="text-label">First name</span>
@@ -291,15 +302,6 @@ function UserDetailEditor({ user, isOwnDetail }: { user: PublicUser; isOwnDetail
             {error}
           </p>
         ) : null}
-
-        <div className="mt-4 flex gap-2">
-          <Button disabled={freeze || !dirty} type="submit">
-            {saving ? "Saving…" : "Save"}
-          </Button>
-          <Button disabled={freeze} onClick={cancelEdit} type="button" variant="outline">
-            Cancel
-          </Button>
-        </div>
       </form>
     </div>
   );
