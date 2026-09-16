@@ -81,8 +81,9 @@ test.describe("User detail K–O", () => {
 
     await expect(page.getByTestId("user-detail-form")).toHaveCount(0);
     const detail = page.getByTestId("user-detail-page");
-    await expect(detail.getByText(first)).toBeVisible();
-    await expect(detail.getByText(last)).toBeVisible();
+    await expect(detail.getByRole("heading", { name: `${first} ${last}` })).toBeVisible();
+    await expect(detail.locator("dd").filter({ hasText: new RegExp(`^${first}$`) })).toBeVisible();
+    await expect(detail.locator("dd").filter({ hasText: new RegExp(`^${last}$`) })).toBeVisible();
   });
 
   test("O: edit → change name → Cancel → view unchanged", async ({ page }) => {
