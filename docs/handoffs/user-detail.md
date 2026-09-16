@@ -95,10 +95,11 @@ Overrides shell “no row-click.”
 **All-or-nothing Save:**
 
 1. Validate in Convex first (incl. email uniqueness excluding `userId`; name rules via `normalizeNames`; email via `assertValidEmailFormat` / `normalizeEmail`).
-2. If email **changed**: WorkOS Update User PUT for target’s `workosUserId` (RAD-87).
-3. If email **unchanged**: **do not** call WorkOS.
-4. Only after WorkOS succeeds (or is skipped) patch Convex: names (recompute derived `name`), email if changed, roles (per RAD-93 merge rules).
-5. If WorkOS fails: **do not** patch; throw clear error (e.g. `"Failed to update email. Please try again."`) with logged status/body.
+2. If email **changed** and the subject has a non-empty `workosUserId`: WorkOS Update User PUT for that id (RAD-87).
+3. If email **changed** but the subject is **not** WorkOS-linked yet (`workosUserId` empty/missing): **skip WorkOS** and still patch Convex email (clarification for this build).
+4. If email **unchanged**: **do not** call WorkOS.
+5. Only after WorkOS succeeds (or is skipped) patch Convex: names (recompute derived `name`), email if changed, roles (per RAD-93 merge rules).
+6. If WorkOS fails: **do not** patch; throw clear error (e.g. `"Failed to update email. Please try again."`) with logged status/body.
 
 **Build note:** Epic tickets RAD-98 / RAD-99 / RAD-100 must be implemented as **this one action** (or consolidated); do not ship three public client endpoints. Need internal helpers that patch the **target** user by id (today `patchEmailInternal` is self/`tokenIdentifier`-shaped).
 

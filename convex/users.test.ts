@@ -248,7 +248,7 @@ describe("users.getById", () => {
     await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
   });
 
-  it("returns a Listed user by id including roles", async () => {
+  it("returns the full public App user doc by id including identity links", async () => {
     const t = testClient();
     const userId = await insertUser(t, {
       email: "ada@example.com",
@@ -260,12 +260,83 @@ describe("users.getById", () => {
 
     await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toEqual({
       _id: userId,
+      appUserId: expect.any(String),
+      tokenIdentifier: "https://example.test|ada@example.com",
       firstName: "Ada",
       email: "ada@example.com",
+      workosUserId: "ada@example.com",
       roles: ["team_member"],
       createdAt: 4,
       updatedAt: 5,
     });
+  });
+});
+
+describe("users.patchUserDetailInternal", () => {
+  it("updates names, email, and assignable roles while preserving super_admin", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "target@example.com",
+      updatedAt: 1,
+      firstName: "Old",
+      lastName: "Name",
+      roles: ["super_admin", "team_member"],
+    });
+
+    const updated = await t.mutation(internal.users.patchUserDetailInternal, {
+      userId,
+      firstName: "New",
+      lastName: "Person",
+      email: "new@example.com",
+      roles: ["manager"],
+    });
+
+    expect(updated).toMatchObject({
+      _id: userId,
+      firstName: "New",
+      lastName: "Person",
+      name: "New Person",
+      email: "new@example.com",
+      roles: ["super_admin", "manager"],
+    });
+  });
+
+  it("rejects super_admin in the assignable roles payload", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "target@example.com",
+      updatedAt: 1,
+      roles: ["manager"],
+    });
+
+    await expect(
+      t.mutation(internal.users.patchUserDetailInternal, {
+        userId,
+        firstName: "A",
+        lastName: "B",
+        email: "target@example.com",
+        roles: ["super_admin", "manager"],
+      }),
+    ).rejects.toThrow(/super_admin/);
+  });
+
+  it("allows empty assignable roles", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "target@example.com",
+      updatedAt: 1,
+      roles: ["manager", "team_member"],
+    });
+
+    const updated = await t.mutation(internal.users.patchUserDetailInternal, {
+      userId,
+      firstName: "",
+      lastName: "",
+      email: "target@example.com",
+      roles: [],
+    });
+
+    expect(updated.roles).toEqual([]);
   });
 });
 

@@ -47,3 +47,46 @@ export function isSuperAdmin(roles: readonly Role[] | undefined): boolean {
 export function isManager(roles: readonly Role[] | undefined): boolean {
   return hasRole(roles, "manager");
 }
+
+/** Roles the User detail editor may set (never includes `super_admin`). */
+export const ASSIGNABLE_ROLES = ["manager", "team_member"] as const;
+
+export type AssignableRole = (typeof ASSIGNABLE_ROLES)[number];
+
+export function isAssignableRole(role: Role): role is AssignableRole {
+  return role === "manager" || role === "team_member";
+}
+
+/**
+ * Validate User detail `roles` args: assignable roles only, reject `super_admin`.
+ * Returns a deduped assignable set (may be empty).
+ */
+export function assertAssignableRoles(roles: readonly Role[]): AssignableRole[] {
+  for (const role of roles) {
+    if (role === "super_admin") {
+      throw new Error("Cannot assign super_admin via User detail");
+    }
+    if (!isAssignableRole(role)) {
+      throw new Error(`Invalid role: ${role}`);
+    }
+  }
+  return uniqueRoles(roles) as AssignableRole[];
+}
+
+/**
+ * Merge assignable roles from the editor with any existing `super_admin` on the subject.
+ * Prevents accidental demotion when the UI never offered `super_admin`.
+ */
+export function mergeRolesPreservingSuperAdmin(
+  existing: readonly Role[] | undefined,
+  assignable: readonly AssignableRole[],
+): Role[] {
+  const next: Role[] = [];
+  if (hasRole(existing, "super_admin")) {
+    next.push("super_admin");
+  }
+  for (const role of uniqueRoles(assignable)) {
+    next.push(role);
+  }
+  return next;
+}
