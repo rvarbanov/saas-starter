@@ -53,8 +53,12 @@ A person created at sign-up whose identity is used only to authenticate.
 _Avoid_: WorkOS user (as the product name), principal, User (when you mean this)
 
 **App user**:
-A person created after the Auth user and linked to them. This record holds their product data. The Users list is a list of App users.
-_Avoid_: Convex user (as the product name), directory user, member, User (when you mean this)
+A person in the product directory. An App user holds product data and may exist before any Auth user; when linked, the Auth user is how they sign in. The Users list is a list of App users.
+_Avoid_: Convex user (as the product name), directory user, member, User (when you mean this), Pending App user
+
+**Create User**:
+The app page where a manager adds a new App user (email required; other editable fields optional). Reached from the Users list. Distinct from sign-up in the Auth workflow.
+_Avoid_: Invite user (invite/link email is a later step), register, add member
 
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An Auth user or App user who has signed out is a Visitor until they sign in again.
