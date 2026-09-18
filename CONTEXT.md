@@ -57,7 +57,7 @@ The product record for a person who uses the app. An App user is the result of e
 _Avoid_: Convex user (as the product name), directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
 
 **Create User**:
-The manager pathway to create an App user from the Users list (email required; other editable fields optional). Same result as Auth workflow sign-up — an App user — on a different path; some products use public sign-up, others only this pathway.
+The manager pathway to create an App user (and its Auth user) from the Users list — email required; other editable fields optional. Same App user result as Auth workflow sign-up, on a different path; some products use public sign-up, others only this pathway. Invite / set-password email is a separate step.
 _Avoid_: Invite user (as the name for this page), register, add member, a different kind of user than App user
 
 **Visitor**:
