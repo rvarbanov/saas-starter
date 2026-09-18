@@ -49,16 +49,16 @@ The account menu. It opens from one control, in the app’s Global header. It ho
 _Avoid_: user menu, account dropdown, sidebar account
 
 **Auth user**:
-A person created at sign-up whose identity is used only to authenticate.
+A person whose identity is used only to authenticate. Created through Auth workflow sign-up or through Create User (manager pathway).
 _Avoid_: WorkOS user (as the product name), principal, User (when you mean this)
 
 **App user**:
-A person in the product directory. An App user holds product data and may exist before any Auth user; when linked, the Auth user is how they sign in. The Users list is a list of App users.
-_Avoid_: Convex user (as the product name), directory user, member, User (when you mean this), Pending App user
+A person in the product directory — the product record for a user. An App user is the result of either pathway that creates a user: Auth workflow sign-up, or Create User by a manager. Holds product data; the Auth user is how they sign in. The Users list is a list of App users.
+_Avoid_: Convex user (as the product name), directory user, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
 
 **Create User**:
-The app page where a manager adds a new App user (email required; other editable fields optional). Reached from the Users list. Distinct from sign-up in the Auth workflow.
-_Avoid_: Invite user (invite/link email is a later step), register, add member
+The manager pathway to create an App user from the Users list (email required; other editable fields optional). Same result as Auth workflow sign-up — an App user — on a different path; some products use public sign-up, others only this pathway.
+_Avoid_: Invite user (as the name for this page), register, add member, a different kind of user than App user
 
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An Auth user or App user who has signed out is a Visitor until they sign in again.
