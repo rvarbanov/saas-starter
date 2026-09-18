@@ -53,8 +53,8 @@ A person whose identity is used only to authenticate. Created through Auth workf
 _Avoid_: WorkOS user (as the product name), principal, User (when you mean this)
 
 **App user**:
-A person in the product directory — the product record for a user. An App user is the result of either pathway that creates a user: Auth workflow sign-up, or Create User by a manager. Holds product data; the Auth user is how they sign in. The Users list is a list of App users.
-_Avoid_: Convex user (as the product name), directory user, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
+The product record for a person who uses the app. An App user is the result of either pathway that creates a user: Auth workflow sign-up, or Create User by a manager. Holds product data; the Auth user is how they sign in. The Users list is a list of App users.
+_Avoid_: Convex user (as the product name), directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
 
 **Create User**:
 The manager pathway to create an App user from the Users list (email required; other editable fields optional). Same result as Auth workflow sign-up — an App user — on a different path; some products use public sign-up, others only this pathway.
