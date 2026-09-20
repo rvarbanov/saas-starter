@@ -1,7 +1,8 @@
 "use client";
 
 import { useAction, useConvexAuth, useQuery } from "convex/react";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, Suspense, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -76,6 +77,44 @@ function validateDraft(draft: Draft): string | null {
     return "Invalid email address";
   }
   return null;
+}
+
+export function InviteFailedBanner() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  if (searchParams.get("invite") !== "failed") {
+    return null;
+  }
+
+  function dismiss() {
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("invite");
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }
+
+  return (
+    <div
+      className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2"
+      data-testid="user-detail-invite-failed-banner"
+      role="status"
+    >
+      <p className="text-body">
+        User created, but the invite email could not be sent. You can resend it later.
+      </p>
+      <Button
+        data-testid="user-detail-invite-failed-dismiss"
+        onClick={dismiss}
+        size="sm"
+        type="button"
+        variant="outline"
+      >
+        Dismiss
+      </Button>
+    </div>
+  );
 }
 
 export function UserDetail({ userId: rawUserId }: { userId: string }) {
@@ -210,6 +249,9 @@ function UserDetailEditor({ user, isOwnDetail }: { user: PublicUser; isOwnDetail
   if (mode === "view") {
     return (
       <div className="page-main" data-testid="user-detail-page">
+        <Suspense>
+          <InviteFailedBanner />
+        </Suspense>
         <div className="mb-4 flex items-start justify-between gap-4">
           <h1 className="heading-page">{title}</h1>
           <Button onClick={enterEdit} type="button">
@@ -225,6 +267,9 @@ function UserDetailEditor({ user, isOwnDetail }: { user: PublicUser; isOwnDetail
 
   return (
     <div className="page-main" data-testid="user-detail-page">
+      <Suspense>
+        <InviteFailedBanner />
+      </Suspense>
       <form className="form" data-testid="user-detail-form" onSubmit={handleSave}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <h1 className="heading-page">{title}</h1>

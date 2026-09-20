@@ -18,7 +18,7 @@ import { api } from "@/convex/_generated/api";
 import type { ListUser } from "@/convex/lib/listUser";
 import { LIST_USERS_PAGE_SIZE } from "@/convex/lib/pagination";
 import { ROLE_VALUES, type Role } from "@/convex/lib/roles";
-import { userDetailPath } from "@/lib/app-routes";
+import { createUserPath, userDetailPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
 import { ROLE_LABELS } from "@/lib/role-labels";
 
@@ -310,9 +310,22 @@ function UsersListInner() {
 
 /** Users list table for `/dashboard/users`. First page of 25 only; search/filter supported. */
 export function UsersList() {
-  if (!isConvexConfigured()) {
-    return <p className="text-caption">Convex is not configured; the Users list cannot load.</p>;
-  }
-
-  return <UsersListInner />;
+  return (
+    <div>
+      <div className="mb-4 flex justify-end">
+        <Button
+          data-testid="create-user-entry"
+          nativeButton={false}
+          render={<Link href={createUserPath()} />}
+        >
+          Create user
+        </Button>
+      </div>
+      {!isConvexConfigured() ? (
+        <p className="text-caption">Convex is not configured; the Users list cannot load.</p>
+      ) : (
+        <UsersListInner />
+      )}
+    </div>
+  );
 }

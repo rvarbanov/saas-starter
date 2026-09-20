@@ -46,6 +46,10 @@ export function appBreadcrumbTrail(
     return [];
   }
 
+  if (path === APP_ROUTES.usersNew) {
+    return [{ label: "Users", href: APP_ROUTES.users }, { label: "Create user" }];
+  }
+
   const userId = parseUserDetailId(path);
   if (userId !== null) {
     return [

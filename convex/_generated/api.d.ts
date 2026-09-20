@@ -15,6 +15,7 @@ import type * as lib_listUser from "../lib/listUser.js";
 import type * as lib_pagination from "../lib/pagination.js";
 import type * as lib_roles from "../lib/roles.js";
 import type * as lib_searchText from "../lib/searchText.js";
+import type * as lib_tokenIdentifier from "../lib/tokenIdentifier.js";
 import type * as lib_upsertUser from "../lib/upsertUser.js";
 import type * as lib_userDoc from "../lib/userDoc.js";
 import type * as lib_userNames from "../lib/userNames.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   "lib/pagination": typeof lib_pagination;
   "lib/roles": typeof lib_roles;
   "lib/searchText": typeof lib_searchText;
+  "lib/tokenIdentifier": typeof lib_tokenIdentifier;
   "lib/upsertUser": typeof lib_upsertUser;
   "lib/userDoc": typeof lib_userDoc;
   "lib/userNames": typeof lib_userNames;
