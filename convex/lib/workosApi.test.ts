@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CREATE_USER_FAILED,
-  EMAIL_ALREADY_REGISTERED,
   createWorkOsUser,
+  EMAIL_ALREADY_REGISTERED,
   isWorkOsDuplicateEmailError,
+  mapCreateUserError,
   sendWorkOsInvitation,
 } from "./workosApi";
 
@@ -23,6 +24,21 @@ describe("isWorkOsDuplicateEmailError", () => {
   it("ignores unrelated failures", () => {
     expect(isWorkOsDuplicateEmailError(500, "internal")).toBe(false);
     expect(isWorkOsDuplicateEmailError(400, JSON.stringify({ code: "invalid_input" }))).toBe(false);
+  });
+});
+
+describe("mapCreateUserError", () => {
+  it("unwraps Convex-wrapped Email already registered", () => {
+    const wrapped = new Error(
+      `[CONVEX Q(users:normalizeEmailForAction)] Server Error\nUncaught Error: ${EMAIL_ALREADY_REGISTERED}`,
+    );
+    expect(mapCreateUserError(wrapped).message).toBe(EMAIL_ALREADY_REGISTERED);
+  });
+
+  it("keeps the generic create string for unrecognized failures", () => {
+    expect(mapCreateUserError(new Error("Invalid creator token identifier")).message).toBe(
+      CREATE_USER_FAILED,
+    );
   });
 });
 

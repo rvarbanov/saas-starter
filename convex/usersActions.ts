@@ -11,10 +11,10 @@ import { userDocValidator } from "./lib/userDoc";
 import { normalizeNames } from "./lib/userNames";
 import {
   CREATE_USER_FAILED,
-  EMAIL_ALREADY_REGISTERED,
   createWorkOsUser,
   deleteWorkOsUser,
   fetchWorkOsUserProfile,
+  mapCreateUserError,
   sendWorkOsInvitation,
 } from "./lib/workosApi";
 
@@ -263,26 +263,6 @@ type PublicUserDoc = {
   updatedAt: number;
 };
 
-function isCreatorFacingError(message: string): boolean {
-  return (
-    message === "Not authenticated" ||
-    message === "Invalid email address" ||
-    message === EMAIL_ALREADY_REGISTERED ||
-    message.startsWith("First name must be at most") ||
-    message.startsWith("Last name must be at most") ||
-    message === "Cannot assign super_admin via User detail" ||
-    message.startsWith("Invalid role:")
-  );
-}
-
-function creatorFacingError(error: unknown): Error {
-  const message = error instanceof Error ? error.message : "Unknown error";
-  if (isCreatorFacingError(message)) {
-    return error instanceof Error ? error : new Error(message);
-  }
-  return new Error(CREATE_USER_FAILED);
-}
-
 /**
  * Create User: all-or-nothing App user + Auth user; invite send is best-effort.
  * Client calls only this action.
@@ -321,7 +301,7 @@ export const createUser = action({
       console.error("Create User validation failed", {
         error: error instanceof Error ? error.message : "Unknown error",
       });
-      throw creatorFacingError(error);
+      throw mapCreateUserError(error);
     }
 
     console.info("Create User tokenIdentifier issuer", { iss: issuer });
@@ -339,7 +319,7 @@ export const createUser = action({
         error: error instanceof Error ? error.message : "Unknown error",
         email: normalizedEmail,
       });
-      throw creatorFacingError(error);
+      throw mapCreateUserError(error);
     }
 
     if (!workosUserId) {

@@ -11,6 +11,42 @@ const WORKOS_USER_MANAGEMENT = "https://api.workos.com/user_management";
 export const CREATE_USER_FAILED = "Failed to create user. Please try again.";
 export const EMAIL_ALREADY_REGISTERED = "Email already registered";
 
+const CREATE_USER_EXACT_MESSAGES = [
+  "Not authenticated",
+  "Invalid email address",
+  EMAIL_ALREADY_REGISTERED,
+  "Cannot assign super_admin via User detail",
+] as const;
+
+const CREATE_USER_PREFIX_MESSAGES = [
+  "First name must be at most",
+  "Last name must be at most",
+  "Invalid role:",
+] as const;
+
+/**
+ * Map action/query failures to creator-facing strings.
+ * Convex `runQuery` / `runMutation` may wrap the original `Error.message`.
+ */
+export function mapCreateUserError(error: unknown): Error {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  for (const known of CREATE_USER_EXACT_MESSAGES) {
+    if (message.includes(known)) {
+      return new Error(known);
+    }
+  }
+  for (const prefix of CREATE_USER_PREFIX_MESSAGES) {
+    if (message.includes(prefix)) {
+      const line = message
+        .split("\n")
+        .map((part) => part.trim())
+        .find((part) => part.includes(prefix));
+      return new Error(line ?? message);
+    }
+  }
+  return new Error(CREATE_USER_FAILED);
+}
+
 function requireWorkOsApiKey(): string {
   const apiKey = process.env.WORKOS_API_KEY;
   if (!apiKey) {
