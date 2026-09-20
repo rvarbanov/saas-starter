@@ -55,6 +55,8 @@ describe("UsersList", () => {
 
     await renderUsersList();
 
+    expect(screen.getByTestId("create-user-entry")).toBeInTheDocument();
+    expect(screen.getByTestId("create-user-entry")).toHaveAttribute("href", "/dashboard/users/new");
     expect(screen.getByTestId("users-directory-toolbar")).toBeInTheDocument();
     expect(screen.getByTestId("users-search-input")).toBeInTheDocument();
     expect(screen.getByTestId("users-directory-table")).toBeInTheDocument();
@@ -95,5 +97,17 @@ describe("UsersList", () => {
     expect(table).toHaveTextContent("Lovelace");
     expect(table).toHaveTextContent("ada@example.com");
     expect(table).toHaveTextContent("Manager");
+  });
+
+  it("keeps the Create user entry visible while the list is loading", async () => {
+    useConvexAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    } as ReturnType<typeof useConvexAuth>);
+    useQueryMock.mockReturnValue(undefined);
+
+    await renderUsersList();
+
+    expect(screen.getByTestId("create-user-entry")).toBeInTheDocument();
   });
 });

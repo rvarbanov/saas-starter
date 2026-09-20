@@ -40,6 +40,13 @@ describe("appBreadcrumbTrail", () => {
       appBreadcrumbTrail("/dashboard/users/j57abc", { userDetailLeaf: "Ada Lovelace" }),
     ).toEqual([{ label: "Users", href: APP_ROUTES.users }, { label: "Ada Lovelace" }]);
   });
+
+  it("builds Users → Create user for the Create page", () => {
+    expect(appBreadcrumbTrail("/dashboard/users/new")).toEqual([
+      { label: "Users", href: APP_ROUTES.users },
+      { label: "Create user" },
+    ]);
+  });
 });
 
 describe("userDetailPath / parseUserDetailId", () => {
@@ -47,6 +54,7 @@ describe("userDetailPath / parseUserDetailId", () => {
     expect(userDetailPath("j57abc")).toBe("/dashboard/users/j57abc");
     expect(parseUserDetailId("/dashboard/users/j57abc")).toBe("j57abc");
     expect(parseUserDetailId("/dashboard/users")).toBeNull();
+    expect(parseUserDetailId("/dashboard/users/new")).toBeNull();
   });
 });
 

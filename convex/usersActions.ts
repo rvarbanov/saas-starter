@@ -5,10 +5,18 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 import { extractEmailFromIdentity } from "./lib/identity";
-import { assertAssignableRoles, rolesValidator } from "./lib/roles";
+import { assertAssignableRoles, type Role, rolesValidator } from "./lib/roles";
+import { issuerFromTokenIdentifier, tokenIdentifierForCreatedUser } from "./lib/tokenIdentifier";
 import { userDocValidator } from "./lib/userDoc";
 import { normalizeNames } from "./lib/userNames";
-import { fetchWorkOsUserProfile } from "./lib/workosApi";
+import {
+  CREATE_USER_FAILED,
+  createWorkOsUser,
+  deleteWorkOsUser,
+  fetchWorkOsUserProfile,
+  mapCreateUserError,
+  sendWorkOsInvitation,
+} from "./lib/workosApi";
 
 const storeResultValidator = v.object({
   _id: v.id("users"),
@@ -233,5 +241,133 @@ export const updateUserDetail = action({
       email: normalizedEmail,
       roles: args.roles,
     });
+  },
+});
+
+const createUserResultValidator = v.object({
+  user: userDocValidator,
+  inviteSent: v.boolean(),
+});
+
+type PublicUserDoc = {
+  _id: Id<"users">;
+  appUserId: string;
+  tokenIdentifier: string;
+  email: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  workosUserId: string;
+  roles: Array<"super_admin" | "manager" | "team_member">;
+  createdAt: number;
+  updatedAt: number;
+};
+
+/**
+ * Create User: all-or-nothing App user + Auth user; invite send is best-effort.
+ * Client calls only this action.
+ */
+export const createUser = action({
+  args: {
+    email: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    roles: v.optional(rolesValidator),
+  },
+  returns: createUserResultValidator,
+  handler: async (ctx, args): Promise<{ user: PublicUserDoc; inviteSent: boolean }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const roles: Role[] = args.roles ?? [];
+    let normalizedEmail: string;
+    let firstName: string | undefined;
+    let lastName: string | undefined;
+    let assignable: Role[];
+    let issuer: string;
+
+    try {
+      const names = normalizeNames(args.firstName ?? "", args.lastName ?? "");
+      firstName = names.firstName;
+      lastName = names.lastName;
+      assignable = assertAssignableRoles(roles);
+      normalizedEmail = await ctx.runQuery(internal.users.normalizeEmailForAction, {
+        email: args.email,
+      });
+      issuer = issuerFromTokenIdentifier(identity.tokenIdentifier);
+    } catch (error) {
+      console.error("Create User validation failed", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw mapCreateUserError(error);
+    }
+
+    console.info("Create User tokenIdentifier issuer", { iss: issuer });
+
+    let workosUserId: string | undefined;
+    try {
+      const created = await createWorkOsUser({
+        email: normalizedEmail,
+        ...(firstName !== undefined ? { firstName } : {}),
+        ...(lastName !== undefined ? { lastName } : {}),
+      });
+      workosUserId = created.id;
+    } catch (error) {
+      console.error("Create User WorkOS create failed", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        email: normalizedEmail,
+      });
+      throw mapCreateUserError(error);
+    }
+
+    if (!workosUserId) {
+      throw new Error(CREATE_USER_FAILED);
+    }
+
+    const tokenIdentifier = tokenIdentifierForCreatedUser(identity.tokenIdentifier, workosUserId);
+
+    let user: PublicUserDoc;
+    try {
+      user = await ctx.runMutation(internal.users.insertCreatedUser, {
+        email: normalizedEmail,
+        ...(firstName !== undefined ? { firstName } : {}),
+        ...(lastName !== undefined ? { lastName } : {}),
+        roles: assignable,
+        workosUserId,
+        tokenIdentifier,
+      });
+    } catch (error) {
+      console.error("Create User Convex insert failed; rolling back WorkOS user", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        workosUserId,
+        email: normalizedEmail,
+      });
+      try {
+        await deleteWorkOsUser(workosUserId);
+      } catch (rollbackError) {
+        console.error("Create User WorkOS rollback failed", {
+          error: rollbackError instanceof Error ? rollbackError.message : "Unknown error",
+          workosUserId,
+        });
+      }
+      throw new Error(CREATE_USER_FAILED);
+    }
+
+    let inviteSent = true;
+    try {
+      await sendWorkOsInvitation(normalizedEmail);
+    } catch (error) {
+      inviteSent = false;
+      console.error("Create User invite send failed; App+Auth user kept", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        workosUserId,
+        email: normalizedEmail,
+        userId: user._id,
+      });
+    }
+
+    return { user, inviteSent };
   },
 });

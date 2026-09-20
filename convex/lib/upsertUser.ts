@@ -16,6 +16,73 @@ export type StoreUserResult = {
   appUserId: string;
 };
 
+async function getUserByWorkosUserId(ctx: MutationCtx, workosUserId: string) {
+  return await ctx.db
+    .query("users")
+    .withIndex("by_workosUserId", (q) => q.eq("workosUserId", workosUserId))
+    .unique();
+}
+
+async function patchAuthProfile(
+  ctx: MutationCtx,
+  existing: {
+    _id: Id<"users">;
+    appUserId: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    tokenIdentifier: string;
+    workosUserId: string;
+    searchText?: string;
+  },
+  profile: AuthProfile,
+  now: number,
+): Promise<StoreUserResult> {
+  const updates: {
+    email?: string;
+    tokenIdentifier?: string;
+    workosUserId?: string;
+    searchText?: string;
+    updatedAt: number;
+  } = { updatedAt: now };
+
+  const normalizedEmail = normalizeEmail(profile.email);
+  if (existing.email !== normalizedEmail) {
+    updates.email = await assertEmailAvailable(ctx, profile.email, existing._id);
+  }
+  if (existing.workosUserId !== profile.workosUserId) {
+    updates.workosUserId = profile.workosUserId;
+  }
+  if (existing.tokenIdentifier !== profile.tokenIdentifier) {
+    updates.tokenIdentifier = profile.tokenIdentifier;
+  }
+
+  if (updates.email !== undefined) {
+    updates.searchText = buildSearchText({
+      firstName: existing.firstName,
+      lastName: existing.lastName,
+      email: updates.email,
+    });
+  } else if (existing.searchText === undefined) {
+    updates.searchText = buildSearchText({
+      firstName: existing.firstName,
+      lastName: existing.lastName,
+      email: existing.email,
+    });
+  }
+
+  if (
+    updates.email !== undefined ||
+    updates.workosUserId !== undefined ||
+    updates.tokenIdentifier !== undefined ||
+    updates.searchText !== undefined
+  ) {
+    await ctx.db.patch("users", existing._id, updates);
+  }
+
+  return { _id: existing._id, appUserId: existing.appUserId };
+}
+
 export async function upsertUserFromProfile(
   ctx: MutationCtx,
   profile: AuthProfile,
@@ -24,44 +91,12 @@ export async function upsertUserFromProfile(
   const existing = await getUserByTokenIdentifier(ctx, profile.tokenIdentifier);
 
   if (existing) {
-    const updates: {
-      email?: string;
-      workosUserId?: string;
-      searchText?: string;
-      updatedAt: number;
-    } = { updatedAt: now };
+    return await patchAuthProfile(ctx, existing, profile, now);
+  }
 
-    const normalizedEmail = normalizeEmail(profile.email);
-    if (existing.email !== normalizedEmail) {
-      updates.email = await assertEmailAvailable(ctx, profile.email, existing._id);
-    }
-    if (existing.workosUserId !== profile.workosUserId) {
-      updates.workosUserId = profile.workosUserId;
-    }
-
-    if (updates.email !== undefined) {
-      updates.searchText = buildSearchText({
-        firstName: existing.firstName,
-        lastName: existing.lastName,
-        email: updates.email,
-      });
-    } else if (existing.searchText === undefined) {
-      updates.searchText = buildSearchText({
-        firstName: existing.firstName,
-        lastName: existing.lastName,
-        email: existing.email,
-      });
-    }
-
-    if (
-      updates.email !== undefined ||
-      updates.workosUserId !== undefined ||
-      updates.searchText !== undefined
-    ) {
-      await ctx.db.patch("users", existing._id, updates);
-    }
-
-    return { _id: existing._id, appUserId: existing.appUserId };
+  const byWorkos = await getUserByWorkosUserId(ctx, profile.workosUserId);
+  if (byWorkos) {
+    return await patchAuthProfile(ctx, byWorkos, profile, now);
   }
 
   const appUserId = crypto.randomUUID();

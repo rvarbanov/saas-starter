@@ -23,6 +23,7 @@ async function insertUser(
     firstName?: string;
     lastName?: string;
     tokenIdentifier?: string;
+    workosUserId?: string;
     roles?: Array<"super_admin" | "manager" | "team_member">;
   },
 ): Promise<Id<"users">> {
@@ -31,7 +32,7 @@ async function insertUser(
       appUserId: crypto.randomUUID(),
       tokenIdentifier: fields.tokenIdentifier ?? `https://example.test|${fields.email}`,
       email: fields.email,
-      workosUserId: fields.email,
+      workosUserId: fields.workosUserId ?? fields.email,
       ...(fields.firstName !== undefined ? { firstName: fields.firstName } : {}),
       ...(fields.lastName !== undefined ? { lastName: fields.lastName } : {}),
       ...(fields.roles !== undefined ? { roles: fields.roles } : {}),
@@ -375,5 +376,92 @@ describe("users.getMe + roles", () => {
 
     const me = await t.withIdentity(identity).query(api.users.getMe, {});
     expect(me?.roles).toEqual(["super_admin", "manager"]);
+  });
+});
+
+describe("users.insertCreatedUser", () => {
+  it("inserts names, assignable roles, and required Auth links", async () => {
+    const t = testClient();
+    const created = await t.mutation(internal.users.insertCreatedUser, {
+      email: "New@Example.com",
+      firstName: "Ada",
+      lastName: "Lovelace",
+      roles: ["manager"],
+      workosUserId: "user_01created",
+      tokenIdentifier: "https://example.test|user_01created",
+    });
+
+    expect(created).toMatchObject({
+      email: "new@example.com",
+      firstName: "Ada",
+      lastName: "Lovelace",
+      name: "Ada Lovelace",
+      roles: ["manager"],
+      workosUserId: "user_01created",
+      tokenIdentifier: "https://example.test|user_01created",
+    });
+    expect(created.appUserId).toEqual(expect.any(String));
+  });
+
+  it("stores empty roles and omitted names as unset / []", async () => {
+    const t = testClient();
+    const created = await t.mutation(internal.users.insertCreatedUser, {
+      email: "bare@example.com",
+      roles: [],
+      workosUserId: "user_01bare",
+      tokenIdentifier: "https://example.test|user_01bare",
+    });
+
+    expect(created.firstName).toBeUndefined();
+    expect(created.lastName).toBeUndefined();
+    expect(created.name).toBeUndefined();
+    expect(created.roles).toEqual([]);
+  });
+
+  it("rejects super_admin and duplicate emails", async () => {
+    const t = testClient();
+    await insertUser(t, { email: "taken@example.com", updatedAt: 1 });
+
+    await expect(
+      t.mutation(internal.users.insertCreatedUser, {
+        email: "taken@example.com",
+        roles: [],
+        workosUserId: "user_01dup",
+        tokenIdentifier: "https://example.test|user_01dup",
+      }),
+    ).rejects.toThrow("Email already registered");
+
+    await expect(
+      t.mutation(internal.users.insertCreatedUser, {
+        email: "role@example.com",
+        roles: ["super_admin"],
+        workosUserId: "user_01role",
+        tokenIdentifier: "https://example.test|user_01role",
+      }),
+    ).rejects.toThrow(/super_admin/);
+  });
+});
+
+describe("users.upsertFromAuthProfile workosUserId fallback", () => {
+  it("patches tokenIdentifier when by_token misses and by_workosUserId hits", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "created@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://old-issuer.test|user_01created",
+      workosUserId: "user_01created",
+    });
+
+    const result = await t.mutation(internal.users.upsertFromAuthProfile, {
+      tokenIdentifier: "https://example.test|user_01created",
+      workosUserId: "user_01created",
+      email: "created@example.com",
+    });
+
+    expect(result._id).toBe(userId);
+
+    const doc = await t.withIdentity(identity).query(api.users.getById, { userId });
+    expect(doc?.tokenIdentifier).toBe("https://example.test|user_01created");
+    expect(doc?.workosUserId).toBe("user_01created");
   });
 });

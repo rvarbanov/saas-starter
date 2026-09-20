@@ -86,7 +86,9 @@ test("H2: Users search finds a known email and nonsense shows No users match", a
   await page.goto(APP_ROUTES.users, { waitUntil: "load" });
   const table = page.getByTestId("users-directory-table");
   await expect(table).toBeVisible();
-  const email = await table.getByRole("cell", { name: /@/ }).first().innerText();
+  // Email is column 3. First-name cells can include `@` via the row link's
+  // aria-label (`Open {email}`) even when firstName is empty (Create User P).
+  const email = (await table.locator("tbody tr").first().locator("td").nth(2).innerText()).trim();
   const needle = email.slice(0, Math.min(8, email.length));
 
   const search = page.getByTestId("users-search-input");
@@ -108,7 +110,7 @@ test("H2: Users search finds a known email and nonsense shows No users match", a
     return;
   }
 
-  await expect(table.getByRole("cell", { name: email })).toBeVisible();
+  await expect(table.locator("td").filter({ hasText: email }).first()).toBeVisible();
 
   await search.fill("zzznomatchzzzxxyyzz");
   await expect(search).toHaveValue("zzznomatchzzzxxyyzz");

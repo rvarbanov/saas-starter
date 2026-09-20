@@ -338,6 +338,53 @@ export const patchUserDetailInternal = internalMutation({
 });
 
 /**
+ * Insert a manager-created App user after WorkOS `createUser` succeeds.
+ * Auth-link fields are required; names/roles follow Create User validation.
+ */
+export const insertCreatedUser = internalMutation({
+  args: {
+    email: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    roles: rolesValidator,
+    workosUserId: v.string(),
+    tokenIdentifier: v.string(),
+  },
+  returns: userDocValidator,
+  handler: async (ctx, args) => {
+    const assignable = assertAssignableRoles(args.roles);
+    const normalizedNames = normalizeNames(args.firstName ?? "", args.lastName ?? "");
+    const normalizedEmail = await assertEmailAvailable(ctx, args.email);
+    const now = Date.now();
+    const appUserId = crypto.randomUUID();
+
+    const userId = await ctx.db.insert("users", {
+      appUserId,
+      tokenIdentifier: args.tokenIdentifier,
+      email: normalizedEmail,
+      workosUserId: args.workosUserId,
+      ...(normalizedNames.firstName !== undefined ? { firstName: normalizedNames.firstName } : {}),
+      ...(normalizedNames.lastName !== undefined ? { lastName: normalizedNames.lastName } : {}),
+      ...(normalizedNames.name !== undefined ? { name: normalizedNames.name } : {}),
+      roles: assignable,
+      searchText: buildSearchText({
+        firstName: normalizedNames.firstName,
+        lastName: normalizedNames.lastName,
+        email: normalizedEmail,
+      }),
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const created = await ctx.db.get("users", userId);
+    if (!created) {
+      throw new Error("User not found");
+    }
+    return toPublicUserDoc(created);
+  },
+});
+
+/**
  * Patch email after WorkOS User Management API update.
  * Called from `usersActions.updateEmail` with a server-verified tokenIdentifier.
  */
