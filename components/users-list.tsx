@@ -3,7 +3,7 @@
 import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { Component, type ReactNode, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -313,13 +313,9 @@ export function UsersList() {
   return (
     <div>
       <div className="mb-4 flex justify-end">
-        <Button
-          data-testid="create-user-entry"
-          nativeButton={false}
-          render={<Link href={createUserPath()} />}
-        >
+        <Link className={buttonVariants()} data-testid="create-user-entry" href={createUserPath()}>
           Create user
-        </Button>
+        </Link>
       </div>
       {!isConvexConfigured() ? (
         <p className="text-caption">Convex is not configured; the Users list cannot load.</p>

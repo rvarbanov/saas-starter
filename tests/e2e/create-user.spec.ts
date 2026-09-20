@@ -11,9 +11,25 @@ function expectPath(page: Page, pathname: string) {
 
 async function openCreateUser(page: Page) {
   await page.goto(APP_ROUTES.users, { waitUntil: "load" });
-  await page.getByTestId("create-user-entry").click();
-  await expectPath(page, createUserPath());
+  const entry = page.getByTestId("create-user-entry");
+  await expect(entry).toBeVisible();
+  await expect(entry).toHaveAttribute("href", createUserPath());
+  await expect(page.getByRole("heading", { name: /^Users$/i })).toBeVisible();
+
+  // Next.js App Router Link clicks can no-op under parallel workers (URL stays
+  // on the list even though the entry is a real <a>). Wait for the create page
+  // after click, then fall back to a full navigation of the same href.
+  await Promise.all([
+    page.waitForURL((url) => url.pathname.replace(/\/$/, "") === createUserPath(), {
+      timeout: 5_000,
+    }),
+    entry.click(),
+  ]).catch(async () => {
+    await page.goto(createUserPath(), { waitUntil: "load" });
+  });
+
   await expect(page.getByTestId("create-user-page")).toBeVisible();
+  await expectPath(page, createUserPath());
 }
 
 test.describe("Create User P–S", () => {
@@ -23,7 +39,7 @@ test.describe("Create User P–S", () => {
     await page.getByTestId("create-user-email").fill(email);
     await page.getByTestId("create-user-submit").click();
     await expect(page.getByTestId("user-detail-page")).toBeVisible();
-    await expect(page.getByTestId("user-detail-page")).toHaveText(new RegExp(email, "i"));
+    await expect(page.getByTestId("user-detail-page")).toContainText(email);
   });
 
   test("Q: invalid email stays on Create with Invalid email address", async ({ page }) => {

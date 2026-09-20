@@ -4,7 +4,7 @@ import { useAction } from "convex/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
@@ -14,6 +14,7 @@ import { MAX_NAME_LENGTH } from "@/convex/lib/userNames";
 import { APP_ROUTES, userDetailPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
 import { ROLE_LABELS } from "@/lib/role-labels";
+import { cn } from "@/lib/utils";
 
 type Draft = {
   firstName: string;
@@ -122,14 +123,18 @@ function CreateUserFormInner() {
             <Button data-testid="create-user-submit" disabled={freeze || !dirty} type="submit">
               {creating ? "Creating…" : "Create user"}
             </Button>
-            <Button
-              disabled={freeze}
-              nativeButton={false}
-              render={<Link data-testid="create-user-cancel" href={APP_ROUTES.users} />}
-              variant="outline"
+            <Link
+              aria-disabled={freeze || undefined}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                freeze && "pointer-events-none opacity-50",
+              )}
+              data-testid="create-user-cancel"
+              href={APP_ROUTES.users}
+              tabIndex={freeze ? -1 : undefined}
             >
               Cancel
-            </Button>
+            </Link>
           </div>
         </div>
 
