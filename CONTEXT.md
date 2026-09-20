@@ -73,12 +73,16 @@ The name, email, and dates shown for an App user in the Users list — not the A
 _Avoid_: Directory DTO, DTO, user doc, profile
 
 **User detail**:
-The app page for one App user opened from the Users list (manager path). Distinct from Profile (self, Avatar menu).
-_Avoid_: User profile, profile page (when you mean this), App user page
+The app page that shows one App user, opened from the Users list (manager path). Distinct from User edit and from Profile (self, Avatar menu).
+_Avoid_: User profile, profile page (when you mean this), App user page, details, view page, show, edit mode (when you mean User edit)
+
+**User edit**:
+The manager page for changing one App user’s editable fields. Distinct from User detail and from Profile.
+_Avoid_: edit mode, in-place edit, user detail edit, details, show
 
 **Profile**:
-The signed-in person’s own account page in the app, reached from the Avatar menu — not User detail.
-_Avoid_: User detail, settings (Settings is a different page)
+The signed-in person’s own account page in the app, reached from the Avatar menu — not User detail and not User edit.
+_Avoid_: User detail, User edit, settings (Settings is a different page)
 
 **Demo page**:
 The Coming soon page — fake metrics and rows used to show the layout, not live product data.
