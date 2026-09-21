@@ -49,11 +49,11 @@ The account menu. It opens from one control, in the app’s Global header. It ho
 _Avoid_: user menu, account dropdown, sidebar account
 
 **Auth user**:
-A person whose identity is used only to authenticate. Created through Auth workflow sign-up or through Create User (manager pathway).
+A person whose identity is used only to authenticate. Created through Auth workflow sign-up or through Create User (manager pathway). The only product field it must hold is the sign-in email; names, roles, and other product data live on the App user.
 _Avoid_: WorkOS user (as the product name), principal, User (when you mean this)
 
 **App user**:
-The product record for a person who uses the app. An App user is the result of either pathway that creates a user: Auth workflow sign-up, or Create User by a manager. Holds product data; the Auth user is how they sign in. The Users list is a list of App users.
+The product record for a person who uses the app. An App user is the result of either pathway that creates a user: Auth workflow sign-up, or Create User by a manager. Holds product data (names, roles, and the rest); the Auth user is how they sign in. The Users list is a list of App users.
 _Avoid_: Convex user (as the product name), directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
 
 **Create User**:
