@@ -66,6 +66,7 @@ Example soft default used for the shell map (recorded when packing, not here as 
 
 - After pack, the **handoff file wins** over Linear map summaries and child issue bodies.
 - Changing a locked choice after pack requires a **new grill (or reopen) and re-pack**. Mark the old file `superseded` (or replace in place and note the re-pack in the map resolution comment). Silent Linear edits are not enough for a build to proceed.
+- **Never delete** a packed handoff file. An overturned file gets `Status: superseded` and a pointer to the winner. Shipping the build does not stale a packed file; only a later overturning decision does.
 
 ## Assemble gate (this repo’s shell map)
 
