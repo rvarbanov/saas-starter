@@ -25,7 +25,7 @@ const storeResultValidator = v.object({
   appUserId: v.string(),
 });
 
-/** True when the App user is linked to a WorkOS Auth user we can update. */
+/** True when the App user has a WorkOS sign-in we can update. */
 function hasWorkOsIntegration(workosUserId: string | undefined): boolean {
   return typeof workosUserId === "string" && workosUserId.trim().length > 0;
 }
@@ -179,7 +179,7 @@ type PublicUserDoc = {
 };
 
 /**
- * Create User: all-or-nothing App user + Auth user; invite send is best-effort.
+ * Create User: all-or-nothing App user and its WorkOS sign-in; invite send is best-effort.
  * Client calls only this action.
  */
 export const createUser = action({
@@ -266,7 +266,7 @@ export const createUser = action({
       await sendWorkOsInvitation(normalizedEmail);
     } catch (error) {
       inviteSent = false;
-      console.error("Create User invite send failed; App+Auth user kept", {
+      console.error("Create User invite send failed; App user kept", {
         error: error instanceof Error ? error.message : "Unknown error",
         workosUserId,
         email: normalizedEmail,

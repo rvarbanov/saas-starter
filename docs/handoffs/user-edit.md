@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** RAD-129, RAD-130, RAD-131, RAD-132, RAD-133, RAD-134
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **Edit User**, **Create User**, **User detail**, **Profile**, **App user**, **Auth user**, **Users list**.
+Language follows [`CONTEXT.md`](../../CONTEXT.md): **Edit User**, **Create User**, **User detail**, **Profile**, **App user**, **Users list**. WorkOS manages sign-in for that App user; there is no second user kind.
 
 ## Destination
 
@@ -92,7 +92,7 @@ Two public actions. Do not merge them.
 - `updateUser` calls WorkOS only when the email changed and the subject has a WorkOS id. PUT body is `{ email }` only. No WorkOS id → patch Convex only.
 - Email all-or-nothing: if the Convex patch fails after a successful WorkOS PUT, PUT the previous email back. If that rollback PUT fails, throw `"Email updated in WorkOS but failed to sync to the app. Sign in again or contact support."`
 - Stay signed in. Do not force re-login.
-- Create User order otherwise stays: validate, WorkOS create, Convex insert, roll back the Auth user if insert fails, invite best-effort.
+- Create User order otherwise stays: validate, WorkOS create, Convex insert, roll back the WorkOS sign-in if insert fails, invite best-effort.
 - Do not copy WorkOS names into Convex on provision. Do not bulk-clear historical WorkOS names.
 
 ### E2E expectations for Edit User build (RAD-133)

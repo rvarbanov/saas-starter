@@ -5,11 +5,11 @@
 - **Status:** packed
 - **Source children:** RAD-118, RAD-125, RAD-119, RAD-120, RAD-121, RAD-122, RAD-123
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **Create User** (manager pathway) ≠ AuthKit self sign-up. **App user** / **Auth user** / **Users list** / **User detail** (not Profile) as defined there.
+Language follows [`CONTEXT.md`](../../CONTEXT.md): **Create User** (manager pathway) ≠ AuthKit self sign-up. **App user** / **Users list** / **User detail** (not Profile) as defined there. WorkOS manages sign-in for that App user; there is no second user kind.
 
 ## Destination
 
-A later build session implements **Create User**: from the Users list, a **Create user** control opens `/dashboard/users/new`; the manager creates an **App user** and matching **Auth user** in one all-or-nothing flow (email required — unique + valid; optional first name, last name, assignable roles), including WorkOS `createUser` plus best-effort `sendInvitation`; on App/Auth failure the creator sees an error and can retry; invite-send failure does not roll back the user (`inviteSent: false` + User detail banner); Cancel returns to the Users list; success navigates to **User detail** for the new `_id`. When this handoff’s Acceptance criteria pass, the Wayfinder map destination is met for the build — this packed file is decision-complete; it does not implement UI.
+A later build session implements **Create User**: from the Users list, a **Create user** control opens `/dashboard/users/new`; the manager creates an **App user** and its WorkOS sign-in in one all-or-nothing flow (email required — unique + valid; optional first name, last name, assignable roles), including WorkOS `createUser` plus best-effort `sendInvitation`; on App user or WorkOS sign-in failure the creator sees an error and can retry; invite-send failure does not roll back the user (`inviteSent: false` + User detail banner); Cancel returns to the Users list; success navigates to **User detail** for the new `_id`. When this handoff’s Acceptance criteria pass, the Wayfinder map destination is met for the build — this packed file is decision-complete; it does not implement UI.
 
 After pack, **this file wins** over Linear map summaries and child issue bodies.
 
@@ -32,7 +32,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 
 - Entry: Users list (`/dashboard/users`); button **Create user** always on the list page.
 - Route: `/dashboard/users/new` (plural `users`).
-- Create is **all-or-nothing** across App user + Auth user (WorkOS) only. Invite send is **best-effort**.
+- Create is **all-or-nothing** across the App user and its WorkOS sign-in only. Invite send is **best-effort**.
 - Auth-link fields stay **required** (`tokenIdentifier`, `workosUserId`). No schema widening.
 - WorkOS MVP: `createUser` (email ± names, **no** password) then `sendInvitation` (`{ email }` only, no organization).
 - Form: email required; firstName / lastName / roles optional. Roles UI mirrors User detail (`manager` | `team_member`; no `super_admin`; empty OK).
@@ -45,7 +45,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 ### Schema: Auth link fields stay required (RAD-118)
 
 - Do **not** make `tokenIdentifier` / `workosUserId` optional.
-- Create User remains all-or-nothing App + Auth; no half-created App user without Auth links.
+- Create User remains all-or-nothing; no half-created App user without its WorkOS sign-in links.
 
 ### Research: WorkOS create vs AuthKit sign-up (RAD-125)
 
@@ -75,7 +75,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 4. WorkOS `sendInvitation({ email })` only (no organization).
 
 - If step 3 fails after step 2 → **delete** WorkOS user, throw.
-- If step 4 fails → **keep** App+Auth; log server-side; return `inviteSent: false` (do not throw).
+- If step 4 fails → **keep** the App user and its WorkOS sign-in; log server-side; return `inviteSent: false` (do not throw).
 - App/Auth hard failures → throw; no half-created App user.
 
 **WorkOS HTTP**
@@ -185,7 +185,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 **Explicitly out of Acceptance**
 
 - `?invite=failed` / invite-failed banner assert
-- Dirty-gate / Creating… / App+Auth hard-fail messaging
+- Dirty-gate / Creating… / App user or WorkOS sign-in hard-fail messaging
 - Names + roles happy path; separate breadcrumbs-only case
 - **Teardown** of created WorkOS/App users — orphans OK for v1; cleanup debt → [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete)
 
@@ -195,7 +195,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 
 1. **WorkOS helpers:** Extend `convex/lib/workosApi.ts` with `createWorkOsUser`, `sendWorkOsInvitation`, `deleteWorkOsUser` (RAD-119 / RAD-125).
 2. **Schema index:** Add `users` index `by_workosUserId` (`workosUserId`) if provision fallback needs it; update `convex/schema.ts`.
-3. **Write API:** Implement `api.usersActions.createUser` in `convex/usersActions.ts` with all-or-nothing App+Auth and best-effort invite (RAD-119). Wire provision/`store` fallback by `workosUserId`. Confirm live JWT `iss` for `tokenIdentifier` construction.
+3. **Write API:** Implement `api.usersActions.createUser` in `convex/usersActions.ts` with all-or-nothing App user and WorkOS sign-in, and best-effort invite (RAD-119). Wire provision/`store` fallback by `workosUserId`. Confirm live JWT `iss` for `tokenIdentifier` construction.
 4. **Deploy Convex:** Human runs `pnpm convex:dev` (or equivalent) against the shared deployment so live functions match source. Agent does not use production `convex deploy` unattended.
 5. **Routes helpers:** Add `APP_ROUTES.usersNew`, `createUserPath()`, `RESERVED_ROUTE_SEGMENTS`, `isReservedRouteSegment`; harden `parseUserDetailId` against `new` / `edit` in `lib/app-routes.ts` (RAD-120).
 6. **Users list entry:** Add always-visible **Create user** Link button + `create-user-entry` in `components/users-list.tsx` (RAD-120).

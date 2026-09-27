@@ -48,29 +48,25 @@ _Avoid_: main, inset, page-main
 The account menu. It opens from one control, in the app’s Global header. It holds Profile, Settings, and Sign out.
 _Avoid_: user menu, account dropdown, sidebar account
 
-**Auth user**:
-A person whose identity is used only to authenticate. Created through Auth workflow sign-up or through Create User (manager pathway). The only product field it must hold is the sign-in email; names, roles, and other product data live on the App user.
-_Avoid_: WorkOS user (as the product name), principal, User (when you mean this)
-
 **App user**:
-The product record for a person who uses the app. An App user is the result of either pathway that creates a user: Auth workflow sign-up, or Create User by a manager. Holds product data (names, roles, and the rest); the Auth user is how they sign in. The Users list is a list of App users.
-_Avoid_: Convex user (as the product name), directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
+The one person in the product, owned by the app, whether they arrived through Auth workflow sign-up or Create User. WorkOS manages sign-in for that same person, and a session matches its App user by the identity on the session, never by email. Names, roles, and other product data live on the App user; WorkOS holds the sign-in email only.
+_Avoid_: Auth user, WorkOS user, Convex user, directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
 
 **Create User**:
-The manager pathway to create an App user (and its Auth user) from the Users list. Same App user result as Auth workflow sign-up, on a different path. Pairs with Edit User (the two manager write pages). Invite / set-password email is a separate step.
-_Avoid_: Invite user (as the name for this page), register, add member, a different kind of user than App user
+The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
+_Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
 **Visitor**:
-Someone who is not signed in right now. They can only use the Public site. An Auth user or App user who has signed out is a Visitor until they sign in again.
-_Avoid_: anonymous user, guest, public user
+Someone who is not signed in right now. They can only use the Public site. An App user who has signed out is a Visitor until they sign in again.
+_Avoid_: anonymous user, guest, public user, Auth user
 
 **Users list**:
 The table of App users on the Users page.
 _Avoid_: Users directory, members, accounts, getMe, directory
 
 **Listed user**:
-The name, email, and dates shown for an App user in the Users list — not the Auth user identity.
-_Avoid_: Directory DTO, DTO, user doc, profile
+The name, email, and dates shown for an App user in the Users list.
+_Avoid_: Directory DTO, DTO, user doc, profile, Auth user
 
 **User detail**:
 The app page that shows one App user, opened from the Users list (manager path). Distinct from Edit User and from Profile (self, Avatar menu).

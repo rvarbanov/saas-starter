@@ -3,7 +3,9 @@ import { v } from "convex/values";
 import { rolesValidator } from "./lib/roles";
 
 /**
- * App user records linked to WorkOS via `tokenIdentifier`.
+ * App user records. WorkOS manages sign-in; the link is `tokenIdentifier`
+ * (session identity), never email. `workosUserId` is the fallback when the
+ * issuer changes.
  * Convex FKs should use `Id<"users">` (`_id`).
  * External APIs / migration export should use `appUserId` (UUID v4).
  *

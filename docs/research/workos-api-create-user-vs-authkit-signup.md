@@ -2,7 +2,7 @@
 
 **Ticket:** [RAD-125](https://linear.app/radi-dev/issue/RAD-125/research-workos-api-create-user-vs-authkit-sign-up)  
 **Parent map:** [RAD-117](https://linear.app/radi-dev/issue/RAD-117/wayfinder-create-user-handoff) (Create User handoff)  
-**Question:** How does WorkOS behave when we create an Auth user via API (manager Create User) versus AuthKit self sign-up, and is there a clear/simple out-of-the-box invite path worth including in Create User MVP?
+**Question:** How does WorkOS behave when we create sign-in via API (manager Create User) versus AuthKit self sign-up, and is there a clear/simple out-of-the-box invite path worth including in Create User MVP?
 
 ---
 
@@ -153,7 +153,7 @@ Sources:
 | Manager Create → `createUser` + invite → person accepts / signs in | Same WorkOS `user.id`; JWT `sub` matches stored `workosUserId` | `store` / `provisionUser` should **update** existing row if `tokenIdentifier` matches (or via workosUserId fallback). |
 | Manager Create → person uses AuthKit **sign-up** instead of invite | Email already registered → AuthKit should not create a second user | Same |
 | Person AuthKit sign-up **first**, then manager Create `createUser` | `createUser` fails on duplicate email | Surface as Create validation error (“Email already registered”) — same class as Convex email uniqueness. |
-| Create App+Auth, person never accepts invite | WorkOS user exists; cannot password-sign-in until invite/reset | Acceptable; resend invite is RAD-124 / later UX. |
+| Create App user and WorkOS sign-in, person never accepts invite | WorkOS user exists; cannot password-sign-in until invite/reset | Acceptable; resend invite is RAD-124 / later UX. |
 
 **Duplicate App user** is our bug if provision only keys on `tokenIdentifier` and Create guessed the wrong issuer. Mitigate with workosUserId/email fallback on provision (above).
 
@@ -177,7 +177,7 @@ Sources:
 
 ### Soft-reopen outcome vs earlier charting lock
 
-Earlier lock “create Auth record only, no invite” is **superseded** by this research under the product rule: *if WorkOS supports a clear, simple invite out of the box, include it.* It does (`sendInvitation` + default email).
+Earlier lock “create the WorkOS sign-in only, no invite” is **superseded** by this research under the product rule: *if WorkOS supports a clear, simple invite out of the box, include it.* It does (`sendInvitation` + default email).
 
 ---
 
