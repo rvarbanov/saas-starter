@@ -17,12 +17,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { appBreadcrumbTrail, userDetailLeafLabel } from "@/lib/app-nav";
-import { APP_ROUTES, parseUserDetailId } from "@/lib/app-routes";
+import { APP_ROUTES, parseUserDetailId, parseUserEditId, userDetailPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
 import { isLikelyUsersId } from "@/lib/convex-id";
 
-function useUserDetailLeafLabel(pathname: string): string | undefined {
-  const rawId = parseUserDetailId(pathname);
+function usePersonCrumb(pathname: string): { label: string; href?: string } | undefined {
+  const detailId = parseUserDetailId(pathname);
+  const editId = parseUserEditId(pathname);
+  const rawId = editId ?? detailId;
   const { isAuthenticated, isLoading } = useConvexAuth();
   const userId = rawId !== null && isLikelyUsersId(rawId) ? (rawId as Id<"users">) : null;
   const ready = isConvexConfigured() && !isLoading && isAuthenticated && userId !== null;
@@ -32,16 +34,20 @@ function useUserDetailLeafLabel(pathname: string): string | undefined {
     return undefined;
   }
   if (user == null) {
-    return "User";
+    return { label: "User" };
   }
-  return userDetailLeafLabel(user);
+  const label = userDetailLeafLabel(user);
+  if (editId !== null) {
+    return { label, href: userDetailPath(editId) };
+  }
+  return { label };
 }
 
 export function AppHeader() {
   const pathname = usePathname();
-  const userDetailLeaf = useUserDetailLeafLabel(pathname);
+  const person = usePersonCrumb(pathname);
   const trail = appBreadcrumbTrail(pathname, {
-    ...(userDetailLeaf !== undefined ? { userDetailLeaf } : {}),
+    ...(person !== undefined ? { userDetailLeaf: person.label, personHref: person.href } : {}),
   });
 
   return (

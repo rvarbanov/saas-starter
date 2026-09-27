@@ -4,6 +4,8 @@ import {
   createUserPath,
   isReservedRouteSegment,
   parseUserDetailId,
+  parseUserEditId,
+  userEditPath,
 } from "./app-routes";
 
 describe("app-routes", () => {
@@ -30,5 +32,16 @@ describe("app-routes", () => {
     expect(parseUserDetailId("/dashboard/users/new")).toBeNull();
     expect(parseUserDetailId("/dashboard/users/edit")).toBeNull();
     expect(parseUserDetailId("/dashboard/users/j57abc")).toBe("j57abc");
+    expect(parseUserDetailId("/dashboard/users/j57abc/edit")).toBeNull();
+  });
+
+  it("parses only the Edit User path", () => {
+    expect(userEditPath("j57abc")).toBe("/dashboard/users/j57abc/edit");
+    expect(parseUserEditId("/dashboard/users/j57abc/edit")).toBe("j57abc");
+    expect(parseUserEditId("/dashboard/users")).toBeNull();
+    expect(parseUserEditId("/dashboard/users/new")).toBeNull();
+    expect(parseUserEditId("/dashboard/users/j57abc")).toBeNull();
+    expect(parseUserEditId("/dashboard/users/edit/edit")).toBeNull();
+    expect(parseUserEditId("/dashboard/users/j57abc/edit/extra")).toBeNull();
   });
 });

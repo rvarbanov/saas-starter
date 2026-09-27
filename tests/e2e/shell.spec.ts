@@ -61,7 +61,7 @@ test("G: Avatar menu opens Settings and Profile; those are not Global nav links"
   await openAccountMenu(page);
   await page.getByRole("menuitem", { name: /^Profile$/i }).click();
   await expectPath(page, APP_ROUTES.profile);
-  await expect(page.getByRole("heading", { name: /^Your name$/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Profile$/i })).toBeVisible();
 });
 
 test("H: Users list shows the table, column headers, and at least one row", async ({ page }) => {

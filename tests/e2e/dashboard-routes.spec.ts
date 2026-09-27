@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { APP_ROUTES } from "../../lib/app-routes";
 
 function expectPath(page: Page, pathname: string) {
@@ -26,9 +26,9 @@ test("walks Settings and Profile via the Avatar menu", async ({ page }) => {
   await page.getByRole("button", { name: /^Account$/i }).click();
   await page.getByRole("menuitem", { name: /^Profile$/i }).click();
   await expectPath(page, APP_ROUTES.profile);
-  await expect(page.getByRole("heading", { name: /^Your name$/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Profile$/i })).toBeVisible();
   await expect(
-    page.getByTestId("profile-name-form").or(page.getByTestId("profile-loading")),
+    page.getByTestId("profile-form").or(page.getByTestId("profile-loading")),
   ).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("navigation", { name: "Global" })).toHaveCount(0);
 

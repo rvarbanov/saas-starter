@@ -61,25 +61,27 @@ test.describe("User detail K–O", () => {
     await expect(detail.getByText("Token identifier")).toBeVisible();
     await expect(detail.getByText("WorkOS user id")).toBeVisible();
     await expect(detail.getByText("Convex id")).toBeVisible();
-    await expect(detail.getByRole("button", { name: /^Edit$/i })).toBeVisible();
+    await expect(detail.getByRole("link", { name: /^Edit$/i })).toBeVisible();
   });
 
   test("N: edit first/last name → Save → view shows new values", async ({ page }) => {
     const email = requireE2eEmail();
     await openSelfUserDetail(page, email);
 
-    await page.getByRole("button", { name: /^Edit$/i }).click();
-    const form = page.getByTestId("user-detail-form");
+    await page.getByRole("link", { name: /^Edit$/i }).click();
+    await expect(page).toHaveURL(/\/dashboard\/users\/[^/]+\/edit$/);
+    const form = page.getByTestId("edit-user-form");
     await expect(form).toBeVisible();
 
     const suffix = String(Date.now()).slice(-4);
     const first = `E2E${suffix}`;
     const last = `User${suffix}`;
-    await form.locator("#user-detail-first-name").fill(first);
-    await form.locator("#user-detail-last-name").fill(last);
-    await form.getByRole("button", { name: /^Save$/i }).click();
+    await form.getByTestId("edit-user-first-name").fill(first);
+    await form.getByTestId("edit-user-last-name").fill(last);
+    await form.getByTestId("edit-user-submit").click();
 
-    await expect(page.getByTestId("user-detail-form")).toHaveCount(0);
+    await expect(page.getByTestId("user-detail-page")).toBeVisible();
+    await expect(page.getByTestId("edit-user-form")).toHaveCount(0);
     const detail = page.getByTestId("user-detail-page");
     await expect(detail.getByRole("heading", { name: `${first} ${last}` })).toBeVisible();
     await expect(detail.locator("dd").filter({ hasText: new RegExp(`^${first}$`) })).toBeVisible();
@@ -93,13 +95,14 @@ test.describe("User detail K–O", () => {
     const detail = page.getByTestId("user-detail-page");
     const before = await detail.locator("h1").innerText();
 
-    await page.getByRole("button", { name: /^Edit$/i }).click();
-    const form = page.getByTestId("user-detail-form");
-    await form.locator("#user-detail-first-name").fill("ShouldNotPersist");
-    await form.getByRole("button", { name: /^Cancel$/i }).click();
+    await page.getByRole("link", { name: /^Edit$/i }).click();
+    const form = page.getByTestId("edit-user-form");
+    await form.getByTestId("edit-user-first-name").fill("ShouldNotPersist");
+    await form.getByTestId("edit-user-cancel").click();
 
-    await expect(page.getByTestId("user-detail-form")).toHaveCount(0);
+    await expect(page.getByTestId("user-detail-page")).toBeVisible();
+    await expect(page.getByTestId("edit-user-form")).toHaveCount(0);
     await expect(detail.locator("h1")).toHaveText(before);
-    await expect(detail.getByText("ShouldNotPersist")).toHaveCount(0);
+    await expect(page.getByText("ShouldNotPersist")).toHaveCount(0);
   });
 });

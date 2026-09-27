@@ -1,4 +1,4 @@
-import { APP_ROUTES, parseUserDetailId } from "@/lib/app-routes";
+import { APP_ROUTES, parseUserDetailId, parseUserEditId } from "@/lib/app-routes";
 
 export type AppNavMatch = "exact" | "prefix";
 
@@ -35,11 +35,12 @@ export type AppBreadcrumbSegment = {
 
 /**
  * Breadcrumb trail for the App header (after the always-present Dashboard root).
- * User detail: Users (link) → person leaf (resolved separately when label known).
+ * User detail: Users (link) → person leaf.
+ * Edit User: Users (link) → person (link when known) → Edit.
  */
 export function appBreadcrumbTrail(
   pathname: string,
-  options?: { userDetailLeaf?: string },
+  options?: { userDetailLeaf?: string; personHref?: string },
 ): AppBreadcrumbSegment[] {
   const path = pathname.replace(/\/$/, "") || "/";
   if (path === APP_ROUTES.dashboard) {
@@ -48,6 +49,16 @@ export function appBreadcrumbTrail(
 
   if (path === APP_ROUTES.usersNew) {
     return [{ label: "Users", href: APP_ROUTES.users }, { label: "Create user" }];
+  }
+
+  const editId = parseUserEditId(path);
+  if (editId !== null) {
+    const personLabel = options?.userDetailLeaf ?? "User";
+    const person =
+      options?.personHref !== undefined
+        ? { label: personLabel, href: options.personHref }
+        : { label: personLabel };
+    return [{ label: "Users", href: APP_ROUTES.users }, person, { label: "Edit" }];
   }
 
   const userId = parseUserDetailId(path);

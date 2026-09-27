@@ -65,21 +65,24 @@ describe("CreateUserForm", () => {
     expect(screen.getByTestId("create-user-cancel")).toHaveAttribute("href", "/dashboard/users");
   });
 
-  it("freezes the form and shows Creating… while the action is pending", () => {
+  it("freezes the form and shows Saving… while the action is pending", () => {
     renderForm(vi.fn(() => new Promise(() => {})));
     fireEvent.change(screen.getByTestId("create-user-email"), {
       target: { value: "ada@example.com" },
     });
     fireEvent.submit(screen.getByTestId("create-user-form"));
-    expect(screen.getByTestId("create-user-submit")).toHaveTextContent("Creating…");
+    expect(screen.getByTestId("create-user-submit")).toHaveTextContent("Saving…");
     expect(screen.getByTestId("create-user-email")).toBeDisabled();
     expect(screen.getByTestId("create-user-first-name")).toBeDisabled();
     expect(screen.getByTestId("create-user-last-name")).toBeDisabled();
-    expect(screen.getByTestId("create-user-role-manager")).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByTestId("create-user-role-team_member")).toHaveAttribute(
-      "aria-disabled",
-      "true",
-    );
     expect(screen.getByTestId("create-user-cancel")).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByTestId("create-user-role-manager")).not.toBeInTheDocument();
+  });
+
+  it("marks email required and shows roles as read-only text", () => {
+    renderForm();
+    expect(screen.getByTestId("create-user-email")).toHaveAttribute("aria-required", "true");
+    expect(screen.getByTestId("create-user-email")).not.toHaveAttribute("required");
+    expect(screen.getByTestId("create-user-roles")).toHaveTextContent("None");
   });
 });

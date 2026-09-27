@@ -18,7 +18,7 @@ test("session persists across all App paths and home", async ({ page }) => {
 
   await page.goto("/dashboard/profile", { waitUntil: "load" });
   await expect(page).toHaveURL(/\/dashboard\/profile\/?$/);
-  await expect(page.getByRole("heading", { name: /^Your name$/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Profile$/i })).toBeVisible();
 
   await page.goto("/dashboard/users", { waitUntil: "load" });
   await expect(page).toHaveURL(/\/dashboard\/users\/?$/);
