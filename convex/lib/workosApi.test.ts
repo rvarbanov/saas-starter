@@ -3,9 +3,11 @@ import {
   CREATE_USER_FAILED,
   createWorkOsUser,
   EMAIL_ALREADY_REGISTERED,
+  EMAIL_UPDATE_FAILED,
   isWorkOsDuplicateEmailError,
   mapCreateUserError,
   sendWorkOsInvitation,
+  updateWorkOsUserEmail,
 } from "./workosApi";
 
 describe("isWorkOsDuplicateEmailError", () => {
@@ -48,7 +50,7 @@ describe("createWorkOsUser", () => {
     vi.restoreAllMocks();
   });
 
-  it("posts email and names and returns the WorkOS user id", async () => {
+  it("posts email only and returns the WorkOS user id", async () => {
     process.env.WORKOS_API_KEY = "sk_test";
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -56,19 +58,15 @@ describe("createWorkOsUser", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(
-      createWorkOsUser({ email: "new@example.com", firstName: "Ada", lastName: "Lovelace" }),
-    ).resolves.toEqual({ id: "user_01created" });
+    await expect(createWorkOsUser({ email: "new@example.com" })).resolves.toEqual({
+      id: "user_01created",
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.workos.com/user_management/users",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({
-          email: "new@example.com",
-          first_name: "Ada",
-          last_name: "Lovelace",
-        }),
+        body: JSON.stringify({ email: "new@example.com" }),
       }),
     );
   });
@@ -102,6 +100,45 @@ describe("createWorkOsUser", () => {
 
     await expect(createWorkOsUser({ email: "new@example.com" })).rejects.toThrow(
       CREATE_USER_FAILED,
+    );
+  });
+});
+
+describe("updateWorkOsUserEmail", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("puts email only", async () => {
+    process.env.WORKOS_API_KEY = "sk_test";
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateWorkOsUserEmail("user_01", "next@example.com");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.workos.com/user_management/users/user_01",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ email: "next@example.com" }),
+      }),
+    );
+  });
+
+  it("throws the update failure string when WorkOS rejects the PUT", async () => {
+    process.env.WORKOS_API_KEY = "sk_test";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => "nope",
+      }),
+    );
+
+    await expect(updateWorkOsUserEmail("user_01", "next@example.com")).rejects.toThrow(
+      EMAIL_UPDATE_FAILED,
     );
   });
 });
