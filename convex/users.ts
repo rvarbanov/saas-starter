@@ -2,24 +2,12 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import {
-  getCurrentUser,
-  getCurrentUserOrThrow,
-  getUserByTokenIdentifier,
-  requireIdentity,
-} from "./lib/auth";
+import { getCurrentUser, requireIdentity } from "./lib/auth";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
-import {
-  assertAssignableRoles,
-  hasAnyRole,
-  mergeRolesPreservingSuperAdmin,
-  type Role,
-  rolesValidator,
-  uniqueRoles,
-} from "./lib/roles";
+import { hasAnyRole, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
 import { buildSearchText } from "./lib/searchText";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { toPublicUserDoc, userDocValidator } from "./lib/userDoc";
@@ -74,7 +62,7 @@ const authProfileValidator = v.object({
 /**
  * Upsert when the WorkOS JWT already includes email (JWT template configured).
  * Prefer `usersActions.provisionUser` from the client when email is missing from the token.
- * Does not seed name fields from WorkOS/JWT — names are Convex-owned via `updateName`.
+ * Does not seed name fields from WorkOS/JWT — names are Convex-owned via `updateUser`.
  */
 export const store = mutation({
   args: {},
@@ -220,53 +208,6 @@ export const setRoles = internalMutation({
   },
 });
 
-/**
- * Update the authenticated user's first and last name in Convex only.
- * Does not call WorkOS.
- */
-export const updateName = mutation({
-  args: {
-    firstName: v.string(),
-    lastName: v.string(),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const user = await getCurrentUserOrThrow(ctx);
-    const normalized = normalizeNames(args.firstName, args.lastName);
-
-    const firstName = normalized.firstName;
-    const lastName = normalized.lastName;
-    const name = normalized.name;
-
-    const unchanged =
-      user.firstName === firstName && user.lastName === lastName && user.name === name;
-    if (unchanged) {
-      return null;
-    }
-
-    await ctx.db.patch("users", user._id, {
-      firstName,
-      lastName,
-      name,
-      searchText: buildSearchText({ firstName, lastName, email: user.email }),
-      updatedAt: Date.now(),
-    });
-    return null;
-  },
-});
-
-/** Load user by token for authenticated actions (actions cannot access the database directly). */
-export const getUserByTokenForAction = internalQuery({
-  args: {
-    tokenIdentifier: v.string(),
-  },
-  returns: v.union(v.null(), userDocValidator),
-  handler: async (ctx, args) => {
-    const user = await getUserByTokenIdentifier(ctx, args.tokenIdentifier);
-    return user ? toPublicUserDoc(user) : null;
-  },
-});
-
 /** Validate and normalize email for authenticated actions. */
 export const normalizeEmailForAction = internalQuery({
   args: {
@@ -292,8 +233,8 @@ export const getUserByIdForAction = internalQuery({
 });
 
 /**
- * Patch another App user after User detail Save validation (and optional WorkOS email update).
- * Roles: assignable subset replace with `super_admin` preserved when already present.
+ * Patch names and email after `updateUser` validation (and optional WorkOS email update).
+ * Does not write roles. Blank names store unset, not `""`.
  */
 export const patchUserDetailInternal = internalMutation({
   args: {
@@ -301,7 +242,6 @@ export const patchUserDetailInternal = internalMutation({
     firstName: v.string(),
     lastName: v.string(),
     email: v.string(),
-    roles: rolesValidator,
   },
   returns: userDocValidator,
   handler: async (ctx, args) => {
@@ -310,8 +250,6 @@ export const patchUserDetailInternal = internalMutation({
       throw new Error("User not found");
     }
 
-    const assignable = assertAssignableRoles(args.roles);
-    const roles = mergeRolesPreservingSuperAdmin(user.roles, assignable);
     const normalizedNames = normalizeNames(args.firstName, args.lastName);
     const normalizedEmail = await assertEmailAvailable(ctx, args.email, args.userId);
 
@@ -320,7 +258,6 @@ export const patchUserDetailInternal = internalMutation({
       lastName: normalizedNames.lastName,
       name: normalizedNames.name,
       email: normalizedEmail,
-      roles,
       searchText: buildSearchText({
         firstName: normalizedNames.firstName,
         lastName: normalizedNames.lastName,
@@ -339,20 +276,18 @@ export const patchUserDetailInternal = internalMutation({
 
 /**
  * Insert a manager-created App user after WorkOS `createUser` succeeds.
- * Auth-link fields are required; names/roles follow Create User validation.
+ * Auth-link fields are required. New App users get `roles: []`.
  */
 export const insertCreatedUser = internalMutation({
   args: {
     email: v.string(),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
-    roles: rolesValidator,
     workosUserId: v.string(),
     tokenIdentifier: v.string(),
   },
   returns: userDocValidator,
   handler: async (ctx, args) => {
-    const assignable = assertAssignableRoles(args.roles);
     const normalizedNames = normalizeNames(args.firstName ?? "", args.lastName ?? "");
     const normalizedEmail = await assertEmailAvailable(ctx, args.email);
     const now = Date.now();
@@ -366,7 +301,7 @@ export const insertCreatedUser = internalMutation({
       ...(normalizedNames.firstName !== undefined ? { firstName: normalizedNames.firstName } : {}),
       ...(normalizedNames.lastName !== undefined ? { lastName: normalizedNames.lastName } : {}),
       ...(normalizedNames.name !== undefined ? { name: normalizedNames.name } : {}),
-      roles: assignable,
+      roles: [],
       searchText: buildSearchText({
         firstName: normalizedNames.firstName,
         lastName: normalizedNames.lastName,
@@ -381,40 +316,6 @@ export const insertCreatedUser = internalMutation({
       throw new Error("User not found");
     }
     return toPublicUserDoc(created);
-  },
-});
-
-/**
- * Patch email after WorkOS User Management API update.
- * Called from `usersActions.updateEmail` with a server-verified tokenIdentifier.
- */
-export const patchEmailInternal = internalMutation({
-  args: {
-    tokenIdentifier: v.string(),
-    email: v.string(),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const user = await getUserByTokenIdentifier(ctx, args.tokenIdentifier);
-    if (!user) {
-      throw new Error("User not found; complete sign-in provisioning");
-    }
-
-    const normalized = await assertEmailAvailable(ctx, args.email, user._id);
-    if (user.email === normalized) {
-      return null;
-    }
-
-    await ctx.db.patch("users", user._id, {
-      email: normalized,
-      searchText: buildSearchText({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: normalized,
-      }),
-      updatedAt: Date.now(),
-    });
-    return null;
   },
 });
 

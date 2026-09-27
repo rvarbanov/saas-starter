@@ -274,7 +274,7 @@ describe("users.getById", () => {
 });
 
 describe("users.patchUserDetailInternal", () => {
-  it("updates names, email, and assignable roles while preserving super_admin", async () => {
+  it("updates names and email and leaves existing roles in place", async () => {
     const t = testClient();
     const userId = await insertUser(t, {
       email: "target@example.com",
@@ -289,7 +289,6 @@ describe("users.patchUserDetailInternal", () => {
       firstName: "New",
       lastName: "Person",
       email: "new@example.com",
-      roles: ["manager"],
     });
 
     expect(updated).toMatchObject({
@@ -298,46 +297,31 @@ describe("users.patchUserDetailInternal", () => {
       lastName: "Person",
       name: "New Person",
       email: "new@example.com",
-      roles: ["super_admin", "manager"],
+      roles: ["super_admin", "team_member"],
     });
   });
 
-  it("rejects super_admin in the assignable roles payload", async () => {
+  it("stores blank names as unset", async () => {
     const t = testClient();
     const userId = await insertUser(t, {
       email: "target@example.com",
       updatedAt: 1,
+      firstName: "Old",
+      lastName: "Name",
       roles: ["manager"],
-    });
-
-    await expect(
-      t.mutation(internal.users.patchUserDetailInternal, {
-        userId,
-        firstName: "A",
-        lastName: "B",
-        email: "target@example.com",
-        roles: ["super_admin", "manager"],
-      }),
-    ).rejects.toThrow(/super_admin/);
-  });
-
-  it("allows empty assignable roles", async () => {
-    const t = testClient();
-    const userId = await insertUser(t, {
-      email: "target@example.com",
-      updatedAt: 1,
-      roles: ["manager", "team_member"],
     });
 
     const updated = await t.mutation(internal.users.patchUserDetailInternal, {
       userId,
-      firstName: "",
+      firstName: "  ",
       lastName: "",
       email: "target@example.com",
-      roles: [],
     });
 
-    expect(updated.roles).toEqual([]);
+    expect(updated.firstName).toBeUndefined();
+    expect(updated.lastName).toBeUndefined();
+    expect(updated.name).toBeUndefined();
+    expect(updated.roles).toEqual(["manager"]);
   });
 });
 
@@ -380,13 +364,12 @@ describe("users.getMe + roles", () => {
 });
 
 describe("users.insertCreatedUser", () => {
-  it("inserts names, assignable roles, and required Auth links", async () => {
+  it("inserts names, empty roles, and required Auth links", async () => {
     const t = testClient();
     const created = await t.mutation(internal.users.insertCreatedUser, {
       email: "New@Example.com",
       firstName: "Ada",
       lastName: "Lovelace",
-      roles: ["manager"],
       workosUserId: "user_01created",
       tokenIdentifier: "https://example.test|user_01created",
     });
@@ -396,18 +379,17 @@ describe("users.insertCreatedUser", () => {
       firstName: "Ada",
       lastName: "Lovelace",
       name: "Ada Lovelace",
-      roles: ["manager"],
+      roles: [],
       workosUserId: "user_01created",
       tokenIdentifier: "https://example.test|user_01created",
     });
     expect(created.appUserId).toEqual(expect.any(String));
   });
 
-  it("stores empty roles and omitted names as unset / []", async () => {
+  it("stores omitted names as unset and roles as []", async () => {
     const t = testClient();
     const created = await t.mutation(internal.users.insertCreatedUser, {
       email: "bare@example.com",
-      roles: [],
       workosUserId: "user_01bare",
       tokenIdentifier: "https://example.test|user_01bare",
     });
@@ -418,27 +400,17 @@ describe("users.insertCreatedUser", () => {
     expect(created.roles).toEqual([]);
   });
 
-  it("rejects super_admin and duplicate emails", async () => {
+  it("rejects duplicate emails", async () => {
     const t = testClient();
     await insertUser(t, { email: "taken@example.com", updatedAt: 1 });
 
     await expect(
       t.mutation(internal.users.insertCreatedUser, {
         email: "taken@example.com",
-        roles: [],
         workosUserId: "user_01dup",
         tokenIdentifier: "https://example.test|user_01dup",
       }),
     ).rejects.toThrow("Email already registered");
-
-    await expect(
-      t.mutation(internal.users.insertCreatedUser, {
-        email: "role@example.com",
-        roles: ["super_admin"],
-        workosUserId: "user_01role",
-        tokenIdentifier: "https://example.test|user_01role",
-      }),
-    ).rejects.toThrow(/super_admin/);
   });
 });
 

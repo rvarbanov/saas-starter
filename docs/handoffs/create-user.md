@@ -23,7 +23,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Making Auth-link fields optional / unlinked App users ([RAD-118](https://linear.app/radi-dev/issue/RAD-118/schema-optional-auth-link-fields-on-app-user) decided: no)
 - Idempotent create / duplicate-submit hardening — post-MVP [RAD-127](https://linear.app/radi-dev/issue/RAD-127/idempotent-create-user-and-user-detail-save)
 - Toast notifications for success/fail
-- Extract shared Create/Edit form component and view/edit route split — [RAD-126](https://linear.app/radi-dev/issue/RAD-126/refactor-user-detail-into-separate-view-and-edit-routes)
+- Extract shared Create/Edit form component and view/edit route split — packed in [`user-edit.md`](./user-edit.md) ([Wayfinder: Edit User handoff](https://linear.app/radi-dev/issue/RAD-126/wayfinder-edit-user-handoff)). That file overturns role checkboxes and **Creating…** for this form.
 - E2E teardown of created WorkOS/App users; invite-failed banner assertion; dirty-gate / Creating… / hard-fail / names+roles happy-path E2E (see RAD-122 outs)
 
 ## Decisions
@@ -107,7 +107,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - `APP_ROUTES.usersNew` + `createUserPath()` → `/dashboard/users/new`.
 - Success: existing `userDetailPath(id)`.
 - `RESERVED_ROUTE_SEGMENTS = ["new", "edit"]` + `isReservedRouteSegment`; `parseUserDetailId` returns null for reserved segments (today it only rejects multi-segment paths — extend).
-- Convention: create = `…/new`; edit = `…/:id/edit` (edit page split → RAD-126, not this MVP).
+- Convention: create = `…/new`; edit = `…/:id/edit` (edit page is [`user-edit.md`](./user-edit.md), outside this Create User MVP).
 
 **Create page chrome**
 
@@ -121,7 +121,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Order: **First name** → **Last name** → **Email** → **Roles**.
 - Roles: assignable checkboxes only (`manager` | `team_member`); empty OK; no `super_admin`.
 - Labels match User detail (no required asterisk in MVP).
-- Create and Edit must stay identical on field set, order, labels, checkboxes, client validation, and submit dirty-gating; **extract shared form after MVP** (RAD-126).
+- Create and Edit must stay identical on field set, order, labels, checkboxes, client validation, and submit dirty-gating; **extract shared form after MVP**. The later pack [`user-edit.md`](./user-edit.md) is the winner: it drops role checkboxes and uses **Save** / **Saving…**.
 
 **Validation & errors**
 
@@ -133,7 +133,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Primary: **Create user** (`data-testid="create-user-submit"`).
 - Dirty gate shared with Edit: initial draft = empty names/email + no roles; submit disabled until draft ≠ initial; also disabled while pending.
 - Pending: disable all inputs, roles, Cancel, submit; label **Creating…**.
-- Cancel: outline `Button` as real `Link` to Users list (`data-testid="create-user-cancel"`); Link vs `router.push` app-wide pattern → RAD-126.
+- Cancel: outline `Button` as real `Link` to Users list (`data-testid="create-user-cancel"`). [`user-edit.md`](./user-edit.md) keeps Cancel as a `Link` (Create User → Users list).
 
 **Success & invite warning**
 
@@ -224,7 +224,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 **Linear debt (do not invent in this build):**
 
 - [RAD-124](https://linear.app/radi-dev/issue/RAD-124/grill-workos-invite-resend-and-email-customization) — invite resend + email customization (separate WorkOS Auth-link / invite grill)
-- [RAD-126](https://linear.app/radi-dev/issue/RAD-126/refactor-user-detail-into-separate-view-and-edit-routes) — shared form extract; view/edit routes; Cancel Link vs push; required-field affordances
+- [RAD-126](https://linear.app/radi-dev/issue/RAD-126/wayfinder-edit-user-handoff) — packed in [`user-edit.md`](./user-edit.md). Overturns this file’s submit copy (**Create user** / **Creating…** → **Save** / **Saving…**), role checkboxes (this MVP does not write roles), and WorkOS create body (email only, no names). Shared form includes Profile. `updateUserDetail` is renamed `updateUser`. Cancel stays a `Link` to the Users list. This Create User file stays **packed** for the create/invite contract.
 - [RAD-127](https://linear.app/radi-dev/issue/RAD-127/idempotent-create-user-and-user-detail-save) — idempotent Create + User detail Save
 - [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager) — directory / Create authz
 - [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) — E2E subject via create → get → update → delete (includes teardown)

@@ -1,5 +1,5 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
-import { ProfileNameForm } from "@/components/profile-name-form";
+import { ProfileForm } from "@/components/profile-form";
 
 export const metadata = {
   title: "Profile",
@@ -7,15 +7,13 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-/** Protected profile page — edit Convex-owned first/last name. */
+/** Protected profile page — shared user form for the signed-in App user. */
 export default async function ProfilePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  await withAuth({ ensureSignedIn: true });
 
   return (
     <div className="page-main">
-      <p className="text-eyebrow">Profile</p>
-      <h1 className="heading-section">Your name</h1>
-      <ProfileNameForm fallbackEmail={user.email} />
+      <ProfileForm />
     </div>
   );
 }

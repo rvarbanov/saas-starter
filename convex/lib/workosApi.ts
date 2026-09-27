@@ -10,6 +10,9 @@ const WORKOS_USER_MANAGEMENT = "https://api.workos.com/user_management";
 
 export const CREATE_USER_FAILED = "Failed to create user. Please try again.";
 export const EMAIL_ALREADY_REGISTERED = "Email already registered";
+export const EMAIL_UPDATE_FAILED = "Failed to update email. Please try again.";
+export const EMAIL_SYNC_FAILED =
+  "Email updated in WorkOS but failed to sync to the app. Sign in again or contact support.";
 
 const CREATE_USER_EXACT_MESSAGES = [
   "Not authenticated",
@@ -130,23 +133,11 @@ export async function fetchWorkOsUserProfile(workosUserId: string): Promise<Work
 }
 
 /**
- * Create the WorkOS sign-in for an App user (email ± names, no password). Does not send an invite.
+ * Create the WorkOS sign-in for an App user (email only, no name, no password). Does not send an invite.
  * Duplicate emails throw {@link EMAIL_ALREADY_REGISTERED}.
  */
-export async function createWorkOsUser(args: {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-}): Promise<CreatedWorkOsUser> {
+export async function createWorkOsUser(args: { email: string }): Promise<CreatedWorkOsUser> {
   const apiKey = requireWorkOsApiKey();
-
-  const body: Record<string, string> = { email: args.email };
-  if (args.firstName !== undefined && args.firstName !== "") {
-    body.first_name = args.firstName;
-  }
-  if (args.lastName !== undefined && args.lastName !== "") {
-    body.last_name = args.lastName;
-  }
 
   const response = await fetch(`${WORKOS_USER_MANAGEMENT}/users`, {
     method: "POST",
@@ -154,7 +145,7 @@ export async function createWorkOsUser(args: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ email: args.email }),
   });
 
   if (!response.ok) {
@@ -177,6 +168,33 @@ export async function createWorkOsUser(args: {
   }
 
   return { id };
+}
+
+/**
+ * PUT the App user's WorkOS sign-in email. Body is `{ email }` only.
+ * Throws {@link EMAIL_UPDATE_FAILED} when WorkOS rejects the change.
+ */
+export async function updateWorkOsUserEmail(workosUserId: string, email: string): Promise<void> {
+  const apiKey = requireWorkOsApiKey();
+
+  const response = await fetch(`${WORKOS_USER_MANAGEMENT}/users/${workosUserId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error("WorkOS email update failed", {
+      status: response.status,
+      body: errorBody,
+      workosUserId,
+    });
+    throw new Error(EMAIL_UPDATE_FAILED);
+  }
 }
 
 /** Send WorkOS's default application-wide invite email (no organization). */

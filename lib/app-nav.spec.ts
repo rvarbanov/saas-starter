@@ -47,6 +47,25 @@ describe("appBreadcrumbTrail", () => {
       { label: "Create user" },
     ]);
   });
+
+  it("builds Users → person → Edit and links the person only when known", () => {
+    expect(
+      appBreadcrumbTrail("/dashboard/users/j57abc/edit", {
+        userDetailLeaf: "Ada Lovelace",
+        personHref: "/dashboard/users/j57abc",
+      }),
+    ).toEqual([
+      { label: "Users", href: APP_ROUTES.users },
+      { label: "Ada Lovelace", href: "/dashboard/users/j57abc" },
+      { label: "Edit" },
+    ]);
+
+    expect(appBreadcrumbTrail("/dashboard/users/j57abc/edit", { userDetailLeaf: "User" })).toEqual([
+      { label: "Users", href: APP_ROUTES.users },
+      { label: "User" },
+      { label: "Edit" },
+    ]);
+  });
 });
 
 describe("userDetailPath / parseUserDetailId", () => {

@@ -49,11 +49,11 @@ The account menu. It opens from one control, in the app’s Global header. It ho
 _Avoid_: user menu, account dropdown, sidebar account
 
 **App user**:
-The one person in the product, owned by the app, whether they arrived through Auth workflow sign-up or Create User. WorkOS manages sign-in for that same person, and a session matches its App user by the identity on the session, never by email.
+The one person in the product, owned by the app, whether they arrived through Auth workflow sign-up or Create User. WorkOS manages sign-in for that same person, and a session matches its App user by the identity on the session, never by email. Names, roles, and other product data live on the App user; WorkOS holds the sign-in email only.
 _Avoid_: Auth user, WorkOS user, Convex user, directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
 
 **Create User**:
-The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step.
+The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
 **Visitor**:
@@ -69,16 +69,16 @@ The name, email, and dates shown for an App user in the Users list.
 _Avoid_: Directory DTO, DTO, user doc, profile, Auth user
 
 **User detail**:
-The app page that shows one App user, opened from the Users list (manager path). Distinct from User edit and from Profile (self, Avatar menu).
-_Avoid_: User profile, profile page (when you mean this), App user page, details, view page, show, edit mode (when you mean User edit)
+The app page that shows one App user, opened from the Users list (manager path). Distinct from Edit User and from Profile (self, Avatar menu).
+_Avoid_: User profile, profile page (when you mean this), App user page, details, view page, show, edit mode (when you mean Edit User)
 
-**User edit**:
-The manager page for changing one App user’s editable fields. Distinct from User detail and from Profile.
-_Avoid_: edit mode, in-place edit, user detail edit, details, show
+**Edit User**:
+The manager page for changing one App user’s editable fields. Distinct from User detail and from Profile. Pairs with Create User (the two manager write pages).
+_Avoid_: User edit, edit mode, in-place edit, user detail edit, details, show
 
 **Profile**:
-The signed-in person’s own account page in the app, reached from the Avatar menu — not User detail and not User edit.
-_Avoid_: User detail, User edit, settings (Settings is a different page)
+The signed-in person’s own account page in the app, reached from the Avatar menu — not User detail and not Edit User.
+_Avoid_: User detail, Edit User, settings (Settings is a different page)
 
 **Demo page**:
 The Coming soon page — fake metrics and rows used to show the layout, not live product data.
