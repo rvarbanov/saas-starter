@@ -35,7 +35,7 @@ Build work is tracked under **[[Epic] User detail](https://linear.app/radi-dev/i
 - Save exits edit mode and shows fresh query data (no full browser reload).
 - Authz interim: any signed-in JWT (same class as Users list) until RAD-70.
 
-### Research: WorkOS update email for another Auth user (RAD-87)
+### Research: WorkOS update email for another App user (RAD-87)
 
 - Manager email updates use the same WorkOS User Management **Update User** API as self `usersActions.updateEmail`:
   - `PUT https://api.workos.com/user_management/users/{user_id}` with `{ "email" }`

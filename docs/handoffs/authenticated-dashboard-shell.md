@@ -97,11 +97,11 @@ Renamed to `getById` on `main` in [#25](https://github.com/rvarbanov/saas-starte
 
 ### Convex Users list API land-and-push (RAD-82)
 
-Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist). Language: **Auth user** / **App user** / **Listed user** / **Users list** per [`CONTEXT.md`](../../CONTEXT.md).
+Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist). Language: **App user** / **Listed user** / **Users list** per [`CONTEXT.md`](../../CONTEXT.md). WorkOS manages sign-in; it is not a second user.
 
 - **Owns:** checklist item 7 — schema index `by_updatedAt`; `api.users.list` and `api.users.getById` in `convex/users.ts`; helpers; unit + `convex-test`. Land `list` and `getById` in the **same** PR. **Done on `main` (#25).**
 - **Does not own:** Users page UI, Load more, Retry, E2E **H** (RAD-78 / checklist item 8).
-- **Auth (RAD-60, unchanged):** Auth user JWT via `ctx.auth.getUserIdentity()` only. App user row not required. Deny → `"Not authenticated"`. Do not use `getCurrentUserOrThrow` for `list` / `getById`. An Auth user with no App user row is a provisioning race / failure — out of scope for this slice; do not add a third person-kind or change the deny path.
+- **Auth (RAD-60, unchanged):** Session identity via `ctx.auth.getUserIdentity()` only. An App user row is not required. Deny → `"Not authenticated"`. Do not use `getCurrentUserOrThrow` for `list` / `getById`. A signed-in session with no App user row is a provisioning race / failure — out of scope for this slice; do not add another person-kind or change the deny path.
 - **Source:** new branch + new PR from `main`. Reuse the API files from [PR 23](https://github.com/rvarbanov/saas-starter/pull/23) (`cursor/users-list-directory-6e91`); do not rewrite unless they drifted from RAD-64. Do not take the Users page from that PR. When RAD-82 is on `main`, PR 23 pulls it in to finish the page.
 - **Push:** the build agent does **not** run Convex login / `CONVEX_DEPLOY_KEY`. After source + tests pass, the agent asks a human to run `npx convex dev` (or `pnpm convex:dev`) against `NEXT_PUBLIC_CONVEX_URL`. Do not use `npx convex deploy` unless this is an intentional production deploy.
 - **Done bar (agent):** `pnpm typecheck`, `pnpm lint`, `pnpm test`. Then ping the human to push. Live `users:list` on the deployment and E2E **H** are not this slice’s merge gate.
@@ -306,7 +306,7 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 2. Add `by_updatedAt` on `users` in `convex/schema.ts`.
 3. Implement `api.users.list` and `api.users.getById` in `convex/users.ts` alongside `getMe` / `store`, per RAD-64 + RAD-60. Reuse PR 23 API files if they still match; do not rewrite for style.
 4. Helpers: `requireIdentity` / `identityOrThrow`; `toListUser` / `listUserValidator`; `clampPaginationNumItems` (cap 100, do not throw).
-5. Tests that do not need a live Convex push: `lib/*.spec.ts` (mapper omits Auth user identity fields; deny message; clamp) and `convex-test` in `convex/users.test.ts` (unauthenticated `list` / `getById` throw `"Not authenticated"`; `getById` missing id → `null`; `list` sort `updatedAt` desc; Listed user shape; `numItems: 200` returns at most 100). Pin `convex-test@0.0.54` while the app is on `convex@^1.34`.
+5. Tests that do not need a live Convex push: `lib/*.spec.ts` (mapper omits session-identity fields; deny message; clamp) and `convex-test` in `convex/users.test.ts` (unauthenticated `list` / `getById` throw `"Not authenticated"`; `getById` missing id → `null`; `list` sort `updatedAt` desc; Listed user shape; `numItems: 200` returns at most 100). Pin `convex-test@0.0.54` while the app is on `convex@^1.34`.
 6. Run `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 7. Ask a human to run `npx convex dev` / `pnpm convex:dev` against `NEXT_PUBLIC_CONVEX_URL`.
 
@@ -395,7 +395,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 - **Session path grill:** [RAD-83](https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80) — **resolved:** Scenario J walks all five App routes + home (URL + one landmark per hop); D stays distributed.
 - **RAD-82 live push:** human runs `convex dev` when the agent asks; not a merge gate for the RAD-82 PR.
 - **RAD-81:** rename `api.users.get` → `api.users.getById` — **done in #25**.
-- **Auth user with no App user row:** provisioning race / failure; out of scope (no extra person-kind, no extra deny path).
+- **Signed-in session with no App user row:** provisioning race / failure; out of scope (no extra person-kind, no extra deny path).
 - **Users list Load more UI:** API stays paginated (RAD-64); RAD-78 UI loads the first 25 rows only. Load more is later work.
 
 ## Sources

@@ -1,6 +1,6 @@
 /**
  * Convex `tokenIdentifier` is `iss|sub` from the AuthKit JWT.
- * Create User reuses the creator's live issuer so the new Auth user matches
+ * Create User reuses the creator's live issuer so the new App user matches
  * provision/`store` lookups after first sign-in.
  */
 export function tokenIdentifierForCreatedUser(

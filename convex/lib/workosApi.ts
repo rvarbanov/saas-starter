@@ -130,7 +130,7 @@ export async function fetchWorkOsUserProfile(workosUserId: string): Promise<Work
 }
 
 /**
- * Create an Auth user (email ± names, no password). Does not send an invite.
+ * Create the WorkOS sign-in for an App user (email ± names, no password). Does not send an invite.
  * Duplicate emails throw {@link EMAIL_ALREADY_REGISTERED}.
  */
 export async function createWorkOsUser(args: {
@@ -203,7 +203,7 @@ export async function sendWorkOsInvitation(email: string): Promise<void> {
   }
 }
 
-/** Delete an Auth user. Used only to roll back Create after a Convex insert failure. */
+/** Delete the WorkOS sign-in. Used only to roll back Create after a Convex insert failure. */
 export async function deleteWorkOsUser(workosUserId: string): Promise<void> {
   const apiKey = requireWorkOsApiKey();
 
