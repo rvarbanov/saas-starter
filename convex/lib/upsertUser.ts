@@ -4,7 +4,7 @@ import { getUserByTokenIdentifier } from "./auth";
 import { buildSearchText } from "./searchText";
 import { assertEmailAvailable, normalizeEmail } from "./users";
 
-/** Auth-linked fields only — WorkOS must not seed profile names into Convex. */
+/** Sign-in fields from WorkOS. WorkOS must not seed profile names into the App user. */
 export type AuthProfile = {
   tokenIdentifier: string;
   workosUserId: string;
