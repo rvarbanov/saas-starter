@@ -24,12 +24,22 @@ test("U: Profile saves a first name and stays on Profile", async ({ page }) => {
 
   const suffix = String(Date.now()).slice(-4);
   const first = `E2E${suffix}`;
+  const submit = page.getByTestId("profile-submit");
   await page.getByTestId("profile-first-name").fill(first);
-  await page.getByTestId("profile-submit").click();
+  await submit.click();
 
+  // Disabled while the write is in flight, then idle Save once it settles.
+  // A failed save re-enables Save and shows profile-error; success leaves Save disabled.
+  await expect(submit).toBeDisabled();
+  await expect(submit).toHaveText("Save");
+  await expect(page.getByTestId("profile-error")).toHaveCount(0);
   await expect(page).toHaveURL(expectPath(APP_ROUTES.profile));
+
+  await page.reload({ waitUntil: "load" });
+  await expect(page.getByTestId("profile-form")).toBeVisible({ timeout: 15_000 });
   await expect(page.getByTestId("profile-first-name")).toHaveValue(first);
   await expect(page.getByTestId("profile-email")).toHaveValue(emailBefore);
+  await expect(page).toHaveURL(expectPath(APP_ROUTES.profile));
 });
 
 test("V: Profile Cancel resets the draft and stays on Profile", async ({ page }) => {
