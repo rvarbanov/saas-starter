@@ -57,7 +57,7 @@ The manager pathway to create an App user from the Users list — email required
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
 **Delete user**:
-The pathway that marks an App user deleted without removing the record.
+The pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list.
 _Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban
 
 **Visitor**:
