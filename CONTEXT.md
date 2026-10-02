@@ -56,6 +56,10 @@ _Avoid_: Auth user, WorkOS user, Convex user, directory, directory user, product
 The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
+**Delete user**:
+The Super admin pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
+_Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban
+
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An App user who has signed out is a Visitor until they sign in again.
 _Avoid_: anonymous user, guest, public user, Auth user
