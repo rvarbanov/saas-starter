@@ -38,6 +38,7 @@ async function patchAuthProfile(
   profile: AuthProfile,
   now: number,
 ): Promise<StoreUserResult> {
+  // Sign-in updates email / token / WorkOS id only. Never set or clear `deletedAt`.
   const updates: {
     email?: string;
     tokenIdentifier?: string;
