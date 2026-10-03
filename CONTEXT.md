@@ -90,10 +90,14 @@ _Avoid_: Coming soon pack, demo data, live metrics, dashboard widgets
 
 ## Changes
 
+**Action**:
+The kind of Change: create, update, or delete.
+_Avoid_: Event type, operation, verb
+
 **Change**:
-The saved record of one create, update, or delete of a resource’s product data, naming who did it, when, and the before and after of each field that differs.
+The saved record of one create, update, or delete of a resource’s product data: the action, the App user who did it (by id), and when. An update also keeps the before and after of each tracked field that differs; a create or delete does not.
 _Avoid_: Audit entry, audit log, activity, event
 
 **Changes**:
-The list of Change records for one resource, on that resource’s detail page. For an App user, the detail page is User detail.
+The list of Change records for one resource, on that resource’s detail page, visible to whoever can see that page. For an App user, the detail page is User detail.
 _Avoid_: Change audit log, activity log, history
