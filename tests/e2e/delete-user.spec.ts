@@ -63,7 +63,7 @@ async function openSelfUserDetail(page: Page, email: string) {
   await expect(search).toHaveValue(email);
   await new Promise((resolve) => setTimeout(resolve, 450));
 
-  const table = page.getByTestId("users-directory-table");
+  const table = page.getByTestId("users-list-table");
   const row = table.locator("tbody tr").filter({ hasText: email }).first();
   await expect(row).toBeVisible();
   await row.getByRole("link").click();
@@ -119,7 +119,7 @@ test.describe("Delete user T–V", () => {
     await search.fill(email);
     await expect(search).toHaveValue(email);
     await new Promise((resolve) => setTimeout(resolve, 450));
-    await expect(page.getByTestId("users-directory-table")).not.toContainText(email);
+    await expect(page.getByTestId("users-list-table")).not.toContainText(email);
 
     await page.goto(detailUrl, { waitUntil: "load" });
     await expect(page.getByTestId("user-detail-not-found")).toHaveText("User not found");

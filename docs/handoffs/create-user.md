@@ -18,7 +18,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Implementing UI inside the Wayfinder map effort (plan-only; build is a later session / epic)
 - Invite **resend** / custom email templates / org-scoped invites — [RAD-124](https://linear.app/radi-dev/issue/RAD-124/grill-workos-invite-resend-and-email-customization)
 - Self **Profile** redesign; AuthKit sign-up changes unrelated to manager Create
-- Directory / Create **authorization** lockdown (Super admin | Manager) — deferred with [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager)
+- Users list / Create **authorization** lockdown (Super admin | Manager) — deferred with [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager)
 - App user **delete**; Users list Load more; new App user fields not already on the table
 - Making Auth-link fields optional / unlinked App users ([RAD-118](https://linear.app/radi-dev/issue/RAD-118/schema-optional-auth-link-fields-on-app-user) decided: no)
 - Idempotent create / duplicate-submit hardening — post-MVP [RAD-127](https://linear.app/radi-dev/issue/RAD-127/idempotent-create-user-and-user-detail-save)
@@ -226,7 +226,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - [RAD-124](https://linear.app/radi-dev/issue/RAD-124/grill-workos-invite-resend-and-email-customization) — invite resend + email customization (separate WorkOS Auth-link / invite grill)
 - [RAD-126](https://linear.app/radi-dev/issue/RAD-126/wayfinder-edit-user-handoff) — packed in [`user-edit.md`](./user-edit.md). Overturns this file’s submit copy (**Create user** / **Creating…** → **Save** / **Saving…**), role checkboxes (this MVP does not write roles), and WorkOS create body (email only, no names). Shared form includes Profile. `updateUserDetail` is renamed `updateUser`. Cancel stays a `Link` to the Users list. This Create User file stays **packed** for the create/invite contract.
 - [RAD-127](https://linear.app/radi-dev/issue/RAD-127/idempotent-create-user-and-user-detail-save) — idempotent Create + User detail Save
-- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager) — directory / Create authz
+- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — Users list / Create authz
 - [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) — E2E subject via create → get → update → delete (includes teardown)
 - Toast notifications — post-MVP, no ticket required to skip
 

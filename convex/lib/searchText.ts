@@ -1,4 +1,4 @@
-/** Build denormalized lowercase search text for Users directory search. */
+/** Build denormalized lowercase search text for Users list search. */
 export function buildSearchText(parts: {
   firstName?: string | undefined;
   lastName?: string | undefined;

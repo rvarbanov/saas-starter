@@ -17,7 +17,7 @@ async function openSelfUserDetail(page: Page, email: string) {
   await expect(search).toHaveValue(email);
   await new Promise((resolve) => setTimeout(resolve, 450));
 
-  const table = page.getByTestId("users-directory-table");
+  const table = page.getByTestId("users-list-table");
   const row = table.locator("tbody tr").filter({ hasText: email }).first();
   await expect(row).toBeVisible();
   await row.getByRole("link").click();
