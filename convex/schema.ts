@@ -32,6 +32,11 @@ export default defineSchema({
      * Optional during backfill; writers always set it going forward.
      */
     searchText: v.optional(v.string()),
+    /**
+     * Soft-delete timestamp. Set means the App user is deleted: hidden from
+     * the Users list and from User detail. The row stays. Sign-in must not clear it.
+     */
+    deletedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

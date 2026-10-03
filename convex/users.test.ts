@@ -25,6 +25,7 @@ async function insertUser(
     tokenIdentifier?: string;
     workosUserId?: string;
     roles?: Array<"super_admin" | "manager" | "team_member">;
+    deletedAt?: number;
   },
 ): Promise<Id<"users">> {
   return await t.run(async (ctx) => {
@@ -36,6 +37,7 @@ async function insertUser(
       ...(fields.firstName !== undefined ? { firstName: fields.firstName } : {}),
       ...(fields.lastName !== undefined ? { lastName: fields.lastName } : {}),
       ...(fields.roles !== undefined ? { roles: fields.roles } : {}),
+      ...(fields.deletedAt !== undefined ? { deletedAt: fields.deletedAt } : {}),
       searchText: buildSearchText({
         firstName: fields.firstName,
         lastName: fields.lastName,
@@ -435,5 +437,172 @@ describe("users.upsertFromAuthProfile workosUserId fallback", () => {
     const doc = await t.withIdentity(identity).query(api.users.getById, { userId });
     expect(doc?.tokenIdentifier).toBe("https://example.test|user_01created");
     expect(doc?.workosUserId).toBe("user_01created");
+  });
+
+  it("leaves deletedAt set when the auth profile is patched", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "deleted@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://old-issuer.test|user_01deleted",
+      workosUserId: "user_01deleted",
+      deletedAt: 50,
+    });
+
+    await t.mutation(internal.users.upsertFromAuthProfile, {
+      tokenIdentifier: "https://example.test|user_01deleted",
+      workosUserId: "user_01deleted",
+      email: "deleted-renamed@example.com",
+    });
+
+    const doc = await t.run(async (ctx) => {
+      return await ctx.db.get("users", userId);
+    });
+    expect(doc?.deletedAt).toBe(50);
+    expect(doc?.email).toBe("deleted-renamed@example.com");
+    expect(doc?.tokenIdentifier).toBe("https://example.test|user_01deleted");
+  });
+});
+
+describe("users.deleteUser", () => {
+  const callerToken = "https://example.test|caller";
+
+  async function insertCaller(
+    t: ReturnType<typeof convexTest>,
+    roles: Array<"super_admin" | "manager" | "team_member">,
+    extra?: { deletedAt?: number; email?: string },
+  ) {
+    return await insertUser(t, {
+      email: extra?.email ?? "caller@example.com",
+      updatedAt: 10,
+      tokenIdentifier: callerToken,
+      roles,
+      ...(extra?.deletedAt !== undefined ? { deletedAt: extra.deletedAt } : {}),
+    });
+  }
+
+  it("throws Not authenticated without a JWT", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, { email: "ada@example.com", updatedAt: 1 });
+    await expect(t.mutation(api.users.deleteUser, { userId })).rejects.toThrow("Not authenticated");
+  });
+
+  it("throws Unauthorized when the caller is not a Super admin", async () => {
+    const t = testClient();
+    await insertCaller(t, ["manager"]);
+    const userId = await insertUser(t, { email: "ada@example.com", updatedAt: 1 });
+    await expect(
+      t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
+    ).rejects.toThrow("Unauthorized");
+  });
+
+  it("throws User not found when the row is missing", async () => {
+    const t = testClient();
+    await insertCaller(t, ["super_admin"]);
+    const userId = await t.run(async (ctx) => {
+      const id = await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|gone",
+        email: "gone@example.com",
+        workosUserId: "gone",
+        searchText: buildSearchText({ email: "gone@example.com" }),
+        createdAt: 1,
+        updatedAt: 1,
+      });
+      await ctx.db.delete("users", id);
+      return id;
+    });
+    await expect(
+      t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
+    ).rejects.toThrow("User not found");
+  });
+
+  it("throws User not found when deletedAt is already set", async () => {
+    const t = testClient();
+    await insertCaller(t, ["super_admin"]);
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 1,
+      deletedAt: 2,
+    });
+    await expect(
+      t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
+    ).rejects.toThrow("User not found");
+  });
+
+  it("throws when a Super admin deletes their own user", async () => {
+    const t = testClient();
+    const callerId = await insertCaller(t, ["super_admin"]);
+    await expect(
+      t.withIdentity(identity).mutation(api.users.deleteUser, { userId: callerId }),
+    ).rejects.toThrow("Cannot delete your own user");
+  });
+
+  it("throws when the target is the last Super admin", async () => {
+    const t = testClient();
+    await insertCaller(t, ["super_admin"], { deletedAt: 5 });
+    const targetId = await insertUser(t, {
+      email: "only-admin@example.com",
+      updatedAt: 2,
+      roles: ["super_admin"],
+    });
+    await expect(
+      t.withIdentity(identity).mutation(api.users.deleteUser, { userId: targetId }),
+    ).rejects.toThrow("Cannot delete the last Super admin");
+  });
+
+  it("sets deletedAt and updatedAt and leaves other fields", async () => {
+    const t = testClient();
+    await insertCaller(t, ["super_admin", "manager"]);
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 1,
+      createdAt: 1,
+      firstName: "Ada",
+      roles: ["team_member"],
+    });
+
+    await expect(
+      t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
+    ).resolves.toBeNull();
+
+    const doc = await t.run(async (ctx) => {
+      return await ctx.db.get("users", userId);
+    });
+    expect(doc?.deletedAt).toEqual(expect.any(Number));
+    expect(doc?.updatedAt).toBe(doc?.deletedAt);
+    expect(doc?.email).toBe("ada@example.com");
+    expect(doc?.firstName).toBe("Ada");
+    expect(doc?.roles).toEqual(["team_member"]);
+    expect(doc?.createdAt).toBe(1);
+  });
+});
+
+describe("deleted App users are hidden", () => {
+  it("omits deletedAt rows from the Users list", async () => {
+    const t = testClient();
+    await insertUser(t, { email: "visible@example.com", updatedAt: 1 });
+    await insertUser(t, {
+      email: "deleted@example.com",
+      updatedAt: 5,
+      deletedAt: 5,
+    });
+
+    const result = await t.withIdentity(identity).query(api.users.list, {
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+
+    expect(result.page.map((user) => user.email)).toEqual(["visible@example.com"]);
+  });
+
+  it("returns null from getById when deletedAt is set", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "deleted@example.com",
+      updatedAt: 1,
+      deletedAt: 2,
+    });
+
+    await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
   });
 });

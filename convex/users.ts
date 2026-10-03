@@ -1,13 +1,19 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import { getCurrentUser, requireIdentity } from "./lib/auth";
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+  mutation,
+  query,
+} from "./_generated/server";
+import { getCurrentUser, getCurrentUserOrThrow, requireIdentity } from "./lib/auth";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
-import { hasAnyRole, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
+import { hasAnyRole, isSuperAdmin, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
 import { buildSearchText } from "./lib/searchText";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { toPublicUserDoc, userDocValidator } from "./lib/userDoc";
@@ -34,6 +40,9 @@ function matchesListFilters(
     now: number;
   },
 ): boolean {
+  if (user.deletedAt !== undefined) {
+    return false;
+  }
   if (filters.roles !== undefined && filters.roles.length > 0) {
     if (!hasAnyRole(user.roles, filters.roles)) {
       return false;
@@ -169,7 +178,73 @@ export const getById = query({
   handler: async (ctx, args) => {
     await requireIdentity(ctx);
     const user = await ctx.db.get("users", args.userId);
-    return user ? toPublicUserDoc(user) : null;
+    if (!user || user.deletedAt !== undefined) {
+      return null;
+    }
+    return toPublicUserDoc(user);
+  },
+});
+
+const SUPER_ADMIN_COUNT_PAGE_SIZE = 100;
+
+/** Count Super admins who are not soft-deleted. Paginate; do not collect the table. */
+async function countActiveSuperAdmins(ctx: MutationCtx): Promise<number> {
+  let count = 0;
+  let cursor: string | null = null;
+  let isDone = false;
+  while (!isDone) {
+    const result = await ctx.db.query("users").withIndex("by_updatedAt").paginate({
+      numItems: SUPER_ADMIN_COUNT_PAGE_SIZE,
+      cursor,
+    });
+    for (const user of result.page) {
+      if (user.deletedAt === undefined && isSuperAdmin(user.roles)) {
+        count += 1;
+      }
+    }
+    cursor = result.continueCursor;
+    isDone = result.isDone;
+  }
+  return count;
+}
+
+/**
+ * Soft-delete an App user. Super admin only, not yourself, not the last Super admin.
+ * Sets `deletedAt` and leaves the row. Does not call WorkOS.
+ */
+export const deleteUser = mutation({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireIdentity(ctx);
+
+    const target = await ctx.db.get("users", args.userId);
+    if (!target || target.deletedAt !== undefined) {
+      throw new Error("User not found");
+    }
+
+    const caller = await getCurrentUserOrThrow(ctx);
+    if (!isSuperAdmin(caller.roles)) {
+      throw new Error("Unauthorized");
+    }
+    if (args.userId === caller._id) {
+      throw new Error("Cannot delete your own user");
+    }
+    if (isSuperAdmin(target.roles)) {
+      const activeSuperAdmins = await countActiveSuperAdmins(ctx);
+      if (activeSuperAdmins === 1) {
+        throw new Error("Cannot delete the last Super admin");
+      }
+    }
+
+    const now = Date.now();
+    await ctx.db.patch("users", args.userId, {
+      deletedAt: now,
+      updatedAt: now,
+    });
+    return null;
   },
 });
 

@@ -1,19 +1,32 @@
 "use client";
 
-import { useConvexAuth, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { formatListedUserDate } from "@/components/users-list";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import type { Role } from "@/convex/lib/roles";
+import { isSuperAdmin, type Role } from "@/convex/lib/roles";
 import { userDetailLeafLabel } from "@/lib/app-nav";
-import { userEditPath } from "@/lib/app-routes";
+import { APP_ROUTES, userEditPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
 import { isLikelyUsersId } from "@/lib/convex-id";
 import { formatRoleLabels } from "@/lib/role-labels";
+
+const DELETE_USER_DIALOG_COPY =
+  "You’re about to delete this user. Are you sure you want to do that?";
 
 type PublicUser = {
   _id: Id<"users">;
@@ -94,6 +107,7 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const ready = !authLoading && isAuthenticated;
   const user = useQuery(api.users.getById, ready ? { userId } : "skip");
+  const me = useQuery(api.users.getMe, ready ? {} : "skip");
 
   if (!ready || user === undefined) {
     return (
@@ -128,6 +142,79 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
         </Link>
       </div>
       <UserDetailViewFields user={user} />
+      {me != null && isSuperAdmin(me.roles) && me._id !== user._id ? (
+        <DeleteUserControl userId={user._id} />
+      ) : null}
+    </div>
+  );
+}
+
+function DeleteUserControl({ userId }: { userId: Id<"users"> }) {
+  const router = useRouter();
+  const deleteUser = useMutation(api.users.deleteUser);
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function handleOpenChange(next: boolean, eventDetails: { cancel: () => void }) {
+    if (!next && pending) {
+      eventDetails.cancel();
+      return;
+    }
+    if (!next) {
+      setError(null);
+    }
+    setOpen(next);
+  }
+
+  async function confirmDelete() {
+    setError(null);
+    setPending(true);
+    try {
+      await deleteUser({ userId });
+      router.replace(APP_ROUTES.users);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete user");
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="mt-8">
+      <AlertDialog onOpenChange={handleOpenChange} open={open}>
+        <AlertDialogTrigger
+          data-testid="user-detail-delete"
+          render={<Button type="button" variant="destructive" />}
+        >
+          Delete
+        </AlertDialogTrigger>
+        <AlertDialogContent data-testid="user-detail-delete-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{DELETE_USER_DIALOG_COPY}</AlertDialogTitle>
+          </AlertDialogHeader>
+          {error !== null ? (
+            <p data-testid="user-detail-delete-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="user-detail-delete-cancel" disabled={pending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="user-detail-delete-confirm"
+              disabled={pending}
+              onClick={() => {
+                void confirmDelete();
+              }}
+              type="button"
+              variant="destructive"
+            >
+              {pending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
