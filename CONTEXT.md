@@ -87,3 +87,13 @@ _Avoid_: User detail, Edit User, settings (Settings is a different page)
 **Demo page**:
 The Coming soon page — fake metrics and rows used to show the layout, not live product data.
 _Avoid_: Coming soon pack, demo data, live metrics, dashboard widgets
+
+## Changes
+
+**Change**:
+The saved record of one create, update, or delete of a resource’s product data, naming who did it, when, and the before and after of each field that differs.
+_Avoid_: Audit entry, audit log, activity, event
+
+**Changes**:
+The list of Change records for one resource, on that resource’s detail page. For an App user, the detail page is User detail.
+_Avoid_: Change audit log, activity log, history
