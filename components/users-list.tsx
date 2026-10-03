@@ -54,7 +54,7 @@ export function usersListErrorMessage(error: unknown): string {
   return "Something went wrong";
 }
 
-/** Empty-state copy when the directory has no rows (virgin vs constrained). */
+/** Empty-state copy when the Users list has no rows (virgin vs constrained). */
 export const USERS_LIST_EMPTY_VIRGIN = "No users found";
 export const USERS_LIST_EMPTY_CONSTRAINED = "No users match";
 
@@ -77,7 +77,7 @@ function EllipsisCell({ value }: { value: string }) {
 
 function UsersTableShell({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full" data-testid="users-directory-table">
+    <div className="w-full" data-testid="users-list-table">
       <Table>
         <TableHeader>
           <TableRow>
@@ -179,7 +179,7 @@ function UsersListToolbar({
   onCreatedWithinDaysChange: (value: CreatedWithinDays | undefined) => void;
 }) {
   return (
-    <div className="mb-4 flex flex-col gap-3" data-testid="users-directory-toolbar">
+    <div className="mb-4 flex flex-col gap-3" data-testid="users-list-toolbar">
       <Input
         aria-label="Search users"
         data-testid="users-search-input"

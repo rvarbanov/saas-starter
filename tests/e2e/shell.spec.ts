@@ -67,8 +67,8 @@ test("G: Avatar menu opens Settings and Profile; those are not Global nav links"
 test("H: Users list shows the table, column headers, and at least one row", async ({ page }) => {
   await page.goto(APP_ROUTES.users, { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: /^Users$/i })).toBeVisible();
-  await expect(page.getByTestId("users-directory-toolbar")).toBeVisible();
-  const table = page.getByTestId("users-directory-table");
+  await expect(page.getByTestId("users-list-toolbar")).toBeVisible();
+  const table = page.getByTestId("users-list-table");
   await expect(table).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "First name" })).toBeVisible();
   await expect(table.getByRole("columnheader", { name: "Last name" })).toBeVisible();
@@ -84,7 +84,7 @@ test("H2: Users search finds a known email and nonsense shows No users match", a
   page,
 }, testInfo) => {
   await page.goto(APP_ROUTES.users, { waitUntil: "load" });
-  const table = page.getByTestId("users-directory-table");
+  const table = page.getByTestId("users-list-table");
   await expect(table).toBeVisible();
   // Email is column 3. First-name cells can include `@` via the row link's
   // aria-label (`Open {email}`) even when firstName is empty (Create User P).

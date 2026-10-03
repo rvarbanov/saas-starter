@@ -28,7 +28,7 @@ export default defineSchema({
      */
     roles: v.optional(rolesValidator),
     /**
-     * Denormalized lowercase firstName + lastName + email for directory search.
+     * Denormalized lowercase firstName + lastName + email for Users list search.
      * Optional during backfill; writers always set it going forward.
      */
     searchText: v.optional(v.string()),

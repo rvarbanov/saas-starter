@@ -20,7 +20,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Changing Users list or Create User URLs. Profile route stays `/dashboard/profile`
 - Deleting packed handoffs
 - Invite resend / email customization — [RAD-124](https://linear.app/radi-dev/issue/RAD-124/grill-workos-invite-resend-and-email-customization)
-- Directory authz — [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager)
+- Users list authz — [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager)
 - App user delete; Users list Load more; new App user fields
 - Idempotent Create / Save — [RAD-127](https://linear.app/radi-dev/issue/RAD-127/idempotent-create-user-and-user-detail-save)
 - Bulk-clearing historical WorkOS names; AuthKit hosted sign-up name fields
@@ -155,7 +155,7 @@ Do not drop these when in-place edit goes away:
 
 - [RAD-136](https://linear.app/radi-dev/issue/RAD-136/relational-roles-and-who-may-assign-them) — roles table and who may assign them. This build does not write roles.
 - [RAD-137](https://linear.app/radi-dev/issue/RAD-137/workos-email-change-workflow) — send-code / confirm vs direct PUT. This build stays signed in and uses a direct email PUT with compensating rollback.
-- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager) — directory authz. JWT-only until then.
+- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — Users list authz. JWT-only until then.
 - [RAD-124](https://linear.app/radi-dev/issue/RAD-124/grill-workos-invite-resend-and-email-customization) — invite resend.
 - [RAD-127](https://linear.app/radi-dev/issue/RAD-127/idempotent-create-user-and-user-detail-save) — idempotent Create / Save.
 - [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) — teardown of created users.
