@@ -21,7 +21,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Restore / undelete. The row stays so a later story can restore it
 - Per-role test sign-in credentials — [RAD-136](https://linear.app/radi-dev/issue/RAD-136/relational-roles-and-who-may-assign-them)
 - The role model — [RAD-136](https://linear.app/radi-dev/issue/RAD-136/relational-roles-and-who-may-assign-them) and [RAD-113](https://linear.app/radi-dev/issue/RAD-113/restrict-role-addremove-to-admins)
-- Directory read lockdown — [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager). Delete does not wait for it
+- Users list read lockdown — [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager). Delete does not wait for it
 - Edit User route split — [RAD-126](https://linear.app/radi-dev/issue/RAD-126/wayfinder-edit-user-handoff). Place Delete on view mode, including the interim in-place view in `components/user-detail.tsx`
 - Bulk delete, Users list Load more, and new App user fields besides `deletedAt`
 - E2E for Manager / Team member (button absent), the last-Super-admin error, the “Deleting…” label, a dialog error, the Edit User page, and a second Delete — [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) remains a later rework
@@ -154,10 +154,10 @@ Last-Super-admin count: paginate `by_updatedAt` until `isDone` and count in Type
 | **U** | Create `e2e-delete+<timestamp>@example.com` → User detail → `user-detail-delete` → dialog copy is only “You’re about to delete this user. Are you sure you want to do that?” → Cancel → dialog closes, still on that User detail, email still shown. |
 | **V** | Create another disposable email → confirm Delete → Users list → that email is absent from the list → open the saved User detail URL → `user-detail-not-found` with “User not found”. |
 
-### Does Delete wait for directory read lockdown? (RAD-150)
+### Does Delete wait for Users list read lockdown? (RAD-150)
 
 - No. Delete ships on its own.
-- Today `users.list` and `users.getById` only require a signed-in JWT. That stays until [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager).
+- Today `users.list` and `users.getById` only require a signed-in JWT. That stays until [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager).
 - The hidden control and `"Unauthorized"` are the Delete gate.
 
 ## Build checklist
@@ -184,7 +184,7 @@ Last-Super-admin count: paginate `by_updatedAt` until `isDone` and count in Type
 
 ## Open / deferred
 
-- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager) — directory reads stay “any signed-in JWT” until that story. Do not add that role check inside Delete.
+- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — Users list reads stay “any signed-in JWT” until that story. Do not add that role check inside Delete.
 - [RAD-136](https://linear.app/radi-dev/issue/RAD-136/relational-roles-and-who-may-assign-them) — test principals per role. Do not add a second E2E persona here.
 - [RAD-126](https://linear.app/radi-dev/issue/RAD-126/wayfinder-edit-user-handoff) — when Edit moves to its own route, Delete stays on User detail view only.
 - [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) — later create → get → update → delete rework. This build’s E2E is **T–V** only.

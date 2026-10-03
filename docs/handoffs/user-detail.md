@@ -18,7 +18,7 @@ Build work is tracked under **[[Epic] User detail](https://linear.app/radi-dev/i
 - Implementing UI inside the Wayfinder map effort (plan-only; build is a later session / epic)
 - Self **Profile** redesign (`/dashboard/profile`) beyond keeping it separate from User detail
 - New App user fields (e.g. phone) not already on the Convex `users` table
-- Directory / User detail **authorization** lockdown (Super admin | Manager) — deferred; see [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager)
+- Users list / User detail **authorization** lockdown (Super admin | Manager) — deferred; see [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager)
 - Role add/remove limited to admins — deferred; see [RAD-113](https://linear.app/radi-dev/issue/RAD-113/restrict-role-addremove-to-admins)
 - Inventing Users list search/filter (already shipped — [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter)); E2E reuses it
 - Users list Load more UI, Admin section, multi-tenant team UI, dark theme
@@ -159,7 +159,7 @@ Overrides shell “no row-click.”
 | testid | Purpose |
 | --- | --- |
 | `users-search-input` | **Reuse** (Users list search) |
-| `users-directory-table` | **Reuse** |
+| `users-list-table` | **Reuse** |
 | `user-detail-page` | User detail page root |
 | `user-detail-form` | Edit-mode form container |
 | `user-detail-error` | Form-level inline error (`role="alert"`) |
@@ -212,7 +212,7 @@ Breadcrumbs and identity labels via accessible names / visible text.
 
 **Linear debt (do not invent in this build):**
 
-- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-manager) — directory / detail authz
+- [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — Users list / detail authz
 - [RAD-113](https://linear.app/radi-dev/issue/RAD-113/restrict-role-addremove-to-admins) — only admins add/remove roles
 - [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) — E2E subject via create → get → update → delete
 - [RAD-116](https://linear.app/radi-dev/issue/RAD-116/e2e-user-detail-roles-coverage) — roles E2E
