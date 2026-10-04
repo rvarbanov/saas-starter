@@ -67,22 +67,26 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debounced;
 }
 
-function EllipsisCell({ value }: { value: string }) {
-  return (
-    <TableCell className="max-w-48 truncate" title={value}>
-      {value}
-    </TableCell>
-  );
-}
+const COLUMN_WIDTH: Record<(typeof COLUMN_HEADERS)[number], string | undefined> = {
+  "First name": "w-32",
+  "Last name": "w-32",
+  Email: undefined,
+  Roles: "w-40",
+  "Created at": "w-52",
+  "Updated at": "w-52",
+};
 
 function UsersTableShell({ children }: { children: ReactNode }) {
   return (
     <div className="w-full" data-testid="users-list-table">
-      <Table>
+      {/* 64rem matches the column floors (8+8+12+10+13+13). table-fixed alone shrinks to the container. */}
+      <Table className="min-w-[64rem] table-fixed">
         <TableHeader>
           <TableRow>
             {COLUMN_HEADERS.map((header) => (
-              <TableHead key={header}>{header}</TableHead>
+              <TableHead className={COLUMN_WIDTH[header]} key={header}>
+                {header}
+              </TableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -150,15 +154,25 @@ function ListedUserRow({ user }: { user: ListUser }) {
   const label = `Open ${user.email}`;
   return (
     <TableRow className="relative cursor-pointer hover:bg-muted/50">
-      <TableCell className="max-w-48 truncate" title={user.firstName ?? ""}>
+      <TableCell className="w-32 truncate" title={user.firstName ?? ""}>
         <Link aria-label={label} className="absolute inset-0 z-10" href={href} />
         <span className="relative z-0">{user.firstName ?? ""}</span>
       </TableCell>
-      <EllipsisCell value={user.lastName ?? ""} />
-      <EllipsisCell value={user.email} />
-      <EllipsisCell value={rolesLabel} />
-      <EllipsisCell value={formatListedUserDate(user.createdAt)} />
-      <EllipsisCell value={formatListedUserDate(user.updatedAt)} />
+      <TableCell className="w-32 truncate" title={user.lastName ?? ""}>
+        {user.lastName ?? ""}
+      </TableCell>
+      <TableCell className="min-w-48 truncate" title={user.email}>
+        {user.email}
+      </TableCell>
+      <TableCell className="w-40 truncate" title={rolesLabel}>
+        {rolesLabel}
+      </TableCell>
+      <TableCell className="w-52 whitespace-nowrap">
+        {formatListedUserDate(user.createdAt)}
+      </TableCell>
+      <TableCell className="w-52 whitespace-nowrap">
+        {formatListedUserDate(user.updatedAt)}
+      </TableCell>
     </TableRow>
   );
 }

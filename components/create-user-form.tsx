@@ -10,7 +10,7 @@ import { isConvexConfigured } from "@/lib/convex-config";
 export function CreateUserForm() {
   if (!isConvexConfigured()) {
     return (
-      <div className="page-main" data-testid="create-user-page">
+      <div className="content-area" data-testid="create-user-page">
         <h1 className="heading-page">Create user</h1>
         <p className="text-caption">Convex is not configured; Create User cannot load.</p>
       </div>
@@ -25,7 +25,7 @@ function CreateUserFormInner() {
   const router = useRouter();
 
   return (
-    <div className="page-main" data-testid="create-user-page">
+    <div className="content-area" data-testid="create-user-page">
       <UserForm
         cancelHref={APP_ROUTES.users}
         email=""

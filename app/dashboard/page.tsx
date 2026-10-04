@@ -9,7 +9,7 @@ export default async function DashboardPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
 
   return (
-    <div className="page-main">
+    <div className="content-area">
       <p className="text-eyebrow">Dashboard</p>
       <h1 className="heading-page">Signed in</h1>
       <p className="text-body">{user.email ?? user.id} — authenticated via WorkOS AuthKit.</p>

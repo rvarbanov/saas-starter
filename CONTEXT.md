@@ -42,7 +42,7 @@ _Avoid_: Chrome, sidebar (as the only name)
 
 **Content area**:
 The page body inside the app’s frame — the part that changes as you move between app pages.
-_Avoid_: main, inset, page-main
+_Avoid_: main, inset, page-main, internal shell
 
 **Avatar menu**:
 The account menu. It opens from one control, in the app’s Global header. It holds Profile, Settings, and Sign out.
