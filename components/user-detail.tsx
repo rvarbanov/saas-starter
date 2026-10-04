@@ -83,7 +83,7 @@ export function InviteFailedBanner() {
 export function UserDetail({ userId: rawUserId }: { userId: string }) {
   if (!isConvexConfigured()) {
     return (
-      <div className="page-main" data-testid="user-detail-page">
+      <div className="content-area" data-testid="user-detail-page">
         <p className="text-caption">Convex is not configured; User detail cannot load.</p>
       </div>
     );
@@ -91,7 +91,7 @@ export function UserDetail({ userId: rawUserId }: { userId: string }) {
 
   if (!isLikelyUsersId(rawUserId)) {
     return (
-      <div className="page-main" data-testid="user-detail-page">
+      <div className="content-area" data-testid="user-detail-page">
         <h1 className="heading-page">User</h1>
         <p className="text-body" data-testid="user-detail-not-found">
           User not found
@@ -111,7 +111,7 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
 
   if (!ready || user === undefined) {
     return (
-      <div className="page-main" data-testid="user-detail-page">
+      <div className="content-area" data-testid="user-detail-page">
         <p className="text-loading">Loading user…</p>
       </div>
     );
@@ -119,7 +119,7 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
 
   if (user === null) {
     return (
-      <div className="page-main" data-testid="user-detail-page">
+      <div className="content-area" data-testid="user-detail-page">
         <h1 className="heading-page">User</h1>
         <p className="text-body" data-testid="user-detail-not-found">
           User not found
@@ -131,7 +131,7 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
   const title = userDetailLeafLabel(user);
 
   return (
-    <div className="page-main" data-testid="user-detail-page">
+    <div className="content-area" data-testid="user-detail-page">
       <Suspense>
         <InviteFailedBanner />
       </Suspense>
