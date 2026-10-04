@@ -98,8 +98,12 @@ _Avoid_: Event type, operation, verb
 A field of product data on a resource whose before and after an update Change records. Each resource names the fields left out of that before and after.
 _Avoid_: Column, attribute, audit field
 
+**System**:
+The actor on a Change when a write changes a resource and no signed-in App user caused it.
+_Avoid_: Admin, script, dashboard user, bot
+
 **Change**:
-The saved record of one create, update, or delete of a resource’s product data: the action, the App user who did it (by id), and when. An update also keeps the before and after of each tracked field that differs; a create or delete does not.
+The saved record of one create, update, or delete of a resource’s product data: the action, who caused it, and when. Who is the signed-in App user, or the system when no signed-in App user caused the write; an update also keeps the before and after of each tracked field that differs.
 _Avoid_: Audit entry, audit log, activity, event
 
 **Changes**:
