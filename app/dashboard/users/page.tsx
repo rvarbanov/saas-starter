@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function UsersPage() {
   return (
-    <div className="page-main">
+    <div className="content-area">
       <h1 className="heading-page">Users</h1>
       <UsersList />
     </div>

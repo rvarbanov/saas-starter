@@ -11,7 +11,8 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
     <TooltipProvider>
       <SidebarProvider defaultOpen>
         <AppSidebar />
-        <SidebarInset>
+        {/* min-w-0: the inset is a flex item, so without this a 64rem Users table widens the frame instead of scrolling. */}
+        <SidebarInset className="min-w-0">
           <AppHeader />
           <div className="flex min-h-0 flex-1 flex-col">{children}</div>
           <AppFooter />

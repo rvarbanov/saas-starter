@@ -54,7 +54,7 @@ A later build session implements the **App** frame (Global nav + Global header +
 - **Writes / admin management:** out of scope; existing self-service APIs unchanged.
 - **Field floor (Users list only):** never return `tokenIdentifier` or `workosUserId`. Positive columns owned by RAD-61. `getMe` may keep identity link fields for self.
 
-**Debt (not blocking this build):** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role) (RBAC / `user_role`); [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) (restrict Users list to Super admin or Manager).
+**Debt (not blocking this build):** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role) (RBAC / `user_role`); [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) (restrict Users list to Super admin or Manager).
 
 ### Users table columns and affordances (RAD-61)
 
@@ -205,7 +205,7 @@ RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEM
 
 | Route | Heading | Body line |
 | --- | --- | --- |
-| `/dashboard/users` | `Users` | `User directory is not wired up yet.` |
+| `/dashboard/users` | `Users` | `Users list is not wired up yet.` |
 | `/dashboard/coming-soon` | `Coming soon` | `Demo metrics land in a later ticket.` |
 
 - Do **not** use the RAD-62 Demo page subtitle or KPI / chart / table on the stub.
@@ -242,7 +242,7 @@ RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEM
 |--------|---------|
 | `app-sidebar` | App Global nav root |
 | `app-topbar` | App Global header |
-| `users-directory-table` | Users list table |
+| `users-list-table` | Users list table |
 | `users-load-more` | Load more control (UI ok; **not** required in E2E this map) |
 | `coming-soon-chart` | Demo page chart region |
 | `coming-soon-table` | Demo page table |
@@ -260,7 +260,7 @@ Nav labels, range buttons (`3m` / `30d` / `7d`), Avatar menu items, and existing
 | E | On `/dashboard`: `app-sidebar` + `app-topbar` visible; **public-site** Global nav + Global footer absent. |
 | F | Full Global nav tour: Dashboard → Users → Coming soon → Dashboard (URL + page landmark each hop). |
 | G | Avatar menu → Settings and Profile (URLs + landmarks); Settings/Profile are **not** Global nav links. |
-| H | Users list: `users-directory-table` visible; column headers First/Last/Email/Created at/Updated at; ≥1 data row. **Load more interaction not in E2E.** |
+| H | Users list: `users-list-table` visible; column headers First/Last/Email/Created at/Updated at; ≥1 data row. **Load more interaction not in E2E.** |
 | I | Demo page: title + subtitle; `coming-soon-chart` + `coming-soon-table`; toggle range to **30d**; one click `coming-soon-table-next`. |
 | J | Update-in-place existing authenticated coverage: Convex profile; session across **all five** App paths + home (`/dashboard` → `/dashboard/settings` → `/dashboard/profile` → `/dashboard/users` → `/dashboard/coming-soon` → `/`; URL + one landmark per hop); authenticated `/sign-up` → `/dashboard`; sign-out **via Avatar menu**. Scenario **D** stays distributed (setup login + authenticated proofs; no separate labeled D test). |
 
@@ -313,7 +313,7 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 **Do not (in RAD-82)**
 
 - Users page, Load more, Retry, toast, search/filter
-- E2E **H** (`users-directory-table`)
+- E2E **H** (`users-list-table`)
 - Rename `users.get` → `users.getById` (RAD-81) — **done in #25**
 - RBAC (RAD-69 / RAD-70)
 - `npx convex deploy` unless this is an intentional production deploy
@@ -321,7 +321,7 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 
 ## Build slice: RAD-78
 
-Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page) — Users list API + Users page.
+Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-list-api-and-dashboardusers-page) — Users list API + Users page.
 
 **Do**
 
@@ -331,7 +331,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 4. `users.list`: args `{ paginationOpts }` only; `updatedAt` desc; silent clamp `numItems` ≤ 100; returns `{ page, continueCursor, isDone }`.
 5. `users.getById`: args `{ userId }`; Listed user or `null` if missing. (Packed name was `get`; rename shipped in RAD-82.)
 6. Users page: one `useQuery` with `{ paginationOpts: { numItems: 25, cursor: null } }`. No Load more, no `users-load-more`.
-7. Table columns L→R: First name · Last name · Email · Created at · Updated at. Empty `"No users found"`. Error: inline server message, or `"Something went wrong"` if none. No Retry, no toast. Landmark `users-directory-table`. Dates: `dateStyle: "medium"`, `timeStyle: "short"`.
+7. Table columns L→R: First name · Last name · Email · Created at · Updated at. Empty `"No users found"`. Error: inline server message, or `"Something went wrong"` if none. No Retry, no toast. Landmark `users-list-table`. Dates: `dateStyle: "medium"`, `timeStyle: "short"`.
 8. Vitest: mapper / auth deny / clamp plus `convex-test` for `list` / `getById` — **on `main`**. This slice: Users page tests + E2E **H**. Quality gates: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 **Do not (in RAD-78)**
@@ -349,7 +349,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 5. ~~Delete top-level `app/settings/` and `app/profile/`~~ **Done on `main`** — **no** legacy redirects.
 6. ~~Add `lib/app-routes.ts`~~ **Done on `main`.** Keep `lib/auth-paths.ts` aligned with AuthKit public paths / proxy.
 7. ~~Schema + Convex: add `by_updatedAt` on `users`; implement `api.users.list` and `api.users.getById` in `convex/users.ts` per RAD-64 (Listed user + auth from RAD-60/61).~~ **Done on `main` (RAD-82, #25).**
-8. ~~Build Users page: first 25 rows via `useQuery` and `users-directory-table`; no Load more.~~ **Done on `main` (RAD-78, #23).**
+8. ~~Build Users page: first 25 rows via `useQuery` and `users-list-table`; no Load more.~~ **Done on `main` (RAD-78, #23).**
 9. Add `lib/coming-soon/` modules (default SaaS analytics + three code-swap modules); wire Demo page (KPI → chart → table) with testids and range/paging controls per RAD-62 / RAD-73.
 10. Wire Global nav IA + Avatar menu + breadcrumbs per RAD-66; brand **SaaS Starter Kit**; strip duplicate frame actions from page bodies.
 11. Preserve existing dashboard/settings/profile **body copy** inside the Content area (soft default).
@@ -388,7 +388,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
 - **Page copy (pack soft default):** preserve existing dashboard/settings/profile body copy inside the Content area; do not invent rewrites unless a later grill says otherwise.
 - **Lucide icons:** locked in RAD-77 (`LayoutDashboard` / `Users` / `Sparkles`).
 - **Demo page mock values:** build invents concrete arrays from the locked schema (RAD-62); do not invent alternate layouts or a runtime module switcher.
-- **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-directory-read-to-super-admin-or-manager) — outside this handoff.
+- **RBAC:** [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role), [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — outside this handoff.
 - **Users search/filter:** [RAD-72](https://linear.app/radi-dev/issue/RAD-72/users-list-searchfilter) — **shipped** (this build). E2E **H2** needs the live Convex deployment to include this PR’s `users.list` args (human `pnpm convex:dev` / CI `CONVEX_DEPLOY_KEY` + `pnpm convex:backfill-search-text`); until then H2 soft-skips when the deployment rejects `search`.
 - **RAD-71** canceled (cursor pagination absorbed into RAD-64).
 - **E2E deferred (do not invent for Acceptance):** Users Load more interaction; mobile Sheet / collapse; desktop Global nav collapse affordance; Demo page module-switching; `make e2e-prod` as Acceptance.
@@ -413,7 +413,7 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-directory-api-an
   - https://linear.app/radi-dev/issue/RAD-73/e2e-expectations-for-shell-build
   - https://linear.app/radi-dev/issue/RAD-77/ui-authenticated-sidebar-and-top-bar
   - https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist
-  - https://linear.app/radi-dev/issue/RAD-78/users-directory-api-and-dashboardusers-page
+  - https://linear.app/radi-dev/issue/RAD-78/users-list-api-and-dashboardusers-page
   - https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80
 - Format contract: [`docs/handoffs/CONTRACT.md`](./CONTRACT.md)
 - Glossary: [`CONTEXT.md`](../../CONTEXT.md)

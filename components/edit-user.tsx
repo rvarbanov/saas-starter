@@ -14,7 +14,7 @@ import { formatRoleLabels } from "@/lib/role-labels";
 export function EditUser({ userId: rawUserId }: { userId: string }) {
   if (!isConvexConfigured()) {
     return (
-      <div className="page-main" data-testid="edit-user-page">
+      <div className="content-area" data-testid="edit-user-page">
         <p className="text-caption">Convex is not configured; Edit User cannot load.</p>
       </div>
     );
@@ -29,7 +29,7 @@ export function EditUser({ userId: rawUserId }: { userId: string }) {
 
 function EditUserNotFound() {
   return (
-    <div className="page-main" data-testid="edit-user-page">
+    <div className="content-area" data-testid="edit-user-page">
       <h1 className="heading-page">User</h1>
       <p className="text-body" data-testid="edit-user-not-found">
         User not found
@@ -45,7 +45,7 @@ function EditUserInner({ userId }: { userId: Id<"users"> }) {
 
   if (!ready || user === undefined) {
     return (
-      <div className="page-main" data-testid="edit-user-page">
+      <div className="content-area" data-testid="edit-user-page">
         <p className="text-loading">Loading user…</p>
       </div>
     );
@@ -75,7 +75,7 @@ function EditUserForm({
   const names = namesForFormInputs(user);
 
   return (
-    <div className="page-main" data-testid="edit-user-page">
+    <div className="content-area" data-testid="edit-user-page">
       <UserForm
         cancelHref={userDetailPath(user._id)}
         email={user.email}

@@ -57,9 +57,9 @@ describe("UsersList", () => {
 
     expect(screen.getByTestId("create-user-entry")).toBeInTheDocument();
     expect(screen.getByTestId("create-user-entry")).toHaveAttribute("href", "/dashboard/users/new");
-    expect(screen.getByTestId("users-directory-toolbar")).toBeInTheDocument();
+    expect(screen.getByTestId("users-list-toolbar")).toBeInTheDocument();
     expect(screen.getByTestId("users-search-input")).toBeInTheDocument();
-    expect(screen.getByTestId("users-directory-table")).toBeInTheDocument();
+    expect(screen.getByTestId("users-list-table")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "First name" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Last name" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Email" })).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe("UsersList", () => {
 
     await renderUsersList();
 
-    const table = screen.getByTestId("users-directory-table");
+    const table = screen.getByTestId("users-list-table");
     expect(table).toHaveTextContent("Ada");
     expect(table).toHaveTextContent("Lovelace");
     expect(table).toHaveTextContent("ada@example.com");

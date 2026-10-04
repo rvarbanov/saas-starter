@@ -7,6 +7,8 @@ function globalNav(page: Page) {
 test.describe("global nav", () => {
   test("home page shows nav links with correct destinations", async ({ page }) => {
     await page.goto("/");
+    await expect(page.locator("main.page-main-centered")).toBeVisible();
+    await expect(page.locator(".content-area")).toHaveCount(0);
     const nav = globalNav(page);
     await expect(nav).toBeVisible();
     await expect(nav.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
@@ -33,6 +35,8 @@ test.describe("global nav", () => {
 test.describe("auth shell", () => {
   test("sign-in page explains email/password and offers continue control", async ({ page }) => {
     await page.goto("/sign-in");
+    await expect(page.locator("main.page-auth")).toBeVisible();
+    await expect(page.locator(".content-area")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: /^Sign in$/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Continue to sign in/i })).toBeVisible();
     await expect(page.getByRole("main").getByRole("link", { name: /^Sign up$/i })).toHaveAttribute(
