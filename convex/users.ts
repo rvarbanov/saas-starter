@@ -431,39 +431,3 @@ export const backfillSearchText = internalMutation({
     };
   },
 });
-
-/**
- * Unset the legacy combined `name` on every App user, including deleted rows.
- * Idempotent and batched. Run via `npx convex run users:stripStoredName` until `isDone`.
- * Remove `name` from the schema only after this has cleared the live deployment.
- */
-export const stripStoredName = internalMutation({
-  args: {
-    paginationOpts: paginationOptsValidator,
-  },
-  returns: v.object({
-    patched: v.number(),
-    continueCursor: v.string(),
-    isDone: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    const result = await ctx.db.query("users").paginate({
-      ...args.paginationOpts,
-      numItems: clampPaginationNumItems(args.paginationOpts.numItems),
-    });
-
-    let patched = 0;
-    for (const user of result.page) {
-      if (user.name !== undefined) {
-        await ctx.db.patch("users", user._id, { name: undefined });
-        patched += 1;
-      }
-    }
-
-    return {
-      patched,
-      continueCursor: result.continueCursor,
-      isDone: result.isDone,
-    };
-  },
-});
