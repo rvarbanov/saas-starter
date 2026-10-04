@@ -60,10 +60,6 @@ _Avoid_: Name, user name
 The App user's family name. Optional.
 _Avoid_: Name, user name
 
-**User name**:
-An App user's first name and last name shown as one label.
-_Avoid_: Name (as a separate stored value), display name, combined name
-
 **Create User**:
 The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
