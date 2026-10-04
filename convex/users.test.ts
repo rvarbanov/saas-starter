@@ -297,7 +297,6 @@ describe("users.patchUserDetailInternal", () => {
       _id: userId,
       firstName: "New",
       lastName: "Person",
-      name: "New Person",
       email: "new@example.com",
       roles: ["super_admin", "team_member"],
     });
@@ -322,7 +321,7 @@ describe("users.patchUserDetailInternal", () => {
 
     expect(updated.firstName).toBeUndefined();
     expect(updated.lastName).toBeUndefined();
-    expect(updated.name).toBeUndefined();
+    expect(updated).not.toHaveProperty("name");
     expect(updated.roles).toEqual(["manager"]);
   });
 });
@@ -380,7 +379,6 @@ describe("users.insertCreatedUser", () => {
       email: "new@example.com",
       firstName: "Ada",
       lastName: "Lovelace",
-      name: "Ada Lovelace",
       roles: [],
       workosUserId: "user_01created",
       tokenIdentifier: "https://example.test|user_01created",
@@ -398,7 +396,7 @@ describe("users.insertCreatedUser", () => {
 
     expect(created.firstName).toBeUndefined();
     expect(created.lastName).toBeUndefined();
-    expect(created.name).toBeUndefined();
+    expect(created).not.toHaveProperty("name");
     expect(created.roles).toEqual([]);
   });
 
@@ -604,5 +602,53 @@ describe("deleted App users are hidden", () => {
     });
 
     await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
+  });
+});
+
+describe("users.stripStoredName", () => {
+  it("unsets name on active and deleted users and leaves other fields", async () => {
+    const t = testClient();
+    const activeId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|active@example.com",
+        email: "active@example.com",
+        workosUserId: "user_active",
+        firstName: "Ada",
+        lastName: "Lovelace",
+        name: "Ada Lovelace",
+        roles: [],
+        searchText: "ada lovelace active@example.com",
+        createdAt: 1,
+        updatedAt: 1,
+      });
+    });
+    const deletedId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|deleted@example.com",
+        email: "deleted@example.com",
+        workosUserId: "user_deleted",
+        name: "Old Name",
+        roles: [],
+        searchText: "deleted@example.com",
+        deletedAt: 2,
+        createdAt: 1,
+        updatedAt: 2,
+      });
+    });
+
+    const result = await t.mutation(internal.users.stripStoredName, {
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result).toMatchObject({ patched: 2, isDone: true });
+    const active = await t.run(async (ctx) => await ctx.db.get("users", activeId));
+    const deleted = await t.run(async (ctx) => await ctx.db.get("users", deletedId));
+    expect(active?.name).toBeUndefined();
+    expect(active?.firstName).toBe("Ada");
+    expect(active?.lastName).toBe("Lovelace");
+    expect(deleted?.name).toBeUndefined();
+    expect(deleted?.deletedAt).toBe(2);
   });
 });

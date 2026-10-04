@@ -17,7 +17,10 @@ export default defineSchema({
     appUserId: v.string(),
     tokenIdentifier: v.string(),
     email: v.string(),
-    /** Convex-owned display name derived from firstName + lastName. */
+    /**
+     * Legacy combined name. Writers no longer set this.
+     * `users.stripStoredName` clears it. Remove this field after that run.
+     */
     name: v.optional(v.string()),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),

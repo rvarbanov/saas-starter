@@ -331,7 +331,6 @@ export const patchUserDetailInternal = internalMutation({
     await ctx.db.patch("users", args.userId, {
       firstName: normalizedNames.firstName,
       lastName: normalizedNames.lastName,
-      name: normalizedNames.name,
       email: normalizedEmail,
       searchText: buildSearchText({
         firstName: normalizedNames.firstName,
@@ -375,7 +374,6 @@ export const insertCreatedUser = internalMutation({
       workosUserId: args.workosUserId,
       ...(normalizedNames.firstName !== undefined ? { firstName: normalizedNames.firstName } : {}),
       ...(normalizedNames.lastName !== undefined ? { lastName: normalizedNames.lastName } : {}),
-      ...(normalizedNames.name !== undefined ? { name: normalizedNames.name } : {}),
       roles: [],
       searchText: buildSearchText({
         firstName: normalizedNames.firstName,
@@ -422,6 +420,42 @@ export const backfillSearchText = internalMutation({
       });
       if (user.searchText !== searchText) {
         await ctx.db.patch("users", user._id, { searchText });
+        patched += 1;
+      }
+    }
+
+    return {
+      patched,
+      continueCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
+  },
+});
+
+/**
+ * Unset the legacy combined `name` on every App user, including deleted rows.
+ * Idempotent and batched. Run via `npx convex run users:stripStoredName` until `isDone`.
+ * Remove `name` from the schema only after this has cleared the live deployment.
+ */
+export const stripStoredName = internalMutation({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: v.object({
+    patched: v.number(),
+    continueCursor: v.string(),
+    isDone: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const result = await ctx.db.query("users").paginate({
+      ...args.paginationOpts,
+      numItems: clampPaginationNumItems(args.paginationOpts.numItems),
+    });
+
+    let patched = 0;
+    for (const user of result.page) {
+      if (user.name !== undefined) {
+        await ctx.db.patch("users", user._id, { name: undefined });
         patched += 1;
       }
     }

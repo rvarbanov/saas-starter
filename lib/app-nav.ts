@@ -86,20 +86,15 @@ export function appBreadcrumbLeaf(pathname: string): string | null {
   return trail[trail.length - 1]?.label ?? null;
 }
 
-/** Leaf label for User detail: first+last → name → email → "User". */
+/** Leaf label for User detail: first+last → email → "User". */
 export function userDetailLeafLabel(user: {
   firstName?: string;
   lastName?: string;
-  name?: string;
   email?: string;
 }): string {
   const full = [user.firstName?.trim(), user.lastName?.trim()].filter(Boolean).join(" ");
   if (full) {
     return full;
-  }
-  const combined = user.name?.trim();
-  if (combined) {
-    return combined;
   }
   const email = user.email?.trim();
   if (email) {

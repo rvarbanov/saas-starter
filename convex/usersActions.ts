@@ -169,7 +169,6 @@ type PublicUserDoc = {
   appUserId: string;
   tokenIdentifier: string;
   email: string;
-  name?: string;
   firstName?: string;
   lastName?: string;
   workosUserId: string;

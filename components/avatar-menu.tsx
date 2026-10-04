@@ -27,12 +27,10 @@ export function AvatarMenu() {
   const name = avatarDisplayName({
     firstName: convexUser?.firstName,
     lastName: convexUser?.lastName,
-    name: convexUser?.name,
   });
   const initials = avatarInitials({
     firstName: convexUser?.firstName,
     lastName: convexUser?.lastName,
-    name: convexUser?.name,
     email,
   });
 

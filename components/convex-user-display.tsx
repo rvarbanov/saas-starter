@@ -39,11 +39,6 @@ function ConvexUserDisplayInner() {
         <span className="text-emphasis">App user id:</span>{" "}
         <code className="inline-code">{user.appUserId}</code>
       </p>
-      {user.name ? (
-        <p>
-          <span className="text-emphasis">Name:</span> {user.name}
-        </p>
-      ) : null}
     </div>
   );
 }

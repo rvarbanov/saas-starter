@@ -78,11 +78,10 @@ describe("userDetailPath / parseUserDetailId", () => {
 });
 
 describe("userDetailLeafLabel", () => {
-  it("prefers first+last, then name, then email", () => {
+  it("joins first and last, then email, then User", () => {
     expect(userDetailLeafLabel({ firstName: "Ada", lastName: "Lovelace", email: "a@b.c" })).toBe(
       "Ada Lovelace",
     );
-    expect(userDetailLeafLabel({ name: "Ada L", email: "a@b.c" })).toBe("Ada L");
     expect(userDetailLeafLabel({ email: "a@b.c" })).toBe("a@b.c");
     expect(userDetailLeafLabel({})).toBe("User");
   });
