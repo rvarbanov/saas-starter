@@ -49,8 +49,20 @@ The account menu. It opens from one control, in the app’s Global header. It ho
 _Avoid_: user menu, account dropdown, sidebar account
 
 **App user**:
-The one person in the product, owned by the app, whether they arrived through Auth workflow sign-up or Create User. WorkOS manages sign-in for that same person, and a session matches its App user by the identity on the session, never by email. Names, roles, and other product data live on the App user; WorkOS holds the sign-in email only.
+The one person in the product, owned by the app, whether they arrived through Auth workflow sign-up or Create User. WorkOS manages sign-in for that same person, and a session matches its App user by the identity on the session, never by email. First name, last name, roles, and other product data live on the App user; WorkOS holds the sign-in email only.
 _Avoid_: Auth user, WorkOS user, Convex user, directory, directory user, product directory, member, User (when you mean this), Pending App user, Create User (the pathway, not the person)
+
+**First name**:
+The App user's given name. Optional.
+_Avoid_: Name, user name
+
+**Last name**:
+The App user's family name. Optional.
+_Avoid_: Name, user name
+
+**User name**:
+An App user's first name and last name shown as one label.
+_Avoid_: Name (as a separate stored value), display name, combined name
 
 **Create User**:
 The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
@@ -69,7 +81,7 @@ The table of App users on the Users page.
 _Avoid_: Users directory, members, accounts, getMe, directory
 
 **Listed user**:
-The name, email, and dates shown for an App user in the Users list.
+The first name, last name, email, and dates shown for an App user in the Users list.
 _Avoid_: Directory DTO, DTO, user doc, profile, Auth user
 
 **User detail**:
