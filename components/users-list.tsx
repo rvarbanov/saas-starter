@@ -79,7 +79,8 @@ const COLUMN_WIDTH: Record<(typeof COLUMN_HEADERS)[number], string | undefined> 
 function UsersTableShell({ children }: { children: ReactNode }) {
   return (
     <div className="w-full" data-testid="users-list-table">
-      <Table className="table-fixed min-w-[64rem]">
+      {/* 64rem matches the column floors (8+8+12+10+13+13). table-fixed alone shrinks to the container. */}
+      <Table className="min-w-[64rem] table-fixed">
         <TableHeader>
           <TableRow>
             {COLUMN_HEADERS.map((header) => (

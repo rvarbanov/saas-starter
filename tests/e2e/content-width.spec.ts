@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { APP_ROUTES } from "../../lib/app-routes";
 
 const WIDE_VIEWPORT = { width: 1440, height: 900 };
@@ -35,14 +35,6 @@ async function expectSingleContentArea(page: Page) {
   await expect(page.locator(".page-main")).toHaveCount(0);
 }
 
-async function followLink(page: Page, link: Locator, url: RegExp) {
-  const href = await link.getAttribute("href");
-  expect(href).toBeTruthy();
-  await Promise.all([page.waitForURL(url, { timeout: 5_000 }), link.click()]).catch(async () => {
-    await page.goto(href ?? "", { waitUntil: "load" });
-  });
-}
-
 async function openUsersList(page: Page) {
   await page.goto(APP_ROUTES.users, { waitUntil: "load" });
   const row = usersTable(page).locator("tbody tr").first();
@@ -59,17 +51,13 @@ test("wide viewport: App pages use content-area", async ({ page }) => {
   }
 
   const row = await openUsersList(page);
-  await followLink(page, row.getByRole("link"), /\/dashboard\/users\/[^/]+$/);
+  await row.getByRole("link").click();
   const detail = page.getByTestId("user-detail-page");
   await expect(detail).toBeVisible();
   await expect(detail).toHaveClass(/content-area/);
   await expectSingleContentArea(page);
 
-  await followLink(
-    page,
-    detail.getByRole("link", { name: /^Edit$/i }),
-    /\/dashboard\/users\/[^/]+\/edit$/,
-  );
+  await page.getByRole("link", { name: /^Edit$/i }).click();
   const edit = page.getByTestId("edit-user-page");
   await expect(edit).toBeVisible();
   await expect(edit).toHaveClass(/content-area/);
