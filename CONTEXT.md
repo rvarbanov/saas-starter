@@ -99,11 +99,11 @@ A field of product data on a resource whose before and after an update Change re
 _Avoid_: Column, attribute, audit field
 
 **System**:
-The actor on a Change when a write changes a resource and no signed-in App user caused it.
+The actor on a Change when a process outside any user action changes a resource.
 _Avoid_: Admin, script, dashboard user, bot
 
 **Change**:
-The saved record of one create, update, or delete of a resource’s product data: the action, who caused it, and when. Who is the signed-in App user, or the system when no signed-in App user caused the write; an update also keeps the before and after of each tracked field that differs.
+The saved record of one create, update, or delete of a resource’s product data: the action, who caused it, and when. Who is the App user when a user action caused the write, and the system when a process outside any user action caused it; an update also keeps the before and after of each tracked field that differs.
 _Avoid_: Audit entry, audit log, activity, event
 
 **Changes**:
