@@ -12,7 +12,7 @@ export default async function ProfilePage() {
   await withAuth({ ensureSignedIn: true });
 
   return (
-    <div className="page-main">
+    <div className="content-area">
       <ProfileForm />
     </div>
   );

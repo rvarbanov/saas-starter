@@ -47,7 +47,7 @@ async function searchUsers(page: Page, email: string) {
   await search.fill(email);
   await expect(search).toHaveValue(email);
   await new Promise((resolve) => setTimeout(resolve, 450));
-  return page.getByTestId("users-directory-table").locator("tbody tr").filter({ hasText: email });
+  return page.getByTestId("users-list-table").locator("tbody tr").filter({ hasText: email });
 }
 
 test("W: create → list → detail → edit names → list → delete", async ({ page }) => {
