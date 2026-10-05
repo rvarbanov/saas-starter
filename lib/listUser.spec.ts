@@ -9,7 +9,6 @@ function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
     appUserId: "11111111-1111-4111-8111-111111111111",
     tokenIdentifier: "https://issuer|user_1",
     email: "ada@example.com",
-    name: "Ada Lovelace",
     firstName: "Ada",
     lastName: "Lovelace",
     workosUserId: "user_1",
@@ -21,7 +20,7 @@ function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
 }
 
 describe("toListUser", () => {
-  it("keeps Listed user fields including roles and omits identity-link fields and name", () => {
+  it("keeps Listed user fields including roles and omits identity-link fields", () => {
     expect(toListUser(fakeUser())).toEqual({
       _id: "jd7users000000000000000000",
       firstName: "Ada",
@@ -39,7 +38,6 @@ describe("toListUser", () => {
         fakeUser({
           firstName: undefined,
           lastName: undefined,
-          name: undefined,
           roles: undefined,
         }),
       ),

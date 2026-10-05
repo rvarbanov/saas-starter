@@ -331,7 +331,6 @@ export const patchUserDetailInternal = internalMutation({
     await ctx.db.patch("users", args.userId, {
       firstName: normalizedNames.firstName,
       lastName: normalizedNames.lastName,
-      name: normalizedNames.name,
       email: normalizedEmail,
       searchText: buildSearchText({
         firstName: normalizedNames.firstName,
@@ -375,7 +374,6 @@ export const insertCreatedUser = internalMutation({
       workosUserId: args.workosUserId,
       ...(normalizedNames.firstName !== undefined ? { firstName: normalizedNames.firstName } : {}),
       ...(normalizedNames.lastName !== undefined ? { lastName: normalizedNames.lastName } : {}),
-      ...(normalizedNames.name !== undefined ? { name: normalizedNames.name } : {}),
       roles: [],
       searchText: buildSearchText({
         firstName: normalizedNames.firstName,

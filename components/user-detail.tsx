@@ -33,7 +33,6 @@ type PublicUser = {
   appUserId: string;
   tokenIdentifier: string;
   email: string;
-  name?: string;
   firstName?: string;
   lastName?: string;
   workosUserId: string;
@@ -225,7 +224,6 @@ function UserDetailViewFields({ user }: { user: PublicUser }) {
       <Field label="First name" value={user.firstName ?? ""} />
       <Field label="Last name" value={user.lastName ?? ""} />
       <Field label="Email" value={user.email} />
-      <Field label="Name" value={user.name ?? ""} />
       <Field label="Roles" value={formatRoleLabels(user.roles)} />
       <Field label="App user id" value={user.appUserId} />
       <Field label="Token identifier" value={user.tokenIdentifier} />

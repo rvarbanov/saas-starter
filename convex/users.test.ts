@@ -297,7 +297,6 @@ describe("users.patchUserDetailInternal", () => {
       _id: userId,
       firstName: "New",
       lastName: "Person",
-      name: "New Person",
       email: "new@example.com",
       roles: ["super_admin", "team_member"],
     });
@@ -322,7 +321,7 @@ describe("users.patchUserDetailInternal", () => {
 
     expect(updated.firstName).toBeUndefined();
     expect(updated.lastName).toBeUndefined();
-    expect(updated.name).toBeUndefined();
+    expect(updated).not.toHaveProperty("name");
     expect(updated.roles).toEqual(["manager"]);
   });
 });
@@ -380,7 +379,6 @@ describe("users.insertCreatedUser", () => {
       email: "new@example.com",
       firstName: "Ada",
       lastName: "Lovelace",
-      name: "Ada Lovelace",
       roles: [],
       workosUserId: "user_01created",
       tokenIdentifier: "https://example.test|user_01created",
@@ -398,7 +396,7 @@ describe("users.insertCreatedUser", () => {
 
     expect(created.firstName).toBeUndefined();
     expect(created.lastName).toBeUndefined();
-    expect(created.name).toBeUndefined();
+    expect(created).not.toHaveProperty("name");
     expect(created.roles).toEqual([]);
   });
 

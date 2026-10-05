@@ -66,7 +66,6 @@ function EditUserForm({
     email: string;
     firstName?: string;
     lastName?: string;
-    name?: string;
     roles: Array<"super_admin" | "manager" | "team_member">;
   };
 }) {

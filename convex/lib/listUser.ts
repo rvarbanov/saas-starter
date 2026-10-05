@@ -20,7 +20,7 @@ export const listUsersPageValidator = v.object({
   isDone: v.boolean(),
 });
 
-/** Projection for the Users list — never identity-link fields or combined `name`. */
+/** Projection for the Users list — never identity-link fields. */
 export function toListUser(user: Doc<"users">): ListUser {
   const listUser: ListUser = {
     _id: user._id,

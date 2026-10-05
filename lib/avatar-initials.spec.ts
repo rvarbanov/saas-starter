@@ -6,10 +6,6 @@ describe("avatarInitials", () => {
     expect(avatarInitials({ firstName: "Ada", lastName: "Lovelace" })).toBe("AL");
   });
 
-  it("falls back to combined name", () => {
-    expect(avatarInitials({ name: "Ada Lovelace" })).toBe("AL");
-  });
-
   it("falls back to email local-part", () => {
     expect(avatarInitials({ email: "ada@example.com" })).toBe("A");
   });
