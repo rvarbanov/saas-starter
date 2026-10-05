@@ -1,6 +1,6 @@
 "use client";
 
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -18,6 +18,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { formatListedUserDate } from "@/components/users-list";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { CHANGES_PAGE_SIZE } from "@/convex/lib/pagination";
 import { isSuperAdmin, type Role } from "@/convex/lib/roles";
 import { userDetailLeafLabel } from "@/lib/app-nav";
 import { APP_ROUTES, userEditPath } from "@/lib/app-routes";
@@ -141,10 +142,69 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
         </Link>
       </div>
       <UserDetailViewFields user={user} />
+      <UserDetailChanges userId={user._id} />
       {me != null && isSuperAdmin(me.roles) && me._id !== user._id ? (
         <DeleteUserControl userId={user._id} />
       ) : null}
     </div>
+  );
+}
+
+const ACTION_LABELS = {
+  create: "Create",
+  update: "Update",
+  delete: "Delete",
+} as const;
+
+function UserDetailChanges({ userId }: { userId: Id<"users"> }) {
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.changes.listForAppUser,
+    { userId },
+    { initialNumItems: CHANGES_PAGE_SIZE },
+  );
+  const showEmpty = status !== "LoadingFirstPage" && results.length === 0;
+
+  return (
+    <section className="mt-8" data-testid="user-detail-changes">
+      <h2 className="heading-section">Changes</h2>
+      {showEmpty ? (
+        <p className="text-body mt-4" data-testid="user-detail-changes-empty">
+          No changes yet
+        </p>
+      ) : (
+        <ul className="mt-4 grid gap-4">
+          {results.map((change) => (
+            <li data-testid="user-detail-change" key={change._id}>
+              <p className="text-value">{ACTION_LABELS[change.action]}</p>
+              <p className="text-body">{change.actorLabel}</p>
+              <p className="text-caption">{formatListedUserDate(change.at)}</p>
+              {change.fields.length > 0 ? (
+                <ul className="mt-2 grid gap-1">
+                  {change.fields.map((field) => (
+                    <li className="text-body" key={field.label}>
+                      {field.label} {field.before} → {field.after}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      {status === "CanLoadMore" ? (
+        <Button
+          className="mt-4"
+          data-testid="user-detail-changes-load-older"
+          onClick={() => {
+            loadMore(CHANGES_PAGE_SIZE);
+          }}
+          type="button"
+          variant="outline"
+        >
+          Load older
+        </Button>
+      ) : null}
+    </section>
   );
 }
 

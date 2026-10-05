@@ -49,6 +49,7 @@ const chromiumProject = {
     /delete-user\.spec\.ts/,
     /edit-user\.spec\.ts/,
     /user-lifecycle\.spec\.ts/,
+    /changes\.spec\.ts/,
     /profile\.spec\.ts/,
     /content-width\.spec\.ts/,
   ],
@@ -61,7 +62,7 @@ const projects = [
   {
     name: "authenticated",
     testMatch:
-      /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts|dashboard-routes\.spec\.ts|shell\.spec\.ts|user-detail\.spec\.ts|create-user\.spec\.ts|delete-user\.spec\.ts|edit-user\.spec\.ts|user-lifecycle\.spec\.ts|profile\.spec\.ts|content-width\.spec\.ts/,
+      /auth-authenticated\.spec\.ts|dashboard-visual\.spec\.ts|dashboard-routes\.spec\.ts|shell\.spec\.ts|user-detail\.spec\.ts|create-user\.spec\.ts|delete-user\.spec\.ts|edit-user\.spec\.ts|user-lifecycle\.spec\.ts|changes\.spec\.ts|profile\.spec\.ts|content-width\.spec\.ts/,
     use: {
       ...devices["Desktop Chrome"],
       storageState: AUTH_STORAGE_PATH,

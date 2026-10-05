@@ -87,6 +87,8 @@ export const updateUser = action({
       throw new Error("Not authenticated");
     }
 
+    const actorUserId = await ctx.runQuery(internal.users.getCallerIdForAction, {});
+
     const user = await ctx.runQuery(internal.users.getUserByIdForAction, {
       userId: args.userId,
     });
@@ -131,6 +133,7 @@ export const updateUser = action({
         firstName: args.firstName,
         lastName: args.lastName,
         email: normalizedEmail,
+        actorUserId,
       });
     } catch (error) {
       if (!workOsLinked) {
@@ -194,6 +197,8 @@ export const createUser = action({
       throw new Error("Not authenticated");
     }
 
+    const actorUserId = await ctx.runQuery(internal.users.getCallerIdForAction, {});
+
     let normalizedEmail: string;
     let firstName: string | undefined;
     let lastName: string | undefined;
@@ -242,6 +247,7 @@ export const createUser = action({
         ...(lastName !== undefined ? { lastName } : {}),
         workosUserId,
         tokenIdentifier,
+        actorUserId,
       });
     } catch (error) {
       console.error("Create User Convex insert failed; rolling back WorkOS user", {
