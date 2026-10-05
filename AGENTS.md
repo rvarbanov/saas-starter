@@ -16,6 +16,12 @@ Convex agent skills for common tasks can be installed by running `npx convex ai-
 
 When implementing a Wayfinder destination from a prior grilling map, read [`docs/handoffs/CONTRACT.md`](docs/handoffs/CONTRACT.md). Execute only from a **`packed`** handoff under `docs/handoffs/` (not from Linear summaries alone).
 
+## Ship
+
+When a slice meets its acceptance bar, merge its pull request into `main`, then set that work's Linear issue status to **Done**.
+
+Done means the pull request is merged and the Linear issue status is Done.
+
 ## Cursor Cloud specific instructions
 
 Stack: single Next.js 16 app (`saas-starter`) + Convex backend + WorkOS AuthKit. Standard commands live in `package.json` scripts and the `Makefile`; the update script already runs `pnpm install`.
