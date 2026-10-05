@@ -24,7 +24,8 @@
     "typecheck": "tsc --noEmit",
     "convex:dev": "convex dev",
     "convex:codegen": "convex codegen",
-    "convex:backfill-search-text": "node scripts/convex-backfill-search-text.mjs"
+    "convex:backfill-search-text": "node scripts/convex-backfill-search-text.mjs",
+    "convex:strip-stored-name": "node scripts/convex-strip-stored-name.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
