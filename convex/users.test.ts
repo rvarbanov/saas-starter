@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { recordChange } from "./lib/changes";
 import { buildSearchText } from "./lib/searchText";
 import schema from "./schema";
 
@@ -291,6 +292,7 @@ describe("users.patchUserDetailInternal", () => {
       firstName: "New",
       lastName: "Person",
       email: "new@example.com",
+      actorUserId: userId,
     });
 
     expect(updated).toMatchObject({
@@ -317,6 +319,7 @@ describe("users.patchUserDetailInternal", () => {
       firstName: "  ",
       lastName: "",
       email: "target@example.com",
+      actorUserId: userId,
     });
 
     expect(updated.firstName).toBeUndefined();
@@ -367,12 +370,17 @@ describe("users.getMe + roles", () => {
 describe("users.insertCreatedUser", () => {
   it("inserts names, empty roles, and required Auth links", async () => {
     const t = testClient();
+    const actorUserId = await insertUser(t, {
+      email: "actor@example.com",
+      updatedAt: 1,
+    });
     const created = await t.mutation(internal.users.insertCreatedUser, {
       email: "New@Example.com",
       firstName: "Ada",
       lastName: "Lovelace",
       workosUserId: "user_01created",
       tokenIdentifier: "https://example.test|user_01created",
+      actorUserId,
     });
 
     expect(created).toMatchObject({
@@ -388,10 +396,15 @@ describe("users.insertCreatedUser", () => {
 
   it("stores omitted names as unset and roles as []", async () => {
     const t = testClient();
+    const actorUserId = await insertUser(t, {
+      email: "actor@example.com",
+      updatedAt: 1,
+    });
     const created = await t.mutation(internal.users.insertCreatedUser, {
       email: "bare@example.com",
       workosUserId: "user_01bare",
       tokenIdentifier: "https://example.test|user_01bare",
+      actorUserId,
     });
 
     expect(created.firstName).toBeUndefined();
@@ -402,13 +415,14 @@ describe("users.insertCreatedUser", () => {
 
   it("rejects duplicate emails", async () => {
     const t = testClient();
-    await insertUser(t, { email: "taken@example.com", updatedAt: 1 });
+    const actorUserId = await insertUser(t, { email: "taken@example.com", updatedAt: 1 });
 
     await expect(
       t.mutation(internal.users.insertCreatedUser, {
         email: "taken@example.com",
         workosUserId: "user_01dup",
         tokenIdentifier: "https://example.test|user_01dup",
+        actorUserId,
       }),
     ).rejects.toThrow("Email already registered");
   });
@@ -602,5 +616,307 @@ describe("deleted App users are hidden", () => {
     });
 
     await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
+  });
+});
+
+async function listChanges(
+  t: ReturnType<typeof convexTest>,
+  userId: Id<"users">,
+  cursor: string | null = null,
+) {
+  return await t.withIdentity(identity).query(api.changes.listForAppUser, {
+    userId,
+    paginationOpts: { numItems: 20, cursor },
+  });
+}
+
+describe("Changes recorded with App user writes", () => {
+  it("throws Not authenticated without a JWT", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, { email: "ada@example.com", updatedAt: 1 });
+    await expect(
+      t.query(api.changes.listForAppUser, {
+        userId,
+        paginationOpts: { numItems: 20, cursor: null },
+      }),
+    ).rejects.toThrow("Not authenticated");
+  });
+
+  it("records create from insertCreatedUser with the signed-in actor", async () => {
+    const t = testClient();
+    const actorUserId = await insertUser(t, {
+      email: "manager@example.com",
+      updatedAt: 1,
+      firstName: "Mina",
+      lastName: "Manager",
+    });
+
+    const created = await t.mutation(internal.users.insertCreatedUser, {
+      email: "new@example.com",
+      firstName: "Ada",
+      workosUserId: "user_01new",
+      tokenIdentifier: "https://example.test|user_01new",
+      actorUserId,
+    });
+
+    const changes = await listChanges(t, created._id);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "create",
+        actorLabel: "Mina Manager",
+        fields: [],
+      }),
+    ]);
+    expect(changes.isDone).toBe(true);
+  });
+
+  it("records nothing when an update changes no tracked field", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 1,
+      firstName: "Ada",
+      lastName: "Lovelace",
+    });
+
+    await t.mutation(internal.users.patchUserDetailInternal, {
+      userId,
+      firstName: "Ada",
+      lastName: "Lovelace",
+      email: "ada@example.com",
+      actorUserId: userId,
+    });
+
+    const changes = await listChanges(t, userId);
+    expect(changes.page).toEqual([]);
+    expect(changes.isDone).toBe(true);
+  });
+
+  it("records an email update with the caller as actor", async () => {
+    const t = testClient();
+    const actorUserId = await insertUser(t, {
+      email: "editor@example.com",
+      updatedAt: 1,
+      firstName: "Ed",
+      lastName: "Itor",
+    });
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 2,
+      firstName: "Ada",
+    });
+
+    await t.mutation(internal.users.patchUserDetailInternal, {
+      userId,
+      firstName: "Ada",
+      lastName: "",
+      email: "ADA-NEW@example.com",
+      actorUserId,
+    });
+
+    const changes = await listChanges(t, userId);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "update",
+        actorLabel: "Ed Itor",
+        fields: [{ label: "Email", before: "ada@example.com", after: "ada-new@example.com" }],
+      }),
+    ]);
+  });
+
+  it("records delete with the caller and the same timestamp as deletedAt", async () => {
+    const t = testClient();
+    await insertUser(t, {
+      email: "caller@example.com",
+      updatedAt: 10,
+      tokenIdentifier: "https://example.test|caller",
+      roles: ["super_admin"],
+      firstName: "Super",
+      lastName: "Admin",
+    });
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 1,
+      firstName: "Ada",
+    });
+
+    await t.withIdentity(identity).mutation(api.users.deleteUser, { userId });
+
+    const doc = await t.run(async (ctx) => {
+      return await ctx.db.get("users", userId);
+    });
+    const changes = await listChanges(t, userId);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "delete",
+        at: doc?.deletedAt,
+        actorLabel: "Super Admin",
+        fields: [],
+      }),
+    ]);
+    expect(doc?.updatedAt).toBe(doc?.deletedAt);
+  });
+
+  it("records an email change on sign-in and skips a token-only sign-in", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 1,
+      tokenIdentifier: "https://old-issuer.test|user_01ada",
+      workosUserId: "user_01ada",
+      firstName: "Ada",
+    });
+
+    await t.mutation(internal.users.upsertFromAuthProfile, {
+      tokenIdentifier: "https://example.test|user_01ada",
+      workosUserId: "user_01ada",
+      email: "ada@example.com",
+    });
+    expect((await listChanges(t, userId)).page).toEqual([]);
+
+    const doc = await t.run(async (ctx) => ctx.db.get("users", userId));
+    expect(doc?.tokenIdentifier).toBe("https://example.test|user_01ada");
+
+    await t.mutation(internal.users.upsertFromAuthProfile, {
+      tokenIdentifier: "https://example.test|user_01ada",
+      workosUserId: "user_01ada",
+      email: "renamed@example.com",
+    });
+
+    const changes = await listChanges(t, userId);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "update",
+        actorLabel: "Ada",
+        fields: [{ label: "Email", before: "ada@example.com", after: "renamed@example.com" }],
+      }),
+    ]);
+  });
+
+  it("records create for a first sign-in insert with the new App user as actor", async () => {
+    const t = testClient();
+    const result = await t.mutation(internal.users.upsertFromAuthProfile, {
+      tokenIdentifier: "https://example.test|user_01fresh",
+      workosUserId: "user_01fresh",
+      email: "Fresh@Example.com",
+    });
+
+    const changes = await listChanges(t, result._id);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "create",
+        actorLabel: "fresh@example.com",
+        fields: [],
+      }),
+    ]);
+  });
+
+  it("records setRoles as system when actorUserId is omitted", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 1,
+      roles: [],
+    });
+
+    await t.mutation(internal.users.setRoles, {
+      userId,
+      roles: ["manager"],
+    });
+
+    const changes = await listChanges(t, userId);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "update",
+        actorLabel: "System",
+        fields: [{ label: "Roles", before: "None", after: "Manager" }],
+      }),
+    ]);
+
+    await t.mutation(internal.users.setRoles, {
+      userId,
+      roles: ["manager"],
+    });
+    expect((await listChanges(t, userId)).page).toHaveLength(1);
+  });
+
+  it("records setRoles with the given actor and rejects a missing actor", async () => {
+    const t = testClient();
+    const actorUserId = await insertUser(t, {
+      email: "boss@example.com",
+      updatedAt: 1,
+      firstName: "Bo",
+      lastName: "Ss",
+    });
+    const userId = await insertUser(t, {
+      email: "ada@example.com",
+      updatedAt: 2,
+      roles: ["team_member"],
+    });
+    const missingActorId = await t.run(async (ctx) => {
+      const id = await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|missing-actor",
+        email: "missing-actor@example.com",
+        workosUserId: "missing-actor",
+        searchText: "missing-actor@example.com",
+        createdAt: 1,
+        updatedAt: 1,
+      });
+      await ctx.db.delete("users", id);
+      return id;
+    });
+
+    await expect(
+      t.mutation(internal.users.setRoles, {
+        userId,
+        roles: ["manager"],
+        actorUserId: missingActorId,
+      }),
+    ).rejects.toThrow("User not found");
+    expect((await listChanges(t, userId)).page).toEqual([]);
+
+    await t.mutation(internal.users.setRoles, {
+      userId,
+      roles: ["manager", "team_member"],
+      actorUserId,
+    });
+
+    const changes = await listChanges(t, userId);
+    expect(changes.page).toEqual([
+      expect.objectContaining({
+        action: "update",
+        actorLabel: "Bo Ss",
+        fields: [{ label: "Roles", before: "Team member", after: "Manager, Team member" }],
+      }),
+    ]);
+  });
+
+  it("returns the next page after 20 Changes", async () => {
+    const t = testClient();
+    const userId = await insertUser(t, { email: "ada@example.com", updatedAt: 1 });
+
+    await t.run(async (ctx) => {
+      for (let at = 1; at <= 21; at += 1) {
+        await recordChange(ctx, {
+          subjectId: userId,
+          action: "create",
+          actor: { kind: "system" },
+          at,
+          fields: [],
+        });
+      }
+    });
+
+    const first = await listChanges(t, userId);
+    expect(first.page).toHaveLength(20);
+    expect(first.isDone).toBe(false);
+    expect(first.page[0]?.at).toBe(21);
+    expect(first.page[19]?.at).toBe(2);
+
+    const second = await listChanges(t, userId, first.continueCursor);
+    expect(second.page).toHaveLength(1);
+    expect(second.page[0]?.at).toBe(1);
+    expect(second.isDone).toBe(true);
   });
 });

@@ -46,4 +46,28 @@ export default defineSchema({
     .searchIndex("search_text", {
       searchField: "searchText",
     }),
+  /**
+   * Append-only Change rows. One row per App user create, update, or delete.
+   * `subjectId` is the subject's `users` `_id`. System actors omit `actorUserId`.
+   */
+  changes: defineTable({
+    resourceKind: v.literal("app_user"),
+    subjectId: v.string(),
+    action: v.union(v.literal("create"), v.literal("update"), v.literal("delete")),
+    actorKind: v.union(v.literal("user"), v.literal("system")),
+    actorUserId: v.optional(v.id("users")),
+    at: v.number(),
+    fields: v.array(
+      v.object({
+        field: v.union(
+          v.literal("firstName"),
+          v.literal("lastName"),
+          v.literal("email"),
+          v.literal("roles"),
+        ),
+        before: v.union(v.string(), v.null()),
+        after: v.union(v.string(), v.null()),
+      }),
+    ),
+  }).index("by_subject_and_at", ["resourceKind", "subjectId", "at"]),
 });

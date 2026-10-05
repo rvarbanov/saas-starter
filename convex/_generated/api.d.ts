@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as changes from "../changes.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_changes from "../lib/changes.js";
 import type * as lib_email from "../lib/email.js";
 import type * as lib_identity from "../lib/identity.js";
 import type * as lib_listUser from "../lib/listUser.js";
@@ -32,7 +34,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  changes: typeof changes;
   "lib/auth": typeof lib_auth;
+  "lib/changes": typeof lib_changes;
   "lib/email": typeof lib_email;
   "lib/identity": typeof lib_identity;
   "lib/listUser": typeof lib_listUser;

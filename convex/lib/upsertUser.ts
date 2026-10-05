@@ -1,6 +1,7 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { getUserByTokenIdentifier } from "./auth";
+import { recordChange } from "./changes";
 import { buildSearchText } from "./searchText";
 import { assertEmailAvailable, normalizeEmail } from "./users";
 
@@ -81,6 +82,16 @@ async function patchAuthProfile(
     await ctx.db.patch("users", existing._id, updates);
   }
 
+  if (updates.email !== undefined) {
+    await recordChange(ctx, {
+      subjectId: existing._id,
+      action: "update",
+      actor: { kind: "user", userId: existing._id },
+      at: now,
+      fields: [{ field: "email", before: existing.email, after: updates.email }],
+    });
+  }
+
   return { _id: existing._id, appUserId: existing.appUserId };
 }
 
@@ -112,6 +123,14 @@ export async function upsertUserFromProfile(
     searchText: buildSearchText({ email }),
     createdAt: now,
     updatedAt: now,
+  });
+
+  await recordChange(ctx, {
+    subjectId: userId,
+    action: "create",
+    actor: { kind: "user", userId },
+    at: now,
+    fields: [],
   });
 
   return { _id: userId, appUserId };

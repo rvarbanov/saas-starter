@@ -9,6 +9,7 @@ import {
   query,
 } from "./_generated/server";
 import { getCurrentUser, getCurrentUserOrThrow, requireIdentity } from "./lib/auth";
+import { diffTrackedFields, recordChange } from "./lib/changes";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUsersPageValidator, toListUser } from "./lib/listUser";
@@ -244,6 +245,13 @@ export const deleteUser = mutation({
       deletedAt: now,
       updatedAt: now,
     });
+    await recordChange(ctx, {
+      subjectId: args.userId,
+      action: "delete",
+      actor: { kind: "user", userId: caller._id },
+      at: now,
+      fields: [],
+    });
     return null;
   },
 });
@@ -266,6 +274,7 @@ export const setRoles = internalMutation({
   args: {
     userId: v.id("users"),
     roles: rolesValidator,
+    actorUserId: v.optional(v.id("users")),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -274,10 +283,43 @@ export const setRoles = internalMutation({
       throw new Error("User not found");
     }
 
+    const actor =
+      args.actorUserId !== undefined
+        ? { kind: "user" as const, userId: args.actorUserId }
+        : { kind: "system" as const };
+    if (actor.kind === "user") {
+      const actorUser = await ctx.db.get("users", actor.userId);
+      if (!actorUser) {
+        throw new Error("User not found");
+      }
+    }
+
     const roles = uniqueRoles(args.roles);
+    const fields = diffTrackedFields(
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        roles: user.roles,
+      },
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        roles,
+      },
+    );
+    const now = Date.now();
     await ctx.db.patch("users", args.userId, {
       roles,
-      updatedAt: Date.now(),
+      updatedAt: now,
+    });
+    await recordChange(ctx, {
+      subjectId: args.userId,
+      action: "update",
+      actor,
+      at: now,
+      fields,
     });
     return null;
   },
@@ -292,6 +334,16 @@ export const normalizeEmailForAction = internalQuery({
   returns: v.string(),
   handler: async (ctx, args) => {
     return await assertEmailAvailable(ctx, args.email, args.excludeUserId);
+  },
+});
+
+/** Signed-in App user for actions that record a Change. The client never sends the actor. */
+export const getCallerIdForAction = internalQuery({
+  args: {},
+  returns: v.id("users"),
+  handler: async (ctx) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    return user._id;
   },
 });
 
@@ -317,6 +369,7 @@ export const patchUserDetailInternal = internalMutation({
     firstName: v.string(),
     lastName: v.string(),
     email: v.string(),
+    actorUserId: v.id("users"),
   },
   returns: userDocValidator,
   handler: async (ctx, args) => {
@@ -327,6 +380,21 @@ export const patchUserDetailInternal = internalMutation({
 
     const normalizedNames = normalizeNames(args.firstName, args.lastName);
     const normalizedEmail = await assertEmailAvailable(ctx, args.email, args.userId);
+    const fields = diffTrackedFields(
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        roles: user.roles,
+      },
+      {
+        firstName: normalizedNames.firstName,
+        lastName: normalizedNames.lastName,
+        email: normalizedEmail,
+        roles: user.roles,
+      },
+    );
+    const now = Date.now();
 
     await ctx.db.patch("users", args.userId, {
       firstName: normalizedNames.firstName,
@@ -337,7 +405,14 @@ export const patchUserDetailInternal = internalMutation({
         lastName: normalizedNames.lastName,
         email: normalizedEmail,
       }),
-      updatedAt: Date.now(),
+      updatedAt: now,
+    });
+    await recordChange(ctx, {
+      subjectId: args.userId,
+      action: "update",
+      actor: { kind: "user", userId: args.actorUserId },
+      at: now,
+      fields,
     });
 
     const updated = await ctx.db.get("users", args.userId);
@@ -359,6 +434,7 @@ export const insertCreatedUser = internalMutation({
     lastName: v.optional(v.string()),
     workosUserId: v.string(),
     tokenIdentifier: v.string(),
+    actorUserId: v.id("users"),
   },
   returns: userDocValidator,
   handler: async (ctx, args) => {
@@ -382,6 +458,14 @@ export const insertCreatedUser = internalMutation({
       }),
       createdAt: now,
       updatedAt: now,
+    });
+
+    await recordChange(ctx, {
+      subjectId: userId,
+      action: "create",
+      actor: { kind: "user", userId: args.actorUserId },
+      at: now,
+      fields: [],
     });
 
     const created = await ctx.db.get("users", userId);
