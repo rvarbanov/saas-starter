@@ -87,3 +87,25 @@ _Avoid_: User detail, Edit User, settings (Settings is a different page)
 **Demo page**:
 The Coming soon page — fake metrics and rows used to show the layout, not live product data.
 _Avoid_: Coming soon pack, demo data, live metrics, dashboard widgets
+
+## Changes
+
+**Action**:
+The kind of Change: create, update, or delete.
+_Avoid_: Event type, operation, verb
+
+**Tracked field**:
+A field of product data on a resource whose before and after an update Change records. Each resource names the fields left out of that before and after.
+_Avoid_: Column, attribute, audit field
+
+**System**:
+The actor on a Change when a process outside any user action changes a resource.
+_Avoid_: Admin, script, dashboard user, bot
+
+**Change**:
+The saved record of one create, update, or delete of a resource’s product data: the action, who caused it, and when. Who is the App user when a user action caused the write, and the system when a process outside any user action caused it; an update also keeps the before and after of each tracked field that differs.
+_Avoid_: Audit entry, audit log, activity, event
+
+**Changes**:
+The list of Change records for one resource, on that resource’s detail page, visible to whoever can see that page. For an App user, the detail page is User detail.
+_Avoid_: Change audit log, activity log, history
