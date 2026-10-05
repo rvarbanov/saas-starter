@@ -86,7 +86,6 @@ jobs:
           fi
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
-          pnpm convex:strip-stored-name
 
       - name: E2E tests
         run: pnpm test:e2e

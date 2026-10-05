@@ -17,12 +17,6 @@ export default defineSchema({
     appUserId: v.string(),
     tokenIdentifier: v.string(),
     email: v.string(),
-    /**
-     * Legacy combined name. Writers no longer set this.
-     * `users.stripStoredName` clears it after deploy. It stays optional so a
-     * row written by an older deploy still matches the schema.
-     */
-    name: v.optional(v.string()),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     workosUserId: v.string(),
