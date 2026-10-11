@@ -39,6 +39,12 @@
   },
   "overrides": [
     {
+      "includes": [".agents/**"],
+      "formatter": {
+        "enabled": false
+      }
+    },
+    {
       "includes": ["components/ui/chart.tsx"],
       "linter": {
         "rules": {
