@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** RAD-155, RAD-156, RAD-157
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md). The **Content area** is the page body inside the **App** frame. The public site and the **Auth workflow** are different surfaces and keep their own narrow classes.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md). The **Content area** is the page body inside the **App** frame. The public site and the **Auth workflow** are different surfaces and keep their own narrow classes.
 
 ## Destination
 

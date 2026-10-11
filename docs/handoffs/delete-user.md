@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** RAD-139, RAD-148, RAD-142, RAD-143, RAD-140, RAD-141, RAD-144, RAD-145, RAD-146, RAD-149, RAD-150, RAD-147
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **Delete user** is the Super admin pathway that marks an **App user** deleted without removing the record. A deleted App user is hidden from the **Users list**, and signing in again does not make them active. WorkOS still holds sign-in for that same person.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **Delete user** is the Super admin pathway that marks an **App user** deleted without removing the record. A deleted App user is hidden from the **Users list**, and signing in again does not make them active. WorkOS still holds sign-in for that same person.
 
 ## Destination
 

@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** RAD-129, RAD-130, RAD-131, RAD-132, RAD-133, RAD-134
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **Edit User**, **Create User**, **User detail**, **Profile**, **App user**, **Users list**. WorkOS manages sign-in for that App user; there is no second user kind.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **Edit User**, **Create User**, **User detail**, **Profile**, **App user**, **Users list**. WorkOS manages sign-in for that App user; there is no second user kind.
 
 ## Destination
 

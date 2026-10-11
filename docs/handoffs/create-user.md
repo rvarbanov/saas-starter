@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** RAD-118, RAD-125, RAD-119, RAD-120, RAD-121, RAD-122, RAD-123
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **Create User** (manager pathway) ≠ AuthKit self sign-up. **App user** / **Users list** / **User detail** (not Profile) as defined there. WorkOS manages sign-in for that App user; there is no second user kind.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **Create User** (manager pathway) ≠ AuthKit self sign-up. **App user** / **Users list** / **User detail** (not Profile) as defined there. WorkOS manages sign-in for that App user; there is no second user kind.
 
 ## Destination
 
