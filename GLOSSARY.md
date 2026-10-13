@@ -61,12 +61,24 @@ The App user's family name. Optional.
 _Avoid_: Name, user name
 
 **Create User**:
-The manager pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
+The User manager (or Administrator) pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
 **Delete user**:
-The Super admin pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
-_Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban
+The Administrator pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
+_Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban, Super admin pathway (legacy label)
+
+**Administrator**:
+The App user Role whose code is `ADM`. Holds every Action in the current catalog when that Action lists `ADM` (including Delete user).
+_Avoid_: Super admin, super_admin, admin (as the Role name)
+
+**User manager**:
+The App user Role whose code is `UMG`. Holds Users-domain Actions other than Delete user when those Actions list `UMG`.
+_Avoid_: Manager, manager, team manager
+
+**Role code**:
+The short string stored on the App user’s `roles` array (`ADM`, `UMG`). The UI shows the Role description, not the code alone.
+_Avoid_: Role slug as the only name, permission, capability
 
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An App user who has signed out is a Visitor until they sign in again.
