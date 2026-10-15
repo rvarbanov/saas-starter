@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** none — grilled in one session and packed directly
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **Change**, **Changes**, **Action**, **Tracked field**, **System**, **App user**, **User detail**, **Create User**, **Edit User**, **Profile**, **Delete user**.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **Change**, **Changes**, **Action**, **Tracked field**, **System**, **App user**, **User detail**, **Create User**, **Edit User**, **Profile**, **Delete user**.
 
 ## Destination
 
@@ -177,5 +177,5 @@ Create User with a unique email and a first name. Open that User detail. Changes
 
 - Map: https://linear.app/radi-dev/issue/RAD-161/wayfinder-changes-handoff
 - Children: none
-- Glossary: `CONTEXT.md`
+- Glossary: `GLOSSARY.md`
 - Contract: `docs/handoffs/CONTRACT.md`

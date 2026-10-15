@@ -1,6 +1,6 @@
 # Authenticated dashboard shell
 
-This packed file is the **App** frame handoff. The filename and map title stay (Linear); the product name is **App**, not “authenticated shell.” Language follows [`CONTEXT.md`](../../CONTEXT.md).
+This packed file is the **App** frame handoff. The filename and map title stay (Linear); the product name is **App**, not “authenticated shell.” Language follows [`GLOSSARY.md`](../../GLOSSARY.md).
 
 - **Map:** https://linear.app/radi-dev/issue/RAD-59/wayfinder-authenticated-dashboard-shell-handoff
 - **Packed:** 2026-08-14
@@ -97,7 +97,7 @@ Renamed to `getById` on `main` in [#25](https://github.com/rvarbanov/saas-starte
 
 ### Convex Users list API land-and-push (RAD-82)
 
-Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist). Language: **App user** / **Listed user** / **Users list** per [`CONTEXT.md`](../../CONTEXT.md). WorkOS manages sign-in; it is not a second user.
+Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-deploy-apiuserslist). Language: **App user** / **Listed user** / **Users list** per [`GLOSSARY.md`](../../GLOSSARY.md). WorkOS manages sign-in; it is not a second user.
 
 - **Owns:** checklist item 7 — schema index `by_updatedAt`; `api.users.list` and `api.users.getById` in `convex/users.ts`; helpers; unit + `convex-test`. Land `list` and `getById` in the **same** PR. **Done on `main` (#25).**
 - **Does not own:** Users page UI, Load more, Retry, E2E **H** (RAD-78 / checklist item 8).
@@ -152,7 +152,7 @@ Ticket: [RAD-82](https://linear.app/radi-dev/issue/RAD-82/convex-implement-and-d
 
 ### App Global header and Global nav leftovers (RAD-77)
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md). The signed-in product is the **App**. Its frame is the app **Global header** + **Global nav** (sidebar-shaped) + **Global footer** + **Content area**. Do not use “authenticated shell,” “public chrome,” or “top bar” as product names. Landmarks `data-testid="app-sidebar"` (Global nav root) and `data-testid="app-topbar"` (Global header) stay as implementation testids.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md). The signed-in product is the **App**. Its frame is the app **Global header** + **Global nav** (sidebar-shaped) + **Global footer** + **Content area**. Do not use “authenticated shell,” “public chrome,” or “top bar” as product names. Landmarks `data-testid="app-sidebar"` (Global nav root) and `data-testid="app-topbar"` (Global header) stay as implementation testids.
 
 RAD-66 IA stays locked. Packed IA wins over [`docs/IMPLEMENTATION.md`](../IMPLEMENTATION.md) (no Work / Team / Admin rows).
 
@@ -416,4 +416,4 @@ Ticket: [RAD-78](https://linear.app/radi-dev/issue/RAD-78/users-list-api-and-das
   - https://linear.app/radi-dev/issue/RAD-78/users-list-api-and-dashboardusers-page
   - https://linear.app/radi-dev/issue/RAD-83/grill-fill-app-session-e2e-path-gaps-post-rad-80
 - Format contract: [`docs/handoffs/CONTRACT.md`](./CONTRACT.md)
-- Glossary: [`CONTEXT.md`](../../CONTEXT.md)
+- Glossary: [`GLOSSARY.md`](../../GLOSSARY.md)

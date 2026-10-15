@@ -1,6 +1,6 @@
 # Research: WorkOS update email for another App user
 
-> Language: this note used to say “Auth user” for the WorkOS sign-in of an App user. The product has one user kind. See [`CONTEXT.md`](../../CONTEXT.md) and [ADR 0002](../adr/0002-one-app-user-workos-manages-sign-in.md).
+> Language: this note used to say “Auth user” for the WorkOS sign-in of an App user. The product has one user kind. See [`GLOSSARY.md`](../../GLOSSARY.md) and [ADR 0002](../adr/0002-one-app-user-workos-manages-sign-in.md).
 
 **Ticket:** [RAD-87](https://linear.app/radi-dev/issue/RAD-87/research-workos-update-email-for-another-auth-user)  
 **Parent map:** [RAD-86](https://linear.app/radi-dev/issue/RAD-86/wayfinder-user-detail-handoff) (User detail handoff)  

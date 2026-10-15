@@ -1,6 +1,6 @@
 # Research: WorkOS delete the sign-in for an App user
 
-> Language: the ticket says “Auth user.” The product has one user kind, the App user. WorkOS holds that person’s sign-in (`workosUserId`). See [`CONTEXT.md`](../../CONTEXT.md) and [ADR 0002](../adr/0002-one-app-user-workos-manages-sign-in.md). This note does not decide what **Delete user** removes.
+> Language: the ticket says “Auth user.” The product has one user kind, the App user. WorkOS holds that person’s sign-in (`workosUserId`). See [`GLOSSARY.md`](../../GLOSSARY.md) and [ADR 0002](../adr/0002-one-app-user-workos-manages-sign-in.md). This note does not decide what **Delete user** removes.
 
 **Ticket:** [RAD-139](https://linear.app/radi-dev/issue/RAD-139/research-workos-delete-an-auth-user)  
 **Parent map:** [RAD-138](https://linear.app/radi-dev/issue/RAD-138/wayfinder-delete-user-handoff) (Wayfinder: Delete user handoff)  
@@ -273,4 +273,4 @@ Facts that make a single Convex action unsafe if it is treated as atomic. This s
 - `app/sign-out/route.ts` — AuthKit `signOut`
 - `lib/sign-out-client.ts` — Avatar menu navigates to `/sign-out`
 - `docs/adr/0002-one-app-user-workos-manages-sign-in.md`
-- `CONTEXT.md`
+- `GLOSSARY.md`

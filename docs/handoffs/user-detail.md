@@ -5,7 +5,7 @@
 - **Status:** superseded — in-place edit is replaced by [`user-edit.md`](./user-edit.md). Do not delete this file. View behavior that `user-edit.md` does not replace is still described here.
 - **Source children:** RAD-87, RAD-88, RAD-91, RAD-92, RAD-89, RAD-93, RAD-90, RAD-94, RAD-95
 
-Language follows [`CONTEXT.md`](../../CONTEXT.md): **User detail** (manager path from Users list) ≠ **Profile** (self, Avatar menu). **App user** / **Listed user** / **Users list** as defined there.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **User detail** (manager path from Users list) ≠ **Profile** (self, Avatar menu). **App user** / **Listed user** / **Users list** as defined there.
 
 ## Destination
 
