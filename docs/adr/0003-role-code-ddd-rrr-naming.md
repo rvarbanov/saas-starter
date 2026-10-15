@@ -42,10 +42,12 @@ decide what a Role may do. Codes are uppercase, seven characters: a three-charac
 ## Consequences
 
 - New Roles follow `DDD_RRR` unless an explicit exception is recorded.
-- Existing codes stay as-is until a **separate migration** updates storage,
-  catalogs, tests, and labels. This ADR alone does not rename anything.
-- Access enforcement MVP 1 currently uses foundational codes `ADM` (Administrator)
-  and `UMG` (User manager) locked on the Access enforcement Wayfinder map. Those
-  remain valid **exceptions** until migration (candidate shapes: `USR_ADM`,
-  `USR_MGR` — not decided here).
+- Other pre-convention codes stay as-is until a **separate migration** updates
+  storage, catalogs, tests, and labels. This ADR alone does not rename those.
+- Access enforcement MVP 1 Role codes are `USR_ADM` (Administrator) and
+  `USR_MGR` (User manager) — not foundational exceptions. Legacy map in that
+  build: `super_admin` → `USR_ADM`, `manager` → `USR_MGR`. Locked on
+  [Foundational role codes vs DDD_RRR migration](https://linear.app/radi-dev/issue/RAD-179).
+- `team_member` remains a temporary stored exception until its cleanup ticket;
+  it is not a Users catalog Role.
 - Catalog sentinel `ANY` is not a Role code and is unchanged by this convention.

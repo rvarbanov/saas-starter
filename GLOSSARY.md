@@ -69,16 +69,16 @@ The Administrator pathway that marks an App user deleted without removing the re
 _Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban, Super admin pathway (legacy label)
 
 **Administrator**:
-The App user Role whose code is `ADM`. Holds every Action in the current catalog when that Action lists `ADM` (including Delete user).
-_Avoid_: Super admin, super_admin, admin (as the Role name)
+The App user Role whose code is `USR_ADM`. Holds every Action in the current catalog when that Action lists `USR_ADM` (including Delete user).
+_Avoid_: Super admin, super_admin, admin (as the Role name), ADM, UMG
 
 **User manager**:
-The App user Role whose code is `UMG`. Holds Users-domain Actions other than Delete user when those Actions list `UMG`.
-_Avoid_: Manager, manager, team manager
+The App user Role whose code is `USR_MGR`. Holds Users-domain Actions other than Delete user when those Actions list `USR_MGR`.
+_Avoid_: Manager, manager, team manager, UMG, ADM
 
 **Role code**:
-The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md`. Access enforcement currently uses foundational codes `ADM` and `UMG` as documented exceptions until a migration. The UI shows the Role description, not the code alone.
-_Avoid_: Role slug as the only name, permission, capability, treating the code as an access level
+The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md`. Access enforcement uses `USR_ADM` (Administrator) and `USR_MGR` (User manager). Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
+_Avoid_: Role slug as the only name, permission, capability, treating the code as an access level, ADM, UMG
 
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An App user who has signed out is a Visitor until they sign in again.
