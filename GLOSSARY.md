@@ -68,16 +68,32 @@ _Avoid_: Invite user (as the name for this page), register, add member, Auth use
 The Administrator pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
 _Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban, Super admin pathway (legacy label)
 
+**Domain** (Role naming):
+The product area a Role belongs to — the three-letter prefix in a Role code (`USR`, `FSC`, and so on). Not an org unit or tenant.
+_Avoid_: Team, organization, scope (when you mean this), permission domain
+
+**Domain admin**:
+The Admin responsibility for one Domain — Role code suffix `ADM`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix.
+_Avoid_: Administrator (when you mean a non-Users Domain admin), Super admin, admin (alone), treating `ADM` as an access level
+
+**Domain manager**:
+The Manager responsibility for one Domain — Role code suffix `MGR`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix.
+_Avoid_: Manager (alone), team manager, User manager (when you mean a non-Users Domain manager), treating `MGR` as an access level
+
+**Domain viewer**:
+The Viewer responsibility for one Domain — Role code suffix `VWR`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix. Access enforcement does not yet ship a Users Domain viewer.
+_Avoid_: Viewer (alone), read-only user, team member (as this responsibility), treating `VWR` as an access level
+
 **Administrator**:
-The App user Role whose code is `USR_ADM`. Holds every Action in the current catalog when that Action lists `USR_ADM` (including Delete user).
-_Avoid_: Super admin, super_admin, admin (as the Role name), ADM, UMG
+The Users Domain admin — Role code `USR_ADM`. Holds every Action in the current catalog when that Action lists `USR_ADM` (including Delete user).
+_Avoid_: Super admin, super_admin, admin (as the Role name), ADM, UMG, Domain admin (when you mean this specific Role)
 
 **User manager**:
-The App user Role whose code is `USR_MGR`. Holds Users-domain Actions other than Delete user when those Actions list `USR_MGR`.
-_Avoid_: Manager, manager, team manager, UMG, ADM
+The Users Domain manager — Role code `USR_MGR`. Holds Users-domain Actions other than Delete user when those Actions list `USR_MGR`.
+_Avoid_: Manager, manager, team manager, UMG, ADM, Domain manager (when you mean this specific Role)
 
 **Role code**:
-The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md`. Access enforcement uses `USR_ADM` (Administrator) and `USR_MGR` (User manager). Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
+The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement uses `USR_ADM` (Administrator) and `USR_MGR` (User manager). Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
 _Avoid_: Role slug as the only name, permission, capability, treating the code as an access level, ADM, UMG
 
 **Visitor**:
