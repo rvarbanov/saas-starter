@@ -77,8 +77,8 @@ The App user Role whose code is `UMG`. Holds Users-domain Actions other than Del
 _Avoid_: Manager, manager, team manager
 
 **Role code**:
-The short string stored on the App user’s `roles` array (`ADM`, `UMG`). The UI shows the Role description, not the code alone.
-_Avoid_: Role slug as the only name, permission, capability
+The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md`. Access enforcement currently uses foundational codes `ADM` and `UMG` as documented exceptions until a migration. The UI shows the Role description, not the code alone.
+_Avoid_: Role slug as the only name, permission, capability, treating the code as an access level
 
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An App user who has signed out is a Visitor until they sign in again.
