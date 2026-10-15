@@ -16,7 +16,8 @@ export async function signInViaWorkOs(
   await page.getByLabel(/email/i).fill(email);
   await page.getByRole("button", { name: /continue/i }).click();
 
-  const passwordField = page.getByLabel(/password/i);
+  // Prefer role over getByLabel: WorkOS also exposes aria-label="Show password".
+  const passwordField = page.getByRole("textbox", { name: /password/i });
   await expect(passwordField).toBeVisible({ timeout: 15_000 });
   await passwordField.fill(password);
   await page.getByRole("button", { name: /sign in|log in/i }).click();
