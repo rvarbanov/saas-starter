@@ -96,6 +96,18 @@ _Avoid_: Manager, manager, team manager, UMG, ADM, Domain manager (when you mean
 The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement uses `USR_ADM` (Administrator) and `USR_MGR` (User manager). Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
 _Avoid_: Role slug as the only name, permission, capability, treating the code as an access level, ADM, UMG
 
+**Role**:
+A named set of Actions an App user may hold, identified by its Role code on the App user’s `roles` array. In Access enforcement MVP 1 the seed Roles are Administrator and User manager; the catalog maps each Action to Role codes (or ANY). Not a separate grant table yet.
+_Avoid_: Permission, capability, grant (as this concept), ACL
+
+**Action**:
+A code-defined allow-or-deny check in the access catalog, named as a Domain plus a verb (for example `users` + `delete`, consulted as `can({ domain, action })`). Distinct from Change kind.
+_Avoid_: Permission, capability, grant, privilege, Change kind (when you mean this)
+
+**ANY**:
+The catalog sentinel that means every provisioned App user. Used on Profile Actions such as `self.read` / `self.write`. Not a Role code and not stored on the App user’s `roles` array.
+_Avoid_: Wildcard role, everyone role, public, anonymous, storing ANY on `roles`
+
 **Visitor**:
 Someone who is not signed in right now. They can only use the Public site. An App user who has signed out is a Visitor until they sign in again.
 _Avoid_: anonymous user, guest, public user, Auth user
@@ -126,9 +138,9 @@ _Avoid_: Coming soon pack, demo data, live metrics, dashboard widgets
 
 ## Changes
 
-**Action**:
-The kind of Change: create, update, or delete.
-_Avoid_: Event type, operation, verb
+**Change kind**:
+Whether a Change is a create, update, or delete.
+_Avoid_: Action (when you mean this — Action is the access-catalog term), Event type, operation, verb
 
 **Tracked field**:
 A field of product data on a resource whose before and after an update Change records. Each resource names the fields left out of that before and after.
@@ -139,7 +151,7 @@ The actor on a Change when a process outside any user action changes a resource.
 _Avoid_: Admin, script, dashboard user, bot
 
 **Change**:
-The saved record of one create, update, or delete of a resource’s product data: the action, who caused it, and when. Who is the App user when a user action caused the write, and the system when a process outside any user action caused it; an update also keeps the before and after of each tracked field that differs.
+The saved record of one create, update, or delete of a resource’s product data: the Change kind, who caused it, and when. Who is the App user when a user action caused the write, and the system when a process outside any user action caused it; an update also keeps the before and after of each tracked field that differs.
 _Avoid_: Audit entry, audit log, activity, event
 
 **Changes**:
