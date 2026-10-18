@@ -5,7 +5,7 @@
 - **Status:** packed
 - **Source children:** none — grilled in one session and packed directly
 
-Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **Change**, **Changes**, **Action**, **Tracked field**, **System**, **App user**, **User detail**, **Create User**, **Edit User**, **Profile**, **Delete user**.
+Language follows [`GLOSSARY.md`](../../GLOSSARY.md): **Change**, **Changes**, **Change kind**, **Tracked field**, **System**, **App user**, **User detail**, **Create User**, **Edit User**, **Profile**, **Delete user**.
 
 ## Destination
 
@@ -65,7 +65,7 @@ Stored field values:
 
 ### Which App user writes record a Change
 
-| Write | Where | Action | Actor |
+| Write | Where | Change kind | Actor |
 | --- | --- | --- | --- |
 | Create User insert | `insertCreatedUser` in `convex/users.ts` | `create` | Signed-in caller, passed from `createUser` in `convex/usersActions.ts` |
 | First sign-in insert | `upsertUserFromProfile` in `convex/lib/upsertUser.ts` | `create` | The new App user |
