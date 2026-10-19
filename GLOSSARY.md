@@ -61,43 +61,51 @@ The App user's family name. Optional.
 _Avoid_: Name, user name
 
 **Create User**:
-The User manager (or Administrator) pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
+The Users manager, Users admin, or System admin pathway to create an App user from the Users list — email required; other editable fields optional. WorkOS sign-in is created for that same App user; invite / set-password email is a separate step. Pairs with Edit User (the two manager write pages).
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
 **Delete user**:
-The Administrator pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
-_Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban, Super admin pathway (legacy label)
+The Users admin or System admin pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
+_Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban, Super admin pathway (legacy label), Administrator pathway (legacy label)
 
 **Domain** (Role naming):
-The product area a Role belongs to — the three-letter prefix in a Role code (`USR`, `FSC`, and so on). Not an org unit or tenant.
+The product area a Role belongs to — the three-letter prefix in a Role code (`USR`, `FSC`, `SYS`, and so on). Not an org unit or tenant.
 _Avoid_: Team, organization, scope (when you mean this), permission domain
 
 **Domain admin**:
 The Admin responsibility for one Domain — Role code suffix `ADM`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix.
-_Avoid_: Administrator (when you mean a non-Users Domain admin), Super admin, admin (alone), treating `ADM` as an access level
+_Avoid_: Users admin (when you mean a non-Users Domain admin), System admin, Super admin, admin (alone), treating `ADM` as an access level
 
 **Domain manager**:
 The Manager responsibility for one Domain — Role code suffix `MGR`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix.
-_Avoid_: Manager (alone), team manager, User manager (when you mean a non-Users Domain manager), treating `MGR` as an access level
+_Avoid_: Manager (alone), team manager, Users manager (when you mean a non-Users Domain manager), treating `MGR` as an access level
 
 **Domain viewer**:
-The Viewer responsibility for one Domain — Role code suffix `VWR`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix. Access enforcement does not yet ship a Users Domain viewer.
-_Avoid_: Viewer (alone), read-only user, team member (as this responsibility), treating `VWR` as an access level
+The Viewer responsibility for one Domain — Role code suffix `VWR`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix.
+_Avoid_: Viewer (alone), Users viewer (when you mean a non-Users Domain viewer), read-only user, team member (as this responsibility), treating `VWR` as an access level
 
-**Administrator**:
-The Users Domain admin — Role code `USR_ADM`. Holds every Action in the current catalog when that Action lists `USR_ADM` (including Delete user).
-_Avoid_: Super admin, super_admin, admin (as the Role name), ADM, UMG, Domain admin (when you mean this specific Role)
+**System admin**:
+The cross-Domain admin — Role code `SYS_ADM`. Holds every Action the catalog lists for it (expected: all Actions across Domains). Listed explicitly on each Action allow-list; not a silent wildcard. Successor to the legacy Super admin / `super_admin` seed.
+_Avoid_: Super admin, super_admin, Administrator, Users admin, admin (alone), god mode (as a product term), treating `SYS` as a tenant
 
-**User manager**:
-The Users Domain manager — Role code `USR_MGR`. Holds Users-domain Actions other than Delete user when those Actions list `USR_MGR`.
-_Avoid_: Manager, manager, team manager, UMG, ADM, Domain manager (when you mean this specific Role)
+**Users admin**:
+The Users Domain admin — Role code `USR_ADM`. Holds Users Domain Actions when those Actions list `USR_ADM` (including Delete user). A Domain-scoped admin subset of what System admin can do; not cross-Domain.
+_Avoid_: Administrator, Super admin, System admin, admin (as the Role name), ADM, Domain admin (when you mean this specific Role)
+
+**Users manager**:
+The Users Domain manager — Role code `USR_MGR`. Holds Users Domain Actions other than Delete user when those Actions list `USR_MGR`.
+_Avoid_: User manager, Manager, manager, team manager, UMG, ADM, Domain manager (when you mean this specific Role)
+
+**Users viewer**:
+The Users Domain viewer — Role code `USR_VWR`. Holds Users Domain read/list Actions when those Actions list `USR_VWR` (exact allow-list locked with the Access enforcement catalog expansion). Cannot create, update, or delete Users.
+_Avoid_: Viewer (alone), team member (as this Role), read-only user, Domain viewer (when you mean this specific Role)
 
 **Role code**:
-The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement uses `USR_ADM` (Administrator) and `USR_MGR` (User manager). Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
+The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement MVP 1 seed Roles: `SYS_ADM` (System admin), `USR_ADM` (Users admin), `USR_MGR` (Users manager), `USR_VWR` (Users viewer). Legacy map: `super_admin` → `SYS_ADM`, `manager` → `USR_MGR`. Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
 _Avoid_: Role slug as the only name, permission, capability, treating the code as an access level, ADM, UMG
 
 **Role**:
-A named set of Actions an App user may hold, identified by its Role code on the App user’s `roles` array. In Access enforcement MVP 1 the seed Roles are Administrator and User manager; the catalog maps each Action to Role codes (or ANY). Not a separate grant table yet.
+A named set of Actions an App user may hold, identified by its Role code on the App user’s `roles` array. In Access enforcement MVP 1 the seed Roles are System admin, Users admin, Users manager, and Users viewer; the catalog maps each Action to Role codes (or ANY). Not a separate grant table yet.
 _Avoid_: Permission, capability, grant (as this concept), ACL
 
 **Action**:
@@ -147,8 +155,8 @@ A field of product data on a resource whose before and after an update Change re
 _Avoid_: Column, attribute, audit field
 
 **System**:
-The actor on a Change when a process outside any user action changes a resource.
-_Avoid_: Admin, script, dashboard user, bot
+The actor on a Change when a process outside any user action changes a resource. A future Role code `SYS_SYS` may name this actor explicitly; deferred past Access enforcement MVP 1.
+_Avoid_: Admin, script, dashboard user, bot, SYS_ADM (when you mean the automated Change actor)
 
 **Change**:
 The saved record of one create, update, or delete of a resource’s product data: the Change kind, who caused it, and when. Who is the App user when a user action caused the write, and the system when a process outside any user action caused it; an update also keeps the before and after of each tracked field that differs.
