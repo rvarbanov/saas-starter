@@ -65,7 +65,7 @@ The Users manager, Users admin, or System admin pathway to create an App user fr
 _Avoid_: Invite user (as the name for this page), register, add member, Auth user, a different kind of user than App user
 
 **Delete user**:
-The Users admin or System admin pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active.
+The Users admin or System admin pathway that marks an App user deleted without removing the record. A deleted App user is hidden from the Users list, and signing in again does not make them active. An App user who still holds System admin (`SYS_ADM`) cannot be deleted until that Role is removed first (ops / internal seed path in Access enforcement MVP 1).
 _Avoid_: Hard delete, destroy, purge, remove user, deactivate, disable, archive, ban, Super admin pathway (legacy label), Administrator pathway (legacy label)
 
 **Domain** (Role naming):
@@ -89,15 +89,15 @@ The cross-Domain admin — Role code `SYS_ADM`. Holds every Action the catalog l
 _Avoid_: Super admin, super_admin, Administrator, Users admin, admin (alone), god mode (as a product term), treating `SYS` as a tenant
 
 **Users admin**:
-The Users Domain admin — Role code `USR_ADM`. Holds Users Domain Actions when those Actions list `USR_ADM` (including Delete user). A Domain-scoped admin subset of what System admin can do; not cross-Domain.
+The Users Domain admin — Role code `USR_ADM`. Holds every Users Domain Action when that Action lists `USR_ADM` (including Delete user and Changes read). A Domain-scoped admin subset of what System admin can do; not cross-Domain. Cannot remove `SYS_ADM` from another App user.
 _Avoid_: Administrator, Super admin, System admin, admin (as the Role name), ADM, Domain admin (when you mean this specific Role)
 
 **Users manager**:
-The Users Domain manager — Role code `USR_MGR`. Holds Users Domain Actions other than Delete user when those Actions list `USR_MGR`.
+The Users Domain manager — Role code `USR_MGR`. Holds Users Domain Actions `list`, `read`, `create`, `update`, and `changes.read` when those Actions list `USR_MGR`. Cannot Delete user.
 _Avoid_: User manager, Manager, manager, team manager, UMG, ADM, Domain manager (when you mean this specific Role)
 
 **Users viewer**:
-The Users Domain viewer — Role code `USR_VWR`. Holds Users Domain read/list Actions when those Actions list `USR_VWR` (exact allow-list locked with the Access enforcement catalog expansion). Cannot create, update, or delete Users.
+The Users Domain viewer — Role code `USR_VWR`. Holds `users.list` and `users.read` only. Cannot create, update, or delete Users, and cannot read Changes on User detail.
 _Avoid_: Viewer (alone), team member (as this Role), read-only user, Domain viewer (when you mean this specific Role)
 
 **Role code**:
