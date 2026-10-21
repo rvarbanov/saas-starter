@@ -4,6 +4,7 @@ import { useAction, useConvexAuth, useQuery } from "convex/react";
 import { UserForm } from "@/components/user-form";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import type { Role } from "@/convex/lib/roles";
 import { namesForFormInputs } from "@/convex/lib/userNames";
 import { APP_ROUTES } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
@@ -60,7 +61,7 @@ function ProfileFields({
     email: string;
     firstName?: string;
     lastName?: string;
-    roles: Array<"super_admin" | "manager" | "team_member">;
+    roles: Role[];
   };
 }) {
   const updateUser = useAction(api.usersActions.updateUser);

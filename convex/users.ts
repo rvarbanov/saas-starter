@@ -1,23 +1,18 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import {
-  internalMutation,
-  internalQuery,
-  type MutationCtx,
-  mutation,
-  query,
-} from "./_generated/server";
-import { getCurrentUser, getCurrentUserOrThrow, requireIdentity } from "./lib/auth";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
 import { diffTrackedFields, recordChange } from "./lib/changes";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
-import { hasAnyRole, isSuperAdmin, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
+import { requireCan } from "./lib/requireCan";
+import { hasAnyRole, hasRole, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
 import { buildSearchText } from "./lib/searchText";
 import { upsertUserFromProfile } from "./lib/upsertUser";
-import { toPublicUserDoc, userDocValidator } from "./lib/userDoc";
+import { meUserValidator, toMeUser, toPublicUserDoc, userDocValidator } from "./lib/userDoc";
 import { normalizeNames } from "./lib/userNames";
 import { assertEmailAvailable } from "./lib/users";
 
@@ -116,7 +111,7 @@ export const upsertFromAuthProfile = internalMutation({
 });
 
 /**
- * Paginated Users list. JWT required; caller need not have a Convex `users` row.
+ * Paginated Users list. Requires `users.list`.
  * Sort is `updatedAt` descending when not searching; search relevance when searching.
  * Optional `search` / `roles` / `createdWithinDays` are AND-combined (server-side).
  * Role/date filters may yield sparse pages. `numItems` is silently capped at 100.
@@ -130,7 +125,7 @@ export const list = query({
   },
   returns: listUsersPageValidator,
   handler: async (ctx, args) => {
-    await requireIdentity(ctx);
+    await requireCan(ctx, { domain: "users", action: "list" });
 
     const paginationOpts = {
       ...args.paginationOpts,
@@ -167,8 +162,8 @@ export const list = query({
 });
 
 /**
- * User detail read: full public App user doc (same shape as `getMe`).
- * JWT required; missing row returns null (does not throw).
+ * User detail read: full public App user doc.
+ * Requires `users.read`. Missing or soft-deleted row returns null (does not throw).
  * Listed-user floor remains on `api.users.list` only.
  */
 export const getById = query({
@@ -177,7 +172,7 @@ export const getById = query({
   },
   returns: v.union(v.null(), userDocValidator),
   handler: async (ctx, args) => {
-    await requireIdentity(ctx);
+    await requireCan(ctx, { domain: "users", action: "read" });
     const user = await ctx.db.get("users", args.userId);
     if (!user || user.deletedAt !== undefined) {
       return null;
@@ -186,32 +181,10 @@ export const getById = query({
   },
 });
 
-const SUPER_ADMIN_COUNT_PAGE_SIZE = 100;
-
-/** Count Super admins who are not soft-deleted. Paginate; do not collect the table. */
-async function countActiveSuperAdmins(ctx: MutationCtx): Promise<number> {
-  let count = 0;
-  let cursor: string | null = null;
-  let isDone = false;
-  while (!isDone) {
-    const result = await ctx.db.query("users").withIndex("by_updatedAt").paginate({
-      numItems: SUPER_ADMIN_COUNT_PAGE_SIZE,
-      cursor,
-    });
-    for (const user of result.page) {
-      if (user.deletedAt === undefined && isSuperAdmin(user.roles)) {
-        count += 1;
-      }
-    }
-    cursor = result.continueCursor;
-    isDone = result.isDone;
-  }
-  return count;
-}
-
 /**
- * Soft-delete an App user. Super admin only, not yourself, not the last Super admin.
- * Sets `deletedAt` and leaves the row. Does not call WorkOS.
+ * Soft-delete an App user. Requires `users.delete`. Not yourself.
+ * A subject who holds `SYS_ADM` cannot be deleted until that Role is removed
+ * via internal `setRoles`. Sets `deletedAt` and leaves the row. Does not call WorkOS.
  */
 export const deleteUser = mutation({
   args: {
@@ -219,25 +192,18 @@ export const deleteUser = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await requireIdentity(ctx);
+    const caller = await requireCan(ctx, { domain: "users", action: "delete" });
 
     const target = await ctx.db.get("users", args.userId);
     if (!target || target.deletedAt !== undefined) {
       throw new Error("User not found");
     }
 
-    const caller = await getCurrentUserOrThrow(ctx);
-    if (!isSuperAdmin(caller.roles)) {
-      throw new Error("Unauthorized");
-    }
     if (args.userId === caller._id) {
       throw new Error("Cannot delete your own user");
     }
-    if (isSuperAdmin(target.roles)) {
-      const activeSuperAdmins = await countActiveSuperAdmins(ctx);
-      if (activeSuperAdmins === 1) {
-        throw new Error("Cannot delete the last Super admin");
-      }
+    if (hasRole(target.roles, "SYS_ADM")) {
+      throw new Error("Cannot delete a user who holds System admin");
     }
 
     const now = Date.now();
@@ -256,13 +222,16 @@ export const deleteUser = mutation({
   },
 });
 
-/** Return the current user's Convex record, or null when unauthenticated / not provisioned yet. */
+/**
+ * Profile floor for every caller: names, email, roles, and `_id`.
+ * Null when unauthenticated or not provisioned yet. Identity-link fields stay on `getById`.
+ */
 export const getMe = query({
   args: {},
-  returns: v.union(v.null(), userDocValidator),
+  returns: v.union(v.null(), meUserValidator),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-    return user ? toPublicUserDoc(user) : null;
+    return user ? toMeUser(user) : null;
   },
 });
 

@@ -37,7 +37,7 @@ describe("usersListErrorMessage", () => {
 
 describe("formatListedUserRoles", () => {
   it("formats known roles for display", () => {
-    expect(formatListedUserRoles(["super_admin", "team_member"])).toBe("Super admin, Team member");
+    expect(formatListedUserRoles(["SYS_ADM", "team_member"])).toBe("System admin, Team member");
   });
 });
 
@@ -47,11 +47,20 @@ describe("UsersList", () => {
       isAuthenticated: true,
       isLoading: false,
     } as ReturnType<typeof useConvexAuth>);
-    useQueryMock.mockReturnValue({
-      page: [],
-      continueCursor: "",
-      isDone: true,
-    });
+    useQueryMock.mockImplementation(((...queryArgs: unknown[]) => {
+      const args = queryArgs[1];
+      if (args && typeof args === "object" && "domain" in args) {
+        return true;
+      }
+      if (args && typeof args === "object" && "paginationOpts" in args) {
+        return {
+          page: [],
+          continueCursor: "",
+          isDone: true,
+        };
+      }
+      return { _id: "me", email: "me@example.com", roles: [] };
+    }) as never);
 
     await renderUsersList();
 
@@ -74,21 +83,30 @@ describe("UsersList", () => {
       isAuthenticated: true,
       isLoading: false,
     } as ReturnType<typeof useConvexAuth>);
-    useQueryMock.mockReturnValue({
-      page: [
-        {
-          _id: "users:row1",
-          firstName: "Ada",
-          lastName: "Lovelace",
-          email: "ada@example.com",
-          roles: ["manager"],
-          createdAt: 1_700_000_000_000,
-          updatedAt: 1_700_000_000_000,
-        },
-      ],
-      continueCursor: "",
-      isDone: true,
-    });
+    useQueryMock.mockImplementation(((...queryArgs: unknown[]) => {
+      const args = queryArgs[1];
+      if (args && typeof args === "object" && "domain" in args) {
+        return true;
+      }
+      if (args && typeof args === "object" && "paginationOpts" in args) {
+        return {
+          page: [
+            {
+              _id: "users:row1",
+              firstName: "Ada",
+              lastName: "Lovelace",
+              email: "ada@example.com",
+              roles: ["USR_MGR"],
+              createdAt: 1_700_000_000_000,
+              updatedAt: 1_700_000_000_000,
+            },
+          ],
+          continueCursor: "",
+          isDone: true,
+        };
+      }
+      return { _id: "me", email: "me@example.com", roles: [] };
+    }) as never);
 
     await renderUsersList();
 
@@ -96,7 +114,7 @@ describe("UsersList", () => {
     expect(table).toHaveTextContent("Ada");
     expect(table).toHaveTextContent("Lovelace");
     expect(table).toHaveTextContent("ada@example.com");
-    expect(table).toHaveTextContent("Manager");
+    expect(table).toHaveTextContent("Users manager");
   });
 
   it("keeps the Create user entry visible while the list is loading", async () => {
@@ -104,7 +122,16 @@ describe("UsersList", () => {
       isAuthenticated: true,
       isLoading: false,
     } as ReturnType<typeof useConvexAuth>);
-    useQueryMock.mockReturnValue(undefined);
+    useQueryMock.mockImplementation(((...queryArgs: unknown[]) => {
+      const args = queryArgs[1];
+      if (args && typeof args === "object" && "domain" in args) {
+        return true;
+      }
+      if (args && typeof args === "object" && "paginationOpts" in args) {
+        return undefined;
+      }
+      return { _id: "me", email: "me@example.com", roles: [] };
+    }) as never);
 
     await renderUsersList();
 

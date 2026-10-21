@@ -18,7 +18,7 @@ const CREATE_USER_EXACT_MESSAGES = [
   "Not authenticated",
   "Invalid email address",
   EMAIL_ALREADY_REGISTERED,
-  "Cannot assign super_admin via User detail",
+  "Unauthorized",
 ] as const;
 
 const CREATE_USER_PREFIX_MESSAGES = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { type LucideIcon, LayoutDashboard, Sparkles, Users } from "lucide-react";
+import { LayoutDashboard, type LucideIcon, Sparkles, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
 import {
@@ -13,8 +13,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCan } from "@/components/use-can";
 import { APP_NAV_ITEMS, isAppNavActive } from "@/lib/app-nav";
 import { APP_ROUTES } from "@/lib/app-routes";
+import { isConvexConfigured } from "@/lib/convex-config";
 
 /** Native `<a>` — ignore Base UI's merged button onClick so href navigation is not preventDefaulted. */
 function AppNavLink({
@@ -39,6 +42,8 @@ const NAV_ICONS: Record<string, LucideIcon> = {
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const configured = isConvexConfigured();
+  const canListUsers = useCan({ domain: "users", action: "list" });
 
   return (
     <Sidebar variant="inset" collapsible="icon" data-testid="app-sidebar">
@@ -57,6 +62,18 @@ export function AppSidebar() {
             <nav aria-label="App">
               <SidebarMenu>
                 {APP_NAV_ITEMS.map((item) => {
+                  if (item.href === APP_ROUTES.users && configured) {
+                    if (canListUsers === undefined) {
+                      return (
+                        <SidebarMenuItem key={item.href}>
+                          <Skeleton className="h-8 w-full" data-testid="users-nav-pending" />
+                        </SidebarMenuItem>
+                      );
+                    }
+                    if (!canListUsers) {
+                      return null;
+                    }
+                  }
                   const Icon = NAV_ICONS[item.href];
                   return (
                     <SidebarMenuItem key={item.href}>
