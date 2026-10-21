@@ -52,6 +52,8 @@ const chromiumProject = {
     /changes\.spec\.ts/,
     /profile\.spec\.ts/,
     /content-width\.spec\.ts/,
+    /access-enforcement\.setup\.ts/,
+    /access-enforcement\.spec\.ts/,
   ],
   use: { ...devices["Desktop Chrome"] },
 };
@@ -68,6 +70,16 @@ const projects = [
       storageState: AUTH_STORAGE_PATH,
     },
     dependencies: ["setup"],
+  },
+  {
+    name: "access-setup",
+    testMatch: /access-enforcement\.setup\.ts/,
+  },
+  {
+    name: "access-enforcement",
+    testMatch: /access-enforcement\.spec\.ts/,
+    use: { ...devices["Desktop Chrome"] },
+    dependencies: ["access-setup"],
   },
   {
     name: "authenticated-sign-out",

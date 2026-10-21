@@ -1,28 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { assertAssignableRoles, mergeRolesPreservingSuperAdmin } from "./roles";
+import { hasRole, migrateLegacyRoleCode, normalizeRoles } from "./roles";
 
-describe("assertAssignableRoles", () => {
-  it("accepts manager and team_member", () => {
-    expect(assertAssignableRoles(["team_member", "manager", "manager"])).toEqual([
-      "team_member",
-      "manager",
-    ]);
-  });
-
-  it("rejects super_admin", () => {
-    expect(() => assertAssignableRoles(["super_admin"])).toThrow(/super_admin/);
+describe("migrateLegacyRoleCode", () => {
+  it("maps super_admin and manager and leaves other codes", () => {
+    expect(migrateLegacyRoleCode("super_admin")).toBe("SYS_ADM");
+    expect(migrateLegacyRoleCode("manager")).toBe("USR_MGR");
+    expect(migrateLegacyRoleCode("team_member")).toBe("team_member");
+    expect(migrateLegacyRoleCode("USR_ADM")).toBe("USR_ADM");
+    expect(migrateLegacyRoleCode("USR_VWR")).toBe("USR_VWR");
   });
 });
 
-describe("mergeRolesPreservingSuperAdmin", () => {
-  it("keeps super_admin when present", () => {
-    expect(mergeRolesPreservingSuperAdmin(["super_admin", "team_member"], ["manager"])).toEqual([
-      "super_admin",
-      "manager",
-    ]);
-  });
-
-  it("does not invent super_admin", () => {
-    expect(mergeRolesPreservingSuperAdmin(["manager"], ["team_member"])).toEqual(["team_member"]);
+describe("normalizeRoles", () => {
+  it("treats missing roles as empty and keeps team_member", () => {
+    expect(normalizeRoles(undefined)).toEqual([]);
+    expect(hasRole(["team_member"], "team_member")).toBe(true);
+    expect(hasRole(["team_member"], "SYS_ADM")).toBe(false);
   });
 });

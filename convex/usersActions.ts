@@ -5,6 +5,7 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 import { extractEmailFromIdentity } from "./lib/identity";
+import type { Role } from "./lib/roles";
 import { issuerFromTokenIdentifier, tokenIdentifierForCreatedUser } from "./lib/tokenIdentifier";
 import { userDocValidator } from "./lib/userDoc";
 import { normalizeNames } from "./lib/userNames";
@@ -88,6 +89,11 @@ export const updateUser = action({
     }
 
     const actorUserId = await ctx.runQuery(internal.users.getCallerIdForAction, {});
+    if (args.userId === actorUserId) {
+      await ctx.runQuery(internal.authz.assertCan, { domain: "profile", action: "self.write" });
+    } else {
+      await ctx.runQuery(internal.authz.assertCan, { domain: "users", action: "update" });
+    }
 
     const user = await ctx.runQuery(internal.users.getUserByIdForAction, {
       userId: args.userId,
@@ -175,7 +181,7 @@ type PublicUserDoc = {
   firstName?: string;
   lastName?: string;
   workosUserId: string;
-  roles: Array<"super_admin" | "manager" | "team_member">;
+  roles: Role[];
   createdAt: number;
   updatedAt: number;
 };
@@ -197,6 +203,7 @@ export const createUser = action({
       throw new Error("Not authenticated");
     }
 
+    await ctx.runQuery(internal.authz.assertCan, { domain: "users", action: "create" });
     const actorUserId = await ctx.runQuery(internal.users.getCallerIdForAction, {});
 
     let normalizedEmail: string;

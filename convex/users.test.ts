@@ -15,8 +15,10 @@ function testClient() {
   return convexTest(schema, modules);
 }
 
+type TestClient = ReturnType<typeof testClient>;
+
 async function insertUser(
-  t: ReturnType<typeof convexTest>,
+  t: TestClient,
   fields: {
     email: string;
     updatedAt: number;
@@ -25,7 +27,7 @@ async function insertUser(
     lastName?: string;
     tokenIdentifier?: string;
     workosUserId?: string;
-    roles?: Array<"super_admin" | "manager" | "team_member">;
+    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">;
     deletedAt?: number;
   },
 ): Promise<Id<"users">> {
@@ -50,6 +52,50 @@ async function insertUser(
   });
 }
 
+async function ensureCaller(
+  t: TestClient,
+  roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member"> = ["SYS_ADM"],
+) {
+  await t.run(async (ctx) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", "https://example.test|caller"))
+      .unique();
+    if (existing) {
+      return;
+    }
+    await ctx.db.insert("users", {
+      appUserId: crypto.randomUUID(),
+      tokenIdentifier: "https://example.test|caller",
+      email: "caller-session@example.com",
+      workosUserId: "caller-session",
+      roles,
+      deletedAt: 1,
+      searchText: buildSearchText({ email: "caller-session@example.com" }),
+      createdAt: 0,
+      updatedAt: 0,
+    });
+  });
+}
+
+async function listAsReader(
+  t: TestClient,
+  args: {
+    paginationOpts: { numItems: number; cursor: string | null };
+    search?: string;
+    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">;
+    createdWithinDays?: 7 | 30 | 90;
+  },
+) {
+  await ensureCaller(t);
+  return await t.withIdentity(identity).query(api.users.list, args);
+}
+
+async function getByIdAsReader(t: TestClient, userId: Id<"users">) {
+  await ensureCaller(t);
+  return await t.withIdentity(identity).query(api.users.getById, { userId });
+}
+
 describe("users.list", () => {
   it("throws Not authenticated without a JWT", async () => {
     const t = testClient();
@@ -66,11 +112,11 @@ describe("users.list", () => {
       updatedAt: 3,
       firstName: "New",
       lastName: "User",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
     await insertUser(t, { email: "mid@example.com", updatedAt: 2 });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
     });
 
@@ -84,7 +130,7 @@ describe("users.list", () => {
       firstName: "New",
       lastName: "User",
       email: "new@example.com",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
       createdAt: 3,
       updatedAt: 3,
     });
@@ -103,7 +149,7 @@ describe("users.list", () => {
       await insertUser(t, { email: `user${i}@example.com`, updatedAt: i });
     }
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 200, cursor: null },
     });
 
@@ -116,7 +162,7 @@ describe("users.list", () => {
     await insertUser(t, { email: "ada@example.com", updatedAt: 2, firstName: "Ada" });
     await insertUser(t, { email: "other@example.com", updatedAt: 1, firstName: "Other" });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
       search: "a",
     });
@@ -139,7 +185,7 @@ describe("users.list", () => {
       lastName: "Hopper",
     });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
       search: "lovelace",
     });
@@ -152,12 +198,12 @@ describe("users.list", () => {
     await insertUser(t, {
       email: "admin@example.com",
       updatedAt: 3,
-      roles: ["super_admin"],
+      roles: ["SYS_ADM"],
     });
     await insertUser(t, {
       email: "mgr@example.com",
       updatedAt: 2,
-      roles: ["manager", "team_member"],
+      roles: ["USR_MGR", "team_member"],
     });
     await insertUser(t, {
       email: "none@example.com",
@@ -165,9 +211,9 @@ describe("users.list", () => {
       roles: [],
     });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
 
     expect(result.page.map((user) => user.email)).toEqual(["mgr@example.com"]);
@@ -187,7 +233,7 @@ describe("users.list", () => {
       createdAt: now - 40 * 24 * 60 * 60 * 1000,
     });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
       createdWithinDays: 7,
     });
@@ -201,25 +247,25 @@ describe("users.list", () => {
       email: "ada.manager@example.com",
       updatedAt: 3,
       firstName: "Ada",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
     await insertUser(t, {
       email: "ada.admin@example.com",
       updatedAt: 2,
       firstName: "Ada",
-      roles: ["super_admin"],
+      roles: ["SYS_ADM"],
     });
     await insertUser(t, {
       email: "grace.manager@example.com",
       updatedAt: 1,
       firstName: "Grace",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
       search: "ada",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
 
     expect(result.page.map((user) => user.email)).toEqual(["ada.manager@example.com"]);
@@ -249,7 +295,7 @@ describe("users.getById", () => {
       return id;
     });
 
-    await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
+    await expect(getByIdAsReader(t, userId)).resolves.toBeNull();
   });
 
   it("returns the full public App user doc by id including identity links", async () => {
@@ -262,7 +308,7 @@ describe("users.getById", () => {
       roles: ["team_member"],
     });
 
-    await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toEqual({
+    await expect(getByIdAsReader(t, userId)).resolves.toEqual({
       _id: userId,
       appUserId: expect.any(String),
       tokenIdentifier: "https://example.test|ada@example.com",
@@ -284,7 +330,7 @@ describe("users.patchUserDetailInternal", () => {
       updatedAt: 1,
       firstName: "Old",
       lastName: "Name",
-      roles: ["super_admin", "team_member"],
+      roles: ["SYS_ADM", "team_member"],
     });
 
     const updated = await t.mutation(internal.users.patchUserDetailInternal, {
@@ -300,7 +346,7 @@ describe("users.patchUserDetailInternal", () => {
       firstName: "New",
       lastName: "Person",
       email: "new@example.com",
-      roles: ["super_admin", "team_member"],
+      roles: ["SYS_ADM", "team_member"],
     });
   });
 
@@ -311,7 +357,7 @@ describe("users.patchUserDetailInternal", () => {
       updatedAt: 1,
       firstName: "Old",
       lastName: "Name",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
 
     const updated = await t.mutation(internal.users.patchUserDetailInternal, {
@@ -325,7 +371,7 @@ describe("users.patchUserDetailInternal", () => {
     expect(updated.firstName).toBeUndefined();
     expect(updated.lastName).toBeUndefined();
     expect(updated).not.toHaveProperty("name");
-    expect(updated.roles).toEqual(["manager"]);
+    expect(updated.roles).toEqual(["USR_MGR"]);
   });
 });
 
@@ -346,6 +392,11 @@ describe("users.getMe + roles", () => {
     const me = await t.withIdentity(identity).query(api.users.getMe, {});
     expect(me?.email).toBe("me@example.com");
     expect(me?.roles).toEqual([]);
+    expect(me).not.toHaveProperty("appUserId");
+    expect(me).not.toHaveProperty("tokenIdentifier");
+    expect(me).not.toHaveProperty("workosUserId");
+    expect(me).not.toHaveProperty("createdAt");
+    expect(me).not.toHaveProperty("updatedAt");
   });
 
   it("returns roles after internal setRoles (multi-role)", async () => {
@@ -359,11 +410,11 @@ describe("users.getMe + roles", () => {
 
     await t.mutation(internal.users.setRoles, {
       userId,
-      roles: ["super_admin", "manager", "super_admin"],
+      roles: ["SYS_ADM", "USR_MGR", "SYS_ADM"],
     });
 
     const me = await t.withIdentity(identity).query(api.users.getMe, {});
-    expect(me?.roles).toEqual(["super_admin", "manager"]);
+    expect(me?.roles).toEqual(["SYS_ADM", "USR_MGR"]);
   });
 });
 
@@ -446,7 +497,7 @@ describe("users.upsertFromAuthProfile workosUserId fallback", () => {
 
     expect(result._id).toBe(userId);
 
-    const doc = await t.withIdentity(identity).query(api.users.getById, { userId });
+    const doc = await getByIdAsReader(t, userId);
     expect(doc?.tokenIdentifier).toBe("https://example.test|user_01created");
     expect(doc?.workosUserId).toBe("user_01created");
   });
@@ -480,8 +531,8 @@ describe("users.deleteUser", () => {
   const callerToken = "https://example.test|caller";
 
   async function insertCaller(
-    t: ReturnType<typeof convexTest>,
-    roles: Array<"super_admin" | "manager" | "team_member">,
+    t: TestClient,
+    roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">,
     extra?: { deletedAt?: number; email?: string },
   ) {
     return await insertUser(t, {
@@ -501,7 +552,7 @@ describe("users.deleteUser", () => {
 
   it("throws Unauthorized when the caller is not a Super admin", async () => {
     const t = testClient();
-    await insertCaller(t, ["manager"]);
+    await insertCaller(t, ["USR_MGR"]);
     const userId = await insertUser(t, { email: "ada@example.com", updatedAt: 1 });
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
@@ -510,7 +561,7 @@ describe("users.deleteUser", () => {
 
   it("throws User not found when the row is missing", async () => {
     const t = testClient();
-    await insertCaller(t, ["super_admin"]);
+    await insertCaller(t, ["SYS_ADM"]);
     const userId = await t.run(async (ctx) => {
       const id = await ctx.db.insert("users", {
         appUserId: crypto.randomUUID(),
@@ -531,7 +582,7 @@ describe("users.deleteUser", () => {
 
   it("throws User not found when deletedAt is already set", async () => {
     const t = testClient();
-    await insertCaller(t, ["super_admin"]);
+    await insertCaller(t, ["SYS_ADM"]);
     const userId = await insertUser(t, {
       email: "ada@example.com",
       updatedAt: 1,
@@ -544,28 +595,28 @@ describe("users.deleteUser", () => {
 
   it("throws when a Super admin deletes their own user", async () => {
     const t = testClient();
-    const callerId = await insertCaller(t, ["super_admin"]);
+    const callerId = await insertCaller(t, ["SYS_ADM"]);
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId: callerId }),
     ).rejects.toThrow("Cannot delete your own user");
   });
 
-  it("throws when the target is the last Super admin", async () => {
+  it("throws when the target holds System admin", async () => {
     const t = testClient();
-    await insertCaller(t, ["super_admin"], { deletedAt: 5 });
+    await insertCaller(t, ["USR_ADM"]);
     const targetId = await insertUser(t, {
-      email: "only-admin@example.com",
+      email: "sys@example.com",
       updatedAt: 2,
-      roles: ["super_admin"],
+      roles: ["SYS_ADM"],
     });
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId: targetId }),
-    ).rejects.toThrow("Cannot delete the last Super admin");
+    ).rejects.toThrow("Cannot delete a user who holds System admin");
   });
 
   it("sets deletedAt and updatedAt and leaves other fields", async () => {
     const t = testClient();
-    await insertCaller(t, ["super_admin", "manager"]);
+    await insertCaller(t, ["SYS_ADM", "USR_MGR"]);
     const userId = await insertUser(t, {
       email: "ada@example.com",
       updatedAt: 1,
@@ -600,7 +651,7 @@ describe("deleted App users are hidden", () => {
       deletedAt: 5,
     });
 
-    const result = await t.withIdentity(identity).query(api.users.list, {
+    const result = await listAsReader(t, {
       paginationOpts: { numItems: 25, cursor: null },
     });
 
@@ -615,15 +666,12 @@ describe("deleted App users are hidden", () => {
       deletedAt: 2,
     });
 
-    await expect(t.withIdentity(identity).query(api.users.getById, { userId })).resolves.toBeNull();
+    await expect(getByIdAsReader(t, userId)).resolves.toBeNull();
   });
 });
 
-async function listChanges(
-  t: ReturnType<typeof convexTest>,
-  userId: Id<"users">,
-  cursor: string | null = null,
-) {
+async function listChanges(t: TestClient, userId: Id<"users">, cursor: string | null = null) {
+  await ensureCaller(t);
   return await t.withIdentity(identity).query(api.changes.listForAppUser, {
     userId,
     paginationOpts: { numItems: 20, cursor },
@@ -730,7 +778,7 @@ describe("Changes recorded with App user writes", () => {
       email: "caller@example.com",
       updatedAt: 10,
       tokenIdentifier: "https://example.test|caller",
-      roles: ["super_admin"],
+      roles: ["SYS_ADM"],
       firstName: "Super",
       lastName: "Admin",
     });
@@ -821,7 +869,7 @@ describe("Changes recorded with App user writes", () => {
 
     await t.mutation(internal.users.setRoles, {
       userId,
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
 
     const changes = await listChanges(t, userId);
@@ -829,13 +877,13 @@ describe("Changes recorded with App user writes", () => {
       expect.objectContaining({
         action: "update",
         actorLabel: "System",
-        fields: [{ label: "Roles", before: "None", after: "Manager" }],
+        fields: [{ label: "Roles", before: "None", after: "Users manager" }],
       }),
     ]);
 
     await t.mutation(internal.users.setRoles, {
       userId,
-      roles: ["manager"],
+      roles: ["USR_MGR"],
     });
     expect((await listChanges(t, userId)).page).toHaveLength(1);
   });
@@ -870,7 +918,7 @@ describe("Changes recorded with App user writes", () => {
     await expect(
       t.mutation(internal.users.setRoles, {
         userId,
-        roles: ["manager"],
+        roles: ["USR_MGR"],
         actorUserId: missingActorId,
       }),
     ).rejects.toThrow("User not found");
@@ -878,7 +926,7 @@ describe("Changes recorded with App user writes", () => {
 
     await t.mutation(internal.users.setRoles, {
       userId,
-      roles: ["manager", "team_member"],
+      roles: ["USR_MGR", "team_member"],
       actorUserId,
     });
 
@@ -887,7 +935,7 @@ describe("Changes recorded with App user writes", () => {
       expect.objectContaining({
         action: "update",
         actorLabel: "Bo Ss",
-        fields: [{ label: "Roles", before: "Team member", after: "Manager, Team member" }],
+        fields: [{ label: "Roles", before: "Team member", after: "Users manager, Team member" }],
       }),
     ]);
   });

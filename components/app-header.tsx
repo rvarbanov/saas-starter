@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useCan } from "@/components/use-can";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { appBreadcrumbTrail, userDetailLeafLabel } from "@/lib/app-nav";
@@ -28,7 +29,8 @@ function usePersonCrumb(pathname: string): { label: string; href?: string } | un
   const { isAuthenticated, isLoading } = useConvexAuth();
   const userId = rawId !== null && isLikelyUsersId(rawId) ? (rawId as Id<"users">) : null;
   const ready = isConvexConfigured() && !isLoading && isAuthenticated && userId !== null;
-  const user = useQuery(api.users.getById, ready ? { userId } : "skip");
+  const canRead = useCan({ domain: "users", action: "read" });
+  const user = useQuery(api.users.getById, ready && canRead === true ? { userId } : "skip");
 
   if (rawId === null) {
     return undefined;

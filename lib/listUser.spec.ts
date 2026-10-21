@@ -12,7 +12,7 @@ function fakeUser(overrides: Partial<Doc<"users">> = {}): Doc<"users"> {
     firstName: "Ada",
     lastName: "Lovelace",
     workosUserId: "user_1",
-    roles: ["manager"],
+    roles: ["USR_MGR"],
     createdAt: 10,
     updatedAt: 20,
     ...overrides,
@@ -26,7 +26,7 @@ describe("toListUser", () => {
       firstName: "Ada",
       lastName: "Lovelace",
       email: "ada@example.com",
-      roles: ["manager"],
+      roles: ["USR_MGR"],
       createdAt: 10,
       updatedAt: 20,
     });

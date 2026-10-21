@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCan } from "@/components/use-can";
 import { api } from "@/convex/_generated/api";
 import type { ListUser } from "@/convex/lib/listUser";
 import { LIST_USERS_PAGE_SIZE } from "@/convex/lib/pagination";
@@ -324,12 +325,20 @@ function UsersListInner() {
 
 /** Users list table for `/dashboard/users`. First page of 25 only; search/filter supported. */
 export function UsersList() {
+  const canCreate = useCan({ domain: "users", action: "create" });
+
   return (
     <div>
       <div className="mb-4 flex justify-end">
-        <Link className={buttonVariants()} data-testid="create-user-entry" href={createUserPath()}>
-          Create user
-        </Link>
+        {canCreate === true ? (
+          <Link
+            className={buttonVariants()}
+            data-testid="create-user-entry"
+            href={createUserPath()}
+          >
+            Create user
+          </Link>
+        ) : null}
       </div>
       {!isConvexConfigured() ? (
         <p className="text-caption">Convex is not configured; the Users list cannot load.</p>

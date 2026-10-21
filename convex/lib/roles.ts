@@ -1,13 +1,18 @@
 import { v } from "convex/values";
 
-/** Product roles per docs/IMPLEMENTATION.md §4. Multi-role is a set (array). */
-export const ROLE_VALUES = ["super_admin", "manager", "team_member"] as const;
+/**
+ * Access enforcement MVP 1 Role codes.
+ * `team_member` stays stored until a later cleanup and is not a Users catalog Role.
+ */
+export const ROLE_VALUES = ["SYS_ADM", "USR_ADM", "USR_MGR", "USR_VWR", "team_member"] as const;
 
 export type Role = (typeof ROLE_VALUES)[number];
 
 export const roleValidator = v.union(
-  v.literal("super_admin"),
-  v.literal("manager"),
+  v.literal("SYS_ADM"),
+  v.literal("USR_ADM"),
+  v.literal("USR_MGR"),
+  v.literal("USR_VWR"),
   v.literal("team_member"),
 );
 
@@ -40,53 +45,16 @@ export function hasAnyRole(roles: readonly Role[] | undefined, wanted: readonly 
   return wanted.some((role) => set.has(role));
 }
 
-export function isSuperAdmin(roles: readonly Role[] | undefined): boolean {
-  return hasRole(roles, "super_admin");
-}
-
-export function isManager(roles: readonly Role[] | undefined): boolean {
-  return hasRole(roles, "manager");
-}
-
-/** Roles the User detail editor may set (never includes `super_admin`). */
-export const ASSIGNABLE_ROLES = ["manager", "team_member"] as const;
-
-export type AssignableRole = (typeof ASSIGNABLE_ROLES)[number];
-
-export function isAssignableRole(role: Role): role is AssignableRole {
-  return role === "manager" || role === "team_member";
-}
-
 /**
- * Validate User detail `roles` args: assignable roles only, reject `super_admin`.
- * Returns a deduped assignable set (may be empty).
+ * Map legacy stored codes onto the MVP 1 Role codes.
+ * `team_member` and unknown codes are unchanged. Does not invent `USR_ADM` or `USR_VWR`.
  */
-export function assertAssignableRoles(roles: readonly Role[]): AssignableRole[] {
-  for (const role of roles) {
-    if (role === "super_admin") {
-      throw new Error("Cannot assign super_admin via User detail");
-    }
-    if (!isAssignableRole(role)) {
-      throw new Error(`Invalid role: ${role}`);
-    }
+export function migrateLegacyRoleCode(code: string): string {
+  if (code === "super_admin") {
+    return "SYS_ADM";
   }
-  return uniqueRoles(roles) as AssignableRole[];
-}
-
-/**
- * Merge assignable roles from the editor with any existing `super_admin` on the subject.
- * Prevents accidental demotion when the UI never offered `super_admin`.
- */
-export function mergeRolesPreservingSuperAdmin(
-  existing: readonly Role[] | undefined,
-  assignable: readonly AssignableRole[],
-): Role[] {
-  const next: Role[] = [];
-  if (hasRole(existing, "super_admin")) {
-    next.push("super_admin");
+  if (code === "manager") {
+    return "USR_MGR";
   }
-  for (const role of uniqueRoles(assignable)) {
-    next.push(role);
-  }
-  return next;
+  return code;
 }

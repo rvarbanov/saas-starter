@@ -15,11 +15,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useCan } from "@/components/use-can";
 import { formatListedUserDate } from "@/components/users-list";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { CHANGES_PAGE_SIZE } from "@/convex/lib/pagination";
-import { isSuperAdmin, type Role } from "@/convex/lib/roles";
+import type { Role } from "@/convex/lib/roles";
 import { userDetailLeafLabel } from "@/lib/app-nav";
 import { APP_ROUTES, userEditPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
@@ -108,6 +109,9 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
   const ready = !authLoading && isAuthenticated;
   const user = useQuery(api.users.getById, ready ? { userId } : "skip");
   const me = useQuery(api.users.getMe, ready ? {} : "skip");
+  const canUpdate = useCan({ domain: "users", action: "update" });
+  const canDelete = useCan({ domain: "users", action: "delete" });
+  const canReadChanges = useCan({ domain: "users", action: "changes.read" });
 
   if (!ready || user === undefined) {
     return (
@@ -137,13 +141,15 @@ function UserDetailInner({ userId }: { userId: Id<"users"> }) {
       </Suspense>
       <div className="mb-4 flex items-start justify-between gap-4">
         <h1 className="heading-page">{title}</h1>
-        <Link className={buttonVariants()} href={userEditPath(user._id)}>
-          Edit
-        </Link>
+        {canUpdate === true ? (
+          <Link className={buttonVariants()} href={userEditPath(user._id)}>
+            Edit
+          </Link>
+        ) : null}
       </div>
       <UserDetailViewFields user={user} />
-      <UserDetailChanges userId={user._id} />
-      {me != null && isSuperAdmin(me.roles) && me._id !== user._id ? (
+      {canReadChanges === true ? <UserDetailChanges userId={user._id} /> : null}
+      {canDelete === true && me != null && me._id !== user._id ? (
         <DeleteUserControl userId={user._id} />
       ) : null}
     </div>
