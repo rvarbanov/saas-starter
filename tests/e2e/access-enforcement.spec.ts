@@ -87,6 +87,7 @@ const usrMgr = creds("E2E_USR_MGR_EMAIL", "E2E_USR_MGR_PASSWORD");
 const usrVwr = creds("E2E_USR_VWR_EMAIL", "E2E_USR_VWR_PASSWORD");
 const targetEmail = process.env.E2E_SYS_ADM_TARGET_EMAIL?.trim();
 const targetPassword = process.env.E2E_SYS_ADM_TARGET_PASSWORD?.trim();
+const none = creds("E2E_NONE_EMAIL", "E2E_NONE_PASSWORD");
 
 if (sysAdm) {
   test.describe("Z System admin", () => {
@@ -195,4 +196,43 @@ if (usrAdm && targetEmail && targetPassword) {
   });
 } else {
   test.skip("AG: Users admin cannot delete a System admin subject", () => {});
+}
+
+async function expectUnauthorizedUsersPage(page: Page, pathname: string) {
+  await page.goto(pathname, { waitUntil: "load" });
+  await expect(page.getByTestId("unauthorized-empty")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Unauthorized" })).toBeVisible();
+  await expect(page.getByText("You do not have access to this page.")).toBeVisible();
+  await expect(page).toHaveURL((url) => pathMatches(url, pathname));
+  await expect(page.getByTestId("users-nav-pending")).toHaveCount(0);
+  await expect(page.locator("[data-app-nav='Users']")).toHaveCount(0);
+}
+
+if (none) {
+  test.describe("AH No roles", () => {
+    test.use({ storageState: ACCESS_ROLE_STORAGE.NONE });
+
+    test("AH: Dashboard, Coming soon, and Profile only", async ({ page }) => {
+      await page.goto(APP_ROUTES.dashboard, { waitUntil: "load" });
+      await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+      await expect(page.locator("[data-app-nav='Dashboard']")).toBeVisible();
+      await expect(page.locator("[data-app-nav='Coming soon']")).toBeVisible();
+      await expect(page.getByTestId("users-nav-pending")).toHaveCount(0);
+      await expect(page.locator("[data-app-nav='Users']")).toHaveCount(0);
+
+      await page.goto(APP_ROUTES.comingSoon, { waitUntil: "load" });
+      await expect(page.getByRole("heading", { name: /^Coming soon$/i })).toBeVisible();
+      await expect(page.getByTestId("unauthorized-empty")).toHaveCount(0);
+
+      await page.goto(APP_ROUTES.profile, { waitUntil: "load" });
+      await expect(page.getByTestId("profile-form")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("profile-email")).toHaveValue(none.email);
+      await expect(page.getByTestId("profile-roles")).toHaveText("None");
+
+      await expectUnauthorizedUsersPage(page, APP_ROUTES.users);
+      await expectUnauthorizedUsersPage(page, APP_ROUTES.usersNew);
+    });
+  });
+} else {
+  test.skip("AH: no roles sees Dashboard, Coming soon, and Profile, not Users", () => {});
 }

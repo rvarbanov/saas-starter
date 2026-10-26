@@ -27,6 +27,12 @@ const ROLES = [
     passwordKey: "E2E_USR_VWR_PASSWORD",
     storage: ACCESS_ROLE_STORAGE.USR_VWR,
   },
+  {
+    name: "No roles",
+    emailKey: "E2E_NONE_EMAIL",
+    passwordKey: "E2E_NONE_PASSWORD",
+    storage: ACCESS_ROLE_STORAGE.NONE,
+  },
 ] as const;
 
 for (const role of ROLES) {

@@ -12,6 +12,7 @@ export const ACCESS_ROLE_STORAGE = {
   USR_ADM: "playwright/.auth/usr-adm.json",
   USR_MGR: "playwright/.auth/usr-mgr.json",
   USR_VWR: "playwright/.auth/usr-vwr.json",
+  NONE: "playwright/.auth/none.json",
 } as const;
 
 /** Load `.env` then `.secret` (same order as playwright.config.ts). */
