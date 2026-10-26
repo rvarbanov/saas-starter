@@ -9,8 +9,9 @@ import { rolesValidator } from "./lib/roles";
  * Convex FKs should use `Id<"users">` (`_id`).
  * External APIs / migration export should use `appUserId` (UUID v4).
  *
- * Roles: optional multi-role set on the user (`super_admin` | `manager` | `team_member`).
- * Missing `roles` means none assigned yet (v1: assign manually via `users.setRoles`).
+ * Roles: optional multi-role set (`SYS_ADM` | `USR_ADM` | `USR_MGR` | `USR_VWR` | `team_member`).
+ * Missing `roles` means none assigned yet (assign manually via internal `users.setRoles`).
+ * Before deploying this schema, rewrite stored `super_admin` → `SYS_ADM` and `manager` → `USR_MGR`.
  */
 export default defineSchema({
   users: defineTable({

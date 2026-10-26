@@ -8,13 +8,16 @@
  * @module
  */
 
+import type * as authz from "../authz.js";
 import type * as changes from "../changes.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_authzCatalog from "../lib/authzCatalog.js";
 import type * as lib_changes from "../lib/changes.js";
 import type * as lib_email from "../lib/email.js";
 import type * as lib_identity from "../lib/identity.js";
 import type * as lib_listUser from "../lib/listUser.js";
 import type * as lib_pagination from "../lib/pagination.js";
+import type * as lib_requireCan from "../lib/requireCan.js";
 import type * as lib_roles from "../lib/roles.js";
 import type * as lib_searchText from "../lib/searchText.js";
 import type * as lib_tokenIdentifier from "../lib/tokenIdentifier.js";
@@ -34,13 +37,16 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  authz: typeof authz;
   changes: typeof changes;
   "lib/auth": typeof lib_auth;
+  "lib/authzCatalog": typeof lib_authzCatalog;
   "lib/changes": typeof lib_changes;
   "lib/email": typeof lib_email;
   "lib/identity": typeof lib_identity;
   "lib/listUser": typeof lib_listUser;
   "lib/pagination": typeof lib_pagination;
+  "lib/requireCan": typeof lib_requireCan;
   "lib/roles": typeof lib_roles;
   "lib/searchText": typeof lib_searchText;
   "lib/tokenIdentifier": typeof lib_tokenIdentifier;

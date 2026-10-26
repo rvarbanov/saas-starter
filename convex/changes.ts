@@ -1,9 +1,9 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { query } from "./_generated/server";
-import { requireIdentity } from "./lib/auth";
 import { actorLabelFor, formatChangeFields } from "./lib/changes";
 import { clampPaginationNumItems } from "./lib/pagination";
+import { requireCan } from "./lib/requireCan";
 
 const changeFieldViewValidator = v.object({
   label: v.string(),
@@ -20,7 +20,7 @@ const changeListItemValidator = v.object({
 });
 
 /**
- * Changes for one App user, newest first. Same signed-in gate as `users.getById`.
+ * Changes for one App user, newest first. Requires `users.changes.read`.
  * Actor labels include deleted App users; this query does not call `getById`.
  */
 export const listForAppUser = query({
@@ -34,7 +34,7 @@ export const listForAppUser = query({
     isDone: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    await requireIdentity(ctx);
+    await requireCan(ctx, { domain: "users", action: "changes.read" });
 
     const paginationOpts = {
       ...args.paginationOpts,

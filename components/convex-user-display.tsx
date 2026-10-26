@@ -4,7 +4,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { isConvexConfigured } from "@/lib/convex-config";
 
-/** Displays the authenticated user's Convex record (email + portable appUserId). */
+/** Displays the authenticated user's email from the Profile floor. */
 export function ConvexUserDisplay() {
   if (!isConvexConfigured()) {
     return null;
@@ -34,10 +34,6 @@ function ConvexUserDisplayInner() {
     <div className="stack-sm text-body" data-testid="convex-user-profile">
       <p>
         <span className="text-emphasis">Email:</span> {user.email}
-      </p>
-      <p>
-        <span className="text-emphasis">App user id:</span>{" "}
-        <code className="inline-code">{user.appUserId}</code>
       </p>
     </div>
   );

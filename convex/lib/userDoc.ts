@@ -16,6 +16,25 @@ export const userDocValidator = v.object({
   updatedAt: v.number(),
 });
 
+/** Profile floor. `_id` is wire-only for React keys and `updateUser({ userId })`. */
+export const meUserValidator = v.object({
+  _id: v.id("users"),
+  email: v.string(),
+  firstName: v.optional(v.string()),
+  lastName: v.optional(v.string()),
+  roles: rolesValidator,
+});
+
+export function toMeUser(user: Doc<"users">) {
+  return {
+    _id: user._id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    roles: normalizeRoles(user.roles),
+  };
+}
+
 export function toPublicUserDoc(user: Doc<"users">) {
   return {
     _id: user._id,

@@ -56,8 +56,14 @@ function queryResult(user: typeof loadedUser | null) {
     if (args === "skip" || args === undefined) {
       return undefined;
     }
+    if (typeof args === "object" && args !== null && "domain" in args) {
+      return true;
+    }
     if (typeof args === "object" && args !== null && "userId" in args) {
       return user;
+    }
+    if (typeof args === "object" && args !== null && Object.keys(args).length === 0) {
+      return { _id: "me", email: "me@example.com", roles: [] };
     }
     return null;
   };

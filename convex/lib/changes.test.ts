@@ -19,7 +19,7 @@ describe("diffTrackedFields", () => {
           firstName: "Ada",
           lastName: "Lovelace",
           email: "ada@example.com",
-          roles: ["manager"],
+          roles: ["USR_MGR"],
         },
         {
           firstName: "Augusta",
@@ -32,7 +32,7 @@ describe("diffTrackedFields", () => {
       { field: "firstName", before: "Ada", after: "Augusta" },
       { field: "lastName", before: "Lovelace", after: "King" },
       { field: "email", before: "ada@example.com", after: "king@example.com" },
-      { field: "roles", before: "manager", after: "team_member" },
+      { field: "roles", before: "USR_MGR", after: "team_member" },
     ]);
   });
 
@@ -54,7 +54,7 @@ describe("diffTrackedFields", () => {
       ...before,
       firstName: "",
       lastName: undefined,
-      roles: [] as Array<"manager">,
+      roles: [] as Array<"USR_MGR">,
       updatedAt: 9,
       createdAt: 2,
       tokenIdentifier: "new-token",
@@ -68,7 +68,7 @@ describe("diffTrackedFields", () => {
   });
 
   it("treats duplicate roles and an empty set as no difference", () => {
-    expect(diffTrackedFields({ roles: ["manager", "manager"] }, { roles: ["manager"] })).toEqual(
+    expect(diffTrackedFields({ roles: ["USR_MGR", "USR_MGR"] }, { roles: ["USR_MGR"] })).toEqual(
       [],
     );
     expect(diffTrackedFields({ roles: undefined }, { roles: [] })).toEqual([]);
@@ -77,14 +77,14 @@ describe("diffTrackedFields", () => {
   it("records a role order change", () => {
     expect(
       diffTrackedFields(
-        { roles: ["manager", "team_member"] },
-        { roles: ["team_member", "manager"] },
+        { roles: ["USR_MGR", "team_member"] },
+        { roles: ["team_member", "USR_MGR"] },
       ),
     ).toEqual([
       {
         field: "roles",
-        before: "manager, team_member",
-        after: "team_member, manager",
+        before: "USR_MGR, team_member",
+        after: "team_member, USR_MGR",
       },
     ]);
   });
@@ -96,12 +96,12 @@ describe("formatChangeFields and actor labels", () => {
       formatChangeFields([
         { field: "firstName", before: null, after: "Ada" },
         { field: "email", before: "ada@example.com", after: "new@example.com" },
-        { field: "roles", before: null, after: "manager, team_member" },
+        { field: "roles", before: null, after: "USR_MGR, team_member" },
       ]),
     ).toEqual([
       { label: "First name", before: "—", after: "Ada" },
       { label: "Email", before: "ada@example.com", after: "new@example.com" },
-      { label: "Roles", before: "None", after: "Manager, Team member" },
+      { label: "Roles", before: "None", after: "Users manager, Team member" },
     ]);
   });
 

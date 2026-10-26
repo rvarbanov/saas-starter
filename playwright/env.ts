@@ -6,6 +6,15 @@ export const DEFAULT_ORIGIN = "http://localhost:3000";
 
 export const AUTH_STORAGE_PATH = "playwright/.auth/user.json";
 
+/** One storageState per Access enforcement Role. Missing secrets skip that Role. */
+export const ACCESS_ROLE_STORAGE = {
+  SYS_ADM: "playwright/.auth/sys-adm.json",
+  USR_ADM: "playwright/.auth/usr-adm.json",
+  USR_MGR: "playwright/.auth/usr-mgr.json",
+  USR_VWR: "playwright/.auth/usr-vwr.json",
+  NO_ROLE: "playwright/.auth/no-role.json",
+} as const;
+
 /** Load `.env` then `.secret` (same order as playwright.config.ts). */
 export function loadPlaywrightEnv(cwd = process.cwd()): void {
   const envPath = resolve(cwd, ".env");
