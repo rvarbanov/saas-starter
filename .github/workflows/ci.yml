@@ -111,5 +111,5 @@ jobs:
           E2E_USR_VWR_PASSWORD: ${{ secrets.E2E_USR_VWR_PASSWORD }}
           E2E_SYS_ADM_TARGET_EMAIL: ${{ secrets.E2E_SYS_ADM_TARGET_EMAIL }}
           E2E_SYS_ADM_TARGET_PASSWORD: ${{ secrets.E2E_SYS_ADM_TARGET_PASSWORD }}
-          E2E_NONE_EMAIL: ${{ secrets.E2E_NONE_EMAIL }}
-          E2E_NONE_PASSWORD: ${{ secrets.E2E_NONE_PASSWORD }}
+          E2E_NO_ROLE_EMAIL: ${{ secrets.E2E_NO_ROLE_EMAIL }}
+          E2E_NO_ROLE_PASSWORD: ${{ secrets.E2E_NO_ROLE_PASSWORD }}

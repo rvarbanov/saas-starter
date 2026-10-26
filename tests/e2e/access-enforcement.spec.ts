@@ -87,7 +87,7 @@ const usrMgr = creds("E2E_USR_MGR_EMAIL", "E2E_USR_MGR_PASSWORD");
 const usrVwr = creds("E2E_USR_VWR_EMAIL", "E2E_USR_VWR_PASSWORD");
 const targetEmail = process.env.E2E_SYS_ADM_TARGET_EMAIL?.trim();
 const targetPassword = process.env.E2E_SYS_ADM_TARGET_PASSWORD?.trim();
-const none = creds("E2E_NONE_EMAIL", "E2E_NONE_PASSWORD");
+const noRole = creds("E2E_NO_ROLE_EMAIL", "E2E_NO_ROLE_PASSWORD");
 
 if (sysAdm) {
   test.describe("Z System admin", () => {
@@ -208,9 +208,9 @@ async function expectUnauthorizedUsersPage(page: Page, pathname: string) {
   await expect(page.locator("[data-app-nav='Users']")).toHaveCount(0);
 }
 
-if (none) {
+if (noRole) {
   test.describe("AH No roles", () => {
-    test.use({ storageState: ACCESS_ROLE_STORAGE.NONE });
+    test.use({ storageState: ACCESS_ROLE_STORAGE.NO_ROLE });
 
     test("AH: Dashboard, Coming soon, and Profile only", async ({ page }) => {
       await page.goto(APP_ROUTES.dashboard, { waitUntil: "load" });
@@ -226,7 +226,7 @@ if (none) {
 
       await page.goto(APP_ROUTES.profile, { waitUntil: "load" });
       await expect(page.getByTestId("profile-form")).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByTestId("profile-email")).toHaveValue(none.email);
+      await expect(page.getByTestId("profile-email")).toHaveValue(noRole.email);
       await expect(page.getByTestId("profile-roles")).toHaveText("None");
 
       await expectUnauthorizedUsersPage(page, APP_ROUTES.users);

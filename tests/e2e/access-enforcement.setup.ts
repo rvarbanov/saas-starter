@@ -29,9 +29,9 @@ const ROLES = [
   },
   {
     name: "No roles",
-    emailKey: "E2E_NONE_EMAIL",
-    passwordKey: "E2E_NONE_PASSWORD",
-    storage: ACCESS_ROLE_STORAGE.NONE,
+    emailKey: "E2E_NO_ROLE_EMAIL",
+    passwordKey: "E2E_NO_ROLE_PASSWORD",
+    storage: ACCESS_ROLE_STORAGE.NO_ROLE,
   },
 ] as const;
 
