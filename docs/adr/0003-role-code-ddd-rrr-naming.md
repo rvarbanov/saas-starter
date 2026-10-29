@@ -55,6 +55,5 @@ decide what a Role may do. Codes are uppercase, seven characters: a three-charac
   silent wildcard). Profile Actions that use catalog sentinel `ANY` stay
   `ANY`-only.
 - Legacy `team_member` is stripped from `users.roles` ([Cleanup team_member Role
-  code](https://linear.app/radi-dev/issue/RAD-180)). Historical Change field text
-  may still contain that code and displays as Team member; it is not a Role.
+  code](https://linear.app/radi-dev/issue/RAD-180)); it is not a Role.
 - Catalog sentinel `ANY` is not a Role code and is unchanged by this convention.

@@ -102,18 +102,6 @@ describe("formatChangeFields and actor labels", () => {
     ]);
   });
 
-  it("maps historical team_member Change text to Team member", () => {
-    expect(
-      formatChangeFields([{ field: "roles", before: "USR_MGR, team_member", after: "USR_MGR" }]),
-    ).toEqual([
-      {
-        label: "Roles",
-        before: "Users manager, Team member",
-        after: "Users manager",
-      },
-    ]);
-  });
-
   it("labels system, deleted, and current actors", () => {
     expect(actorLabelFor("system", null)).toBe("System");
     expect(actorLabelFor("user", null)).toBe("Deleted user");

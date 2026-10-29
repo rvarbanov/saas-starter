@@ -38,16 +38,11 @@ const ROLE_LABELS: Record<Role, string> = {
   USR_VWR: "Users viewer",
 };
 
-/** Display-only labels for Role codes that may still appear in stored Change text. */
-const HISTORICAL_ROLE_LABELS: Record<string, string> = {
-  team_member: "Team member",
-};
-
 function roleCodeLabel(code: string): string {
   if (code in ROLE_LABELS) {
     return ROLE_LABELS[code as Role];
   }
-  return HISTORICAL_ROLE_LABELS[code] ?? code;
+  return code;
 }
 
 function storedName(value: string | undefined): string | null {
