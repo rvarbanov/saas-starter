@@ -189,7 +189,7 @@ The template is considered **spec-complete** when:
   - Be deployed to Vercel via the documented CI/CD flow.  
 - **Queues:** A written **evaluation** of Vercel Queues vs alternatives exists in `IMPLEMENTATION.md` before locking a vendor.  
 - The **public**, **dashboard**, and **admin** sections exist with the **required pages** listed in `IMPLEMENTATION.md`, **WorkOS**-based auth, and basic CRUD for at least one representative resource.  
-- **Roles** (super admin, manager, team member) and **multi-role users** are reflected in data model and access checks per `IMPLEMENTATION.md`.  
+- **Roles** (`SYS_ADM`, `USR_ADM`, `USR_MGR`, `USR_VWR`) and **multi-Role App users** are reflected in data model and access checks per `IMPLEMENTATION.md` / Access enforcement.  
 - At least one E2E test covering each major section, and **happy-path E2E** for create / update / fetch for that resource (or documented scope per above).  
 - `INTENT.md`, `SPECIFICATION.md`, and `IMPLEMENTATION.md` are present and consistent.
 

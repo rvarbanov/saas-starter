@@ -54,6 +54,4 @@ decide what a Role may do. Codes are uppercase, seven characters: a three-charac
 - `SYS_ADM` is listed **explicitly** on every Role-gated Action allow-list (no
   silent wildcard). Profile Actions that use catalog sentinel `ANY` stay
   `ANY`-only.
-- `team_member` remains a temporary stored exception until its cleanup ticket;
-  it is not a Users catalog Role.
 - Catalog sentinel `ANY` is not a Role code and is unchanged by this convention.

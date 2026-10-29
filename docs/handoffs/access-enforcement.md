@@ -19,7 +19,6 @@ This handoff feeds build stories under [Roles and access (scoped RBAC)](https://
 
 - Implementing Access enforcement inside the Wayfinder map effort (plan-only; build is a later session)
 - [System actor Role code SYS_SYS for automated Changes](https://linear.app/radi-dev/issue/RAD-183)
-- [Cleanup team_member Role code](https://linear.app/radi-dev/issue/RAD-180)
 - Role / grant management UI and who-may-assign policy ([MVP2: Role / grant management (outline)](https://linear.app/radi-dev/issue/RAD-166), [MVP2: Relational grants + who may assign](https://linear.app/radi-dev/issue/RAD-136))
 - Relational grants migration
 - Internal vs public app mode ([Deferred: Internal vs public app mode for starter](https://linear.app/radi-dev/issue/RAD-167))
@@ -68,7 +67,6 @@ Catalog is nested in code (e.g. `actions.users.list = [...]`, `actions.profile.s
 
 - Role codes follow `DDD_RRR` ([ADR 0003](../adr/0003-role-code-ddd-rrr-naming.md)).
 - **Superseded for MVP 1 seed set and legacy map** by RAD-181: use `SYS_ADM` / `USR_ADM` / `USR_MGR` / `USR_VWR`, and `super_admin` → `SYS_ADM` (not `USR_ADM`).
-- `team_member` remains a temporary stored exception until [RAD-180](https://linear.app/radi-dev/issue/RAD-180); it is not a Users catalog Role.
 
 ### Expand Access enforcement Roles: System admin, Users viewer (RAD-181)
 
@@ -91,7 +89,6 @@ Profile `self.read` / `self.write` stay **`ANY` only**.
 | --- | --- |
 | `super_admin` | `SYS_ADM` |
 | `manager` | `USR_MGR` |
-| `team_member` | unchanged until cleanup |
 | empty / missing | no Users Actions |
 
 No automatic invent of `USR_ADM` or `USR_VWR` — seed via internal `setRoles` / test principals.
@@ -219,7 +216,7 @@ Reuse existing Users / Create / Delete testids where present.
 
 1. **Catalog module:** Add nested Action → Role-code allow-lists (RAD-181 table + Profile `ANY`) and helpers used by `can` and server gates. No silent `SYS_ADM` / admin wildcard.
 2. **`api.authz.can`:** Implement `convex/authz.ts` per RAD-170 (args, returns, auth/provisioning throws, unknown → `false`).
-3. **Role code migration:** Migrate stored `super_admin` → `SYS_ADM`, `manager` → `USR_MGR` in schema, validators, labels (`lib/role-labels.ts`, Convex roles helpers), filters, and tests. Leave `team_member` until RAD-180. Seed `USR_ADM` / `USR_VWR` only via internal `setRoles` / ops.
+3. **Role code migration:** Migrate stored `super_admin` → `SYS_ADM`, `manager` → `USR_MGR` in schema, validators, labels (`lib/role-labels.ts`, Convex roles helpers), filters, and tests. Seed `USR_ADM` / `USR_VWR` only via internal `setRoles` / ops.
 4. **`getMe` floor:** Strip `getMe` to RAD-174 fields; keep privileged identity fields on `getById` only when `users.read` allows.
 5. **Public role writes:** Ensure create/update APIs reject `roles`; keep internal `setRoles`. Confirm no role checkbox UI regresses (RAD-173).
 6. **Users layout gate:** Add/extend `app/dashboard/users/layout.tsx` for per-route Actions (RAD-172); hide Users nav without `list`; no resource fetch until `can` is true.
@@ -245,7 +242,7 @@ Reuse existing Users / Create / Delete testids where present.
 - **Provision E2E principals:** Human fills `E2E_SYS_ADM_*`, `E2E_USR_ADM_*`, `E2E_USR_MGR_*`, `E2E_USR_VWR_*`, and `E2E_SYS_ADM_TARGET_*` (and seeds Roles). Until then Z–AG skip.
 - **Migrate legacy E2E login** from `E2E_WORKOS_*` to `E2E_SYS_ADM_*` when ready — do not block this build on that retarget.
 - **Profile-only Unauthorized-on-Users E2E** — later (not Z–AG).
-- [RAD-180](https://linear.app/radi-dev/issue/RAD-180) `team_member` cleanup; [RAD-183](https://linear.app/radi-dev/issue/RAD-183) `SYS_SYS`.
+- [RAD-183](https://linear.app/radi-dev/issue/RAD-183) `SYS_SYS`.
 
 ## Sources
 

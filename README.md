@@ -62,12 +62,11 @@ Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (*
 | `/dashboard`               | Authenticated home + primary CRUD    |
 | `/dashboard/settings`      | Account settings                     |
 | `/dashboard/profile`       | User’s own profile                   |
-| `/team` / workspace routes | **Manager**: manage assigned team(s) |
-| `/work` / assigned work    | **Team member**: own work items      |
-| `/admin/...`               | **Super admin** only                 |
+| `/dashboard/users`         | Users list (Role-gated)              |
+| `/admin/...`               | System admin only (when present)     |
 
 
-**Roles:** **Super admin** (global), **Manager** (team scope), **Team member** (self + assigned work); a user **can have multiple roles**. See `**docs/IMPLEMENTATION.md`** §4.
+**Roles:** Access enforcement MVP 1 seed Roles — **System admin** (`SYS_ADM`), **Users admin** (`USR_ADM`), **Users manager** (`USR_MGR`), **Users viewer** (`USR_VWR`); a user **can have multiple Roles**. See `**docs/IMPLEMENTATION.md`** §4 and `**GLOSSARY.md**`.
 
 ---
 

@@ -27,7 +27,7 @@ async function insertUser(
     lastName?: string;
     tokenIdentifier?: string;
     workosUserId?: string;
-    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">;
+    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR">;
     deletedAt?: number;
   },
 ): Promise<Id<"users">> {
@@ -54,7 +54,7 @@ async function insertUser(
 
 async function ensureCaller(
   t: TestClient,
-  roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member"> = ["SYS_ADM"],
+  roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR"> = ["SYS_ADM"],
 ) {
   await t.run(async (ctx) => {
     const existing = await ctx.db
@@ -83,7 +83,7 @@ async function listAsReader(
   args: {
     paginationOpts: { numItems: number; cursor: string | null };
     search?: string;
-    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">;
+    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR">;
     createdWithinDays?: 7 | 30 | 90;
   },
 ) {
@@ -203,7 +203,7 @@ describe("users.list", () => {
     await insertUser(t, {
       email: "mgr@example.com",
       updatedAt: 2,
-      roles: ["USR_MGR", "team_member"],
+      roles: ["USR_MGR", "USR_VWR"],
     });
     await insertUser(t, {
       email: "none@example.com",
@@ -305,7 +305,7 @@ describe("users.getById", () => {
       updatedAt: 5,
       createdAt: 4,
       firstName: "Ada",
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
     });
 
     await expect(getByIdAsReader(t, userId)).resolves.toEqual({
@@ -315,7 +315,7 @@ describe("users.getById", () => {
       firstName: "Ada",
       email: "ada@example.com",
       workosUserId: "ada@example.com",
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
       createdAt: 4,
       updatedAt: 5,
     });
@@ -330,7 +330,7 @@ describe("users.patchUserDetailInternal", () => {
       updatedAt: 1,
       firstName: "Old",
       lastName: "Name",
-      roles: ["SYS_ADM", "team_member"],
+      roles: ["SYS_ADM", "USR_VWR"],
     });
 
     const updated = await t.mutation(internal.users.patchUserDetailInternal, {
@@ -346,7 +346,7 @@ describe("users.patchUserDetailInternal", () => {
       firstName: "New",
       lastName: "Person",
       email: "new@example.com",
-      roles: ["SYS_ADM", "team_member"],
+      roles: ["SYS_ADM", "USR_VWR"],
     });
   });
 
@@ -532,7 +532,7 @@ describe("users.deleteUser", () => {
 
   async function insertCaller(
     t: TestClient,
-    roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">,
+    roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR">,
     extra?: { deletedAt?: number; email?: string },
   ) {
     return await insertUser(t, {
@@ -622,7 +622,7 @@ describe("users.deleteUser", () => {
       updatedAt: 1,
       createdAt: 1,
       firstName: "Ada",
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
     });
 
     await expect(
@@ -636,7 +636,7 @@ describe("users.deleteUser", () => {
     expect(doc?.updatedAt).toBe(doc?.deletedAt);
     expect(doc?.email).toBe("ada@example.com");
     expect(doc?.firstName).toBe("Ada");
-    expect(doc?.roles).toEqual(["team_member"]);
+    expect(doc?.roles).toEqual(["USR_VWR"]);
     expect(doc?.createdAt).toBe(1);
   });
 });
@@ -899,7 +899,7 @@ describe("Changes recorded with App user writes", () => {
     const userId = await insertUser(t, {
       email: "ada@example.com",
       updatedAt: 2,
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
     });
     const missingActorId = await t.run(async (ctx) => {
       const id = await ctx.db.insert("users", {
@@ -926,7 +926,7 @@ describe("Changes recorded with App user writes", () => {
 
     await t.mutation(internal.users.setRoles, {
       userId,
-      roles: ["USR_MGR", "team_member"],
+      roles: ["USR_MGR", "USR_VWR"],
       actorUserId,
     });
 
@@ -935,7 +935,7 @@ describe("Changes recorded with App user writes", () => {
       expect.objectContaining({
         action: "update",
         actorLabel: "Bo Ss",
-        fields: [{ label: "Roles", before: "Team member", after: "Users manager, Team member" }],
+        fields: [{ label: "Roles", before: "Users viewer", after: "Users manager, Users viewer" }],
       }),
     ]);
   });

@@ -11,7 +11,7 @@ const modules = import.meta.glob("./**/*.ts");
 const identity = { subject: "caller", issuer: "https://example.test" };
 const callerToken = "https://example.test|caller";
 
-type RoleName = "SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member";
+type RoleName = "SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR";
 
 function testClient() {
   return convexTest(schema, modules);
@@ -85,17 +85,6 @@ describe("authz.can", () => {
     await insertCaller(t, []);
     await expect(
       t.withIdentity(identity).query(api.authz.can, { domain: "profile", action: "self.read" }),
-    ).resolves.toBe(true);
-    await expect(
-      t.withIdentity(identity).query(api.authz.can, { domain: "users", action: "list" }),
-    ).resolves.toBe(false);
-  });
-
-  it("allows team_member to write their Profile and denies Users list", async () => {
-    const t = testClient();
-    await insertCaller(t, ["team_member"]);
-    await expect(
-      t.withIdentity(identity).query(api.authz.can, { domain: "profile", action: "self.write" }),
     ).resolves.toBe(true);
     await expect(
       t.withIdentity(identity).query(api.authz.can, { domain: "users", action: "list" }),
@@ -181,7 +170,7 @@ describe("users action gates", () => {
   it("lets USR_ADM and SYS_ADM delete a non-System-admin and rejects a SYS_ADM subject", async () => {
     const t = testClient();
     await insertCaller(t, ["USR_ADM"]);
-    const subjectId = await insertUser(t, { email: "ada@example.com", roles: ["team_member"] });
+    const subjectId = await insertUser(t, { email: "ada@example.com", roles: [] });
     const sysId = await insertUser(t, { email: "sys@example.com", roles: ["SYS_ADM"] });
 
     await expect(
@@ -204,9 +193,9 @@ describe("users action gates", () => {
     ).resolves.toBeNull();
   });
 
-  it("lets team_member update themselves and denies updating someone else", async () => {
+  it("lets an empty-roles caller update themselves and denies updating someone else", async () => {
     const t = testClient();
-    const callerId = await insertCaller(t, ["team_member"]);
+    const callerId = await insertCaller(t, []);
     const otherId = await insertUser(t, { email: "ada@example.com" });
 
     await expect(

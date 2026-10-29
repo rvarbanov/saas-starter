@@ -35,7 +35,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Create is **all-or-nothing** across the App user and its WorkOS sign-in only. Invite send is **best-effort**.
 - Auth-link fields stay **required** (`tokenIdentifier`, `workosUserId`). No schema widening.
 - WorkOS MVP: `createUser` (email ± names, **no** password) then `sendInvitation` (`{ email }` only, no organization).
-- Form: email required; firstName / lastName / roles optional. Roles UI mirrors User detail (`manager` | `team_member`; no `super_admin`; empty OK).
+- Form: email required; firstName / lastName / roles optional. Role assignment UI is out of Create User MVP (empty Roles OK; writes stay internal — see Access enforcement).
 - Validation: reuse existing email helpers + name trim/max length; no new “valid name” grammar.
 - Cancel → Users list. Success → User detail for new `_id`.
 - Breadcrumbs: Dashboard → Users → Create user.
@@ -64,7 +64,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 | **Args** | `{ email: string, firstName?: string, lastName?: string, roles?: Role[] }` |
 | **Email** | Required; validate/normalize via existing helpers — creator-facing `"Invalid email address"`, `"Email already registered"` |
 | **Names** | Omit or empty → stored unset; existing normalize / max-length rules |
-| **Roles** | Omit → `[]`; only `manager` \| `team_member` via `assertAssignableRoles` (reject `super_admin`) |
+| **Roles** | Omit → `[]`; public Create must not accept client Role writes (internal `setRoles` only) |
 | **Returns** | `{ user: PublicUserDoc, inviteSent: boolean }` — `user` same public doc validator as User detail |
 
 **Order & rollback**
@@ -119,9 +119,9 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 **Fields (shared with User detail edit)**
 
 - Order: **First name** → **Last name** → **Email** → **Roles**.
-- Roles: assignable checkboxes only (`manager` | `team_member`); empty OK; no `super_admin`.
+- No Role checkboxes on Create (Access enforcement / [`user-edit.md`](./user-edit.md): Role writes are internal-only).
 - Labels match User detail (no required asterisk in MVP).
-- Create and Edit must stay identical on field set, order, labels, checkboxes, client validation, and submit dirty-gating; **extract shared form after MVP**. The later pack [`user-edit.md`](./user-edit.md) is the winner: it drops role checkboxes and uses **Save** / **Saving…**.
+- Create and Edit must stay identical on field set, order, labels, client validation, and submit dirty-gating; **extract shared form after MVP**. The later pack [`user-edit.md`](./user-edit.md) is the winner: it drops role checkboxes and uses **Save** / **Saving…**.
 
 **Validation & errors**
 
@@ -152,8 +152,6 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 | `create-user-email` | Email input |
 | `create-user-first-name` | First name |
 | `create-user-last-name` | Last name |
-| `create-user-role-manager` | Manager checkbox |
-| `create-user-role-team_member` | Team member checkbox |
 | `create-user-submit` | Submit |
 | `create-user-cancel` | Cancel → list |
 | `create-user-error` | Form-level alert |

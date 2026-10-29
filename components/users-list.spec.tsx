@@ -37,7 +37,7 @@ describe("usersListErrorMessage", () => {
 
 describe("formatListedUserRoles", () => {
   it("formats known roles for display", () => {
-    expect(formatListedUserRoles(["SYS_ADM", "team_member"])).toBe("System admin, Team member");
+    expect(formatListedUserRoles(["SYS_ADM", "USR_VWR"])).toBe("System admin, Users viewer");
   });
 });
 

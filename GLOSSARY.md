@@ -82,7 +82,7 @@ _Avoid_: Manager (alone), team manager, Users manager (when you mean a non-Users
 
 **Domain viewer**:
 The Viewer responsibility for one Domain — Role code suffix `VWR`. A naming pattern only; which Actions it holds come from that Domain’s catalog, not from the suffix.
-_Avoid_: Viewer (alone), Users viewer (when you mean a non-Users Domain viewer), read-only user, team member (as this responsibility), treating `VWR` as an access level
+_Avoid_: Viewer (alone), Users viewer (when you mean a non-Users Domain viewer), read-only user, treating `VWR` as an access level
 
 **System admin**:
 The cross-Domain admin — Role code `SYS_ADM`. Holds every Action the catalog lists for it (expected: all Actions across Domains). Listed explicitly on each Action allow-list; not a silent wildcard. Successor to the legacy Super admin / `super_admin` seed.
@@ -98,10 +98,10 @@ _Avoid_: User manager, Manager, manager, team manager, UMG, ADM, Domain manager 
 
 **Users viewer**:
 The Users Domain viewer — Role code `USR_VWR`. Holds `users.list` and `users.read` only. Cannot create, update, or delete Users, and cannot read Changes on User detail.
-_Avoid_: Viewer (alone), team member (as this Role), read-only user, Domain viewer (when you mean this specific Role)
+_Avoid_: Viewer (alone), read-only user, Domain viewer (when you mean this specific Role)
 
 **Role code**:
-The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement MVP 1 seed Roles: `SYS_ADM` (System admin), `USR_ADM` (Users admin), `USR_MGR` (Users manager), `USR_VWR` (Users viewer). Legacy map: `super_admin` → `SYS_ADM`, `manager` → `USR_MGR`. Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
+The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement MVP 1 seed Roles: `SYS_ADM` (System admin), `USR_ADM` (Users admin), `USR_MGR` (Users manager), `USR_VWR` (Users viewer). Legacy map: `super_admin` → `SYS_ADM`, `manager` → `USR_MGR`. The UI shows the Role description, not the code alone.
 _Avoid_: Role slug as the only name, permission, capability, treating the code as an access level, ADM, UMG
 
 **Role**:

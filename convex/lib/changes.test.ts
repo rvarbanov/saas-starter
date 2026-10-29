@@ -25,14 +25,14 @@ describe("diffTrackedFields", () => {
           firstName: "Augusta",
           lastName: "King",
           email: "king@example.com",
-          roles: ["team_member"],
+          roles: ["USR_VWR"],
         },
       ),
     ).toEqual([
       { field: "firstName", before: "Ada", after: "Augusta" },
       { field: "lastName", before: "Lovelace", after: "King" },
       { field: "email", before: "ada@example.com", after: "king@example.com" },
-      { field: "roles", before: "USR_MGR", after: "team_member" },
+      { field: "roles", before: "USR_MGR", after: "USR_VWR" },
     ]);
   });
 
@@ -76,15 +76,12 @@ describe("diffTrackedFields", () => {
 
   it("records a role order change", () => {
     expect(
-      diffTrackedFields(
-        { roles: ["USR_MGR", "team_member"] },
-        { roles: ["team_member", "USR_MGR"] },
-      ),
+      diffTrackedFields({ roles: ["USR_MGR", "USR_VWR"] }, { roles: ["USR_VWR", "USR_MGR"] }),
     ).toEqual([
       {
         field: "roles",
-        before: "USR_MGR, team_member",
-        after: "team_member, USR_MGR",
+        before: "USR_MGR, USR_VWR",
+        after: "USR_VWR, USR_MGR",
       },
     ]);
   });
@@ -96,12 +93,12 @@ describe("formatChangeFields and actor labels", () => {
       formatChangeFields([
         { field: "firstName", before: null, after: "Ada" },
         { field: "email", before: "ada@example.com", after: "new@example.com" },
-        { field: "roles", before: null, after: "USR_MGR, team_member" },
+        { field: "roles", before: null, after: "USR_MGR, USR_VWR" },
       ]),
     ).toEqual([
       { label: "First name", before: "—", after: "Ada" },
       { label: "Email", before: "ada@example.com", after: "new@example.com" },
-      { label: "Roles", before: "None", after: "Users manager, Team member" },
+      { label: "Roles", before: "None", after: "Users manager, Users viewer" },
     ]);
   });
 

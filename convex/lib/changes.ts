@@ -36,8 +36,14 @@ const ROLE_LABELS: Record<Role, string> = {
   USR_ADM: "Users admin",
   USR_MGR: "Users manager",
   USR_VWR: "Users viewer",
-  team_member: "Team member",
 };
+
+function roleCodeLabel(code: string): string {
+  if (code in ROLE_LABELS) {
+    return ROLE_LABELS[code as Role];
+  }
+  return code;
+}
 
 function storedName(value: string | undefined): string | null {
   if (value === undefined) {
@@ -128,7 +134,7 @@ function formatStoredValue(field: TrackedFieldName, value: string | null): strin
     return value
       .split(", ")
       .filter((part) => part.length > 0)
-      .map((part) => ROLE_LABELS[part as Role] ?? part)
+      .map((part) => roleCodeLabel(part))
       .join(", ");
   }
   return value === null ? "—" : value;
