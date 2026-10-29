@@ -20,11 +20,10 @@ describe("authz catalog", () => {
     expect(allows(["USR_ADM"], { domain: "users", action: "delete" })).toBe(true);
   });
 
-  it("allows Profile Actions for every provisioned role set, including empty and team_member", () => {
+  it("allows Profile Actions for every provisioned role set, including empty roles", () => {
     expect(allows([], { domain: "profile", action: "self.read" })).toBe(true);
     expect(allows([], { domain: "profile", action: "self.write" })).toBe(true);
-    expect(allows(["team_member"], { domain: "profile", action: "self.write" })).toBe(true);
-    expect(allows(["team_member"], { domain: "users", action: "list" })).toBe(false);
+    expect(allows([], { domain: "users", action: "list" })).toBe(false);
     expect(allows(undefined, { domain: "users", action: "read" })).toBe(false);
   });
 

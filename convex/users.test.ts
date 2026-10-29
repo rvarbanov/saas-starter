@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
+import { defineSchema, defineTable } from "convex/server";
 import { convexTest } from "convex-test";
+import { v } from "convex/values";
 import { describe, expect, it } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -10,6 +12,54 @@ import schema from "./schema";
 const modules = import.meta.glob("./**/*.ts");
 
 const identity = { subject: "caller", issuer: "https://example.test" };
+
+/** Allows seeding pre-cleanup `team_member` rows for the strip migration rehearsal. */
+const legacyStripSchema = defineSchema(
+  {
+    users: defineTable({
+      appUserId: v.string(),
+      tokenIdentifier: v.string(),
+      email: v.string(),
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+      workosUserId: v.string(),
+      roles: v.optional(v.array(v.string())),
+      searchText: v.optional(v.string()),
+      deletedAt: v.optional(v.number()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_token", ["tokenIdentifier"])
+      .index("by_email", ["email"])
+      .index("by_app_user_id", ["appUserId"])
+      .index("by_workosUserId", ["workosUserId"])
+      .index("by_updatedAt", ["updatedAt"])
+      .searchIndex("search_text", {
+        searchField: "searchText",
+      }),
+    changes: defineTable({
+      resourceKind: v.literal("app_user"),
+      subjectId: v.string(),
+      action: v.union(v.literal("create"), v.literal("update"), v.literal("delete")),
+      actorKind: v.union(v.literal("user"), v.literal("system")),
+      actorUserId: v.optional(v.id("users")),
+      at: v.number(),
+      fields: v.array(
+        v.object({
+          field: v.union(
+            v.literal("firstName"),
+            v.literal("lastName"),
+            v.literal("email"),
+            v.literal("roles"),
+          ),
+          before: v.union(v.string(), v.null()),
+          after: v.union(v.string(), v.null()),
+        }),
+      ),
+    }).index("by_subject_and_at", ["resourceKind", "subjectId", "at"]),
+  },
+  { schemaValidation: false },
+);
 
 function testClient() {
   return convexTest(schema, modules);
@@ -27,7 +77,7 @@ async function insertUser(
     lastName?: string;
     tokenIdentifier?: string;
     workosUserId?: string;
-    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">;
+    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR">;
     deletedAt?: number;
   },
 ): Promise<Id<"users">> {
@@ -54,7 +104,7 @@ async function insertUser(
 
 async function ensureCaller(
   t: TestClient,
-  roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member"> = ["SYS_ADM"],
+  roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR"> = ["SYS_ADM"],
 ) {
   await t.run(async (ctx) => {
     const existing = await ctx.db
@@ -83,7 +133,7 @@ async function listAsReader(
   args: {
     paginationOpts: { numItems: number; cursor: string | null };
     search?: string;
-    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">;
+    roles?: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR">;
     createdWithinDays?: 7 | 30 | 90;
   },
 ) {
@@ -203,7 +253,7 @@ describe("users.list", () => {
     await insertUser(t, {
       email: "mgr@example.com",
       updatedAt: 2,
-      roles: ["USR_MGR", "team_member"],
+      roles: ["USR_MGR", "USR_VWR"],
     });
     await insertUser(t, {
       email: "none@example.com",
@@ -305,7 +355,7 @@ describe("users.getById", () => {
       updatedAt: 5,
       createdAt: 4,
       firstName: "Ada",
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
     });
 
     await expect(getByIdAsReader(t, userId)).resolves.toEqual({
@@ -315,7 +365,7 @@ describe("users.getById", () => {
       firstName: "Ada",
       email: "ada@example.com",
       workosUserId: "ada@example.com",
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
       createdAt: 4,
       updatedAt: 5,
     });
@@ -330,7 +380,7 @@ describe("users.patchUserDetailInternal", () => {
       updatedAt: 1,
       firstName: "Old",
       lastName: "Name",
-      roles: ["SYS_ADM", "team_member"],
+      roles: ["SYS_ADM", "USR_VWR"],
     });
 
     const updated = await t.mutation(internal.users.patchUserDetailInternal, {
@@ -346,7 +396,7 @@ describe("users.patchUserDetailInternal", () => {
       firstName: "New",
       lastName: "Person",
       email: "new@example.com",
-      roles: ["SYS_ADM", "team_member"],
+      roles: ["SYS_ADM", "USR_VWR"],
     });
   });
 
@@ -532,7 +582,7 @@ describe("users.deleteUser", () => {
 
   async function insertCaller(
     t: TestClient,
-    roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR" | "team_member">,
+    roles: Array<"SYS_ADM" | "USR_ADM" | "USR_MGR" | "USR_VWR">,
     extra?: { deletedAt?: number; email?: string },
   ) {
     return await insertUser(t, {
@@ -622,7 +672,7 @@ describe("users.deleteUser", () => {
       updatedAt: 1,
       createdAt: 1,
       firstName: "Ada",
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
     });
 
     await expect(
@@ -636,7 +686,7 @@ describe("users.deleteUser", () => {
     expect(doc?.updatedAt).toBe(doc?.deletedAt);
     expect(doc?.email).toBe("ada@example.com");
     expect(doc?.firstName).toBe("Ada");
-    expect(doc?.roles).toEqual(["team_member"]);
+    expect(doc?.roles).toEqual(["USR_VWR"]);
     expect(doc?.createdAt).toBe(1);
   });
 });
@@ -899,7 +949,7 @@ describe("Changes recorded with App user writes", () => {
     const userId = await insertUser(t, {
       email: "ada@example.com",
       updatedAt: 2,
-      roles: ["team_member"],
+      roles: ["USR_VWR"],
     });
     const missingActorId = await t.run(async (ctx) => {
       const id = await ctx.db.insert("users", {
@@ -926,7 +976,7 @@ describe("Changes recorded with App user writes", () => {
 
     await t.mutation(internal.users.setRoles, {
       userId,
-      roles: ["USR_MGR", "team_member"],
+      roles: ["USR_MGR", "USR_VWR"],
       actorUserId,
     });
 
@@ -935,7 +985,7 @@ describe("Changes recorded with App user writes", () => {
       expect.objectContaining({
         action: "update",
         actorLabel: "Bo Ss",
-        fields: [{ label: "Roles", before: "Team member", after: "Users manager, Team member" }],
+        fields: [{ label: "Roles", before: "Users viewer", after: "Users manager, Users viewer" }],
       }),
     ]);
   });
@@ -966,5 +1016,98 @@ describe("Changes recorded with App user writes", () => {
     expect(second.page).toHaveLength(1);
     expect(second.page[0]?.at).toBe(1);
     expect(second.isDone).toBe(true);
+  });
+});
+
+describe("users.stripTeamMemberRoles", () => {
+  it("is a no-op when no App user holds team_member", async () => {
+    const t = testClient();
+    await insertUser(t, { email: "clean@example.com", updatedAt: 1, roles: ["USR_MGR"] });
+    await insertUser(t, {
+      email: "deleted-clean@example.com",
+      updatedAt: 2,
+      roles: ["USR_ADM"],
+      deletedAt: 9,
+    });
+
+    const page = await t.mutation(internal.users.stripTeamMemberRoles, {
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+
+    expect(page.patched).toBe(0);
+    expect(page.isDone).toBe(true);
+  });
+
+  it("strips team_member including soft-deleted and records a system Change", async () => {
+    // Legacy rows cannot be inserted under the narrowed schema validator.
+    const t = convexTest(legacyStripSchema, modules);
+
+    const soleId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|sole",
+        email: "sole@example.com",
+        workosUserId: "sole",
+        roles: ["team_member"],
+        createdAt: 1,
+        updatedAt: 1,
+      });
+    });
+    const mixedId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|mixed",
+        email: "mixed@example.com",
+        workosUserId: "mixed",
+        roles: ["SYS_ADM", "team_member", "USR_MGR"],
+        deletedAt: 9,
+        createdAt: 2,
+        updatedAt: 2,
+      });
+    });
+    await t.run(async (ctx) => {
+      await ctx.db.insert("users", {
+        appUserId: crypto.randomUUID(),
+        tokenIdentifier: "https://example.test|clean",
+        email: "clean@example.com",
+        workosUserId: "clean",
+        roles: ["USR_ADM"],
+        createdAt: 3,
+        updatedAt: 3,
+      });
+    });
+
+    const page = await t.mutation(internal.users.stripTeamMemberRoles, {
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+
+    expect(page.patched).toBe(2);
+    expect(page.isDone).toBe(true);
+
+    const sole = await t.run(async (ctx) => await ctx.db.get("users", soleId));
+    expect(sole?.roles).toEqual([]);
+    expect(sole?.updatedAt).toBeGreaterThan(1);
+
+    const mixed = await t.run(async (ctx) => await ctx.db.get("users", mixedId));
+    expect(mixed?.roles).toEqual(["SYS_ADM", "USR_MGR"]);
+    expect(mixed?.deletedAt).toBe(9);
+
+    const changes = await t.run(async (ctx) => {
+      return await ctx.db.query("changes").collect();
+    });
+    expect(changes).toHaveLength(2);
+    expect(changes.every((change) => change.actorKind === "system")).toBe(true);
+    expect(changes.every((change) => change.action === "update")).toBe(true);
+    const bySubject = Object.fromEntries(changes.map((change) => [change.subjectId, change]));
+    expect(bySubject[soleId]?.fields).toEqual([
+      { field: "roles", before: "team_member", after: null },
+    ]);
+    expect(bySubject[mixedId]?.fields).toEqual([
+      {
+        field: "roles",
+        before: "SYS_ADM, team_member, USR_MGR",
+        after: "SYS_ADM, USR_MGR",
+      },
+    ]);
   });
 });

@@ -101,7 +101,7 @@ The Users Domain viewer — Role code `USR_VWR`. Holds `users.list` and `users.r
 _Avoid_: Viewer (alone), team member (as this Role), read-only user, Domain viewer (when you mean this specific Role)
 
 **Role code**:
-The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement MVP 1 seed Roles: `SYS_ADM` (System admin), `USR_ADM` (Users admin), `USR_MGR` (Users manager), `USR_VWR` (Users viewer). Legacy map: `super_admin` → `SYS_ADM`, `manager` → `USR_MGR`. Legacy `team_member` may still appear in storage until a later cleanup. The UI shows the Role description, not the code alone.
+The string stored on the App user’s `roles` array. New Roles follow `DDD_RRR` (Domain + responsibility) per `docs/adr/0003-role-code-ddd-rrr-naming.md` — Domain admin (`*_ADM`), Domain manager (`*_MGR`), Domain viewer (`*_VWR`), and other responsibilities in that ADR. Access enforcement MVP 1 seed Roles: `SYS_ADM` (System admin), `USR_ADM` (Users admin), `USR_MGR` (Users manager), `USR_VWR` (Users viewer). Legacy map: `super_admin` → `SYS_ADM`, `manager` → `USR_MGR`. Legacy `team_member` is not a Role; historical Change text may still contain that code and displays as Team member. The UI shows the Role description, not the code alone.
 _Avoid_: Role slug as the only name, permission, capability, treating the code as an access level, ADM, UMG
 
 **Role**:

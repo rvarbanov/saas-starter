@@ -5,7 +5,6 @@ export const ROLE_LABELS: Record<Role, string> = {
   USR_ADM: "Users admin",
   USR_MGR: "Users manager",
   USR_VWR: "Users viewer",
-  team_member: "Team member",
 };
 
 export function formatRoleLabels(roles: readonly Role[] | undefined): string {
