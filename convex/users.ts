@@ -9,14 +9,7 @@ import { extractEmailFromIdentity } from "./lib/identity";
 import { listUsersPageValidator, toListUser } from "./lib/listUser";
 import { clampPaginationNumItems } from "./lib/pagination";
 import { requireCan } from "./lib/requireCan";
-import {
-  hasAnyRole,
-  hasRole,
-  type Role,
-  rolesValidator,
-  stripTeamMemberRoleCode,
-  uniqueRoles,
-} from "./lib/roles";
+import { hasAnyRole, hasRole, type Role, rolesValidator, uniqueRoles } from "./lib/roles";
 import { buildSearchText } from "./lib/searchText";
 import { upsertUserFromProfile } from "./lib/upsertUser";
 import { meUserValidator, toMeUser, toPublicUserDoc, userDocValidator } from "./lib/userDoc";
@@ -482,62 +475,6 @@ export const backfillSearchText = internalMutation({
         await ctx.db.patch("users", user._id, { searchText });
         patched += 1;
       }
-    }
-
-    return {
-      patched,
-      continueCursor: result.continueCursor,
-      isDone: result.isDone,
-    };
-  },
-});
-
-/**
- * Strip legacy `team_member` from every App user's roles (including soft-deleted).
- * Writes a system Change when the array changes. Run until `isDone` before
- * deploying a schema that drops `team_member` from the Role union.
- * Driver: `pnpm convex:strip-team-member-roles`.
- */
-export const stripTeamMemberRoles = internalMutation({
-  args: {
-    paginationOpts: paginationOptsValidator,
-  },
-  returns: v.object({
-    patched: v.number(),
-    continueCursor: v.string(),
-    isDone: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    const result = await ctx.db.query("users").paginate({
-      ...args.paginationOpts,
-      numItems: clampPaginationNumItems(args.paginationOpts.numItems),
-    });
-
-    let patched = 0;
-    for (const user of result.page) {
-      const strip = stripTeamMemberRoleCode(user.roles as readonly string[] | undefined);
-      if (!strip.changed) {
-        continue;
-      }
-      const now = Date.now();
-      await ctx.db.patch("users", user._id, {
-        roles: strip.roles,
-        updatedAt: now,
-      });
-      await recordChange(ctx, {
-        subjectId: user._id,
-        action: "update",
-        actor: { kind: "system" },
-        at: now,
-        fields: [
-          {
-            field: "roles",
-            before: strip.beforeLiteral,
-            after: strip.afterLiteral,
-          },
-        ],
-      });
-      patched += 1;
     }
 
     return {

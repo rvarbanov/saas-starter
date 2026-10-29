@@ -118,7 +118,7 @@ export async function upsertUserFromProfile(
     tokenIdentifier: profile.tokenIdentifier,
     email,
     workosUserId: profile.workosUserId,
-    // Explicit empty set — provisioning does not assign Team member or any role.
+    // Explicit empty set — provisioning does not assign a default Role.
     roles: [],
     searchText: buildSearchText({ email }),
     createdAt: now,
