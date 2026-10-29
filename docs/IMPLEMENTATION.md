@@ -47,12 +47,11 @@ These routes must exist for **SEO**, **trust**, and **compliance** (adjust paths
 | `/dashboard`                | Authenticated home; entry to CRUD for the primary resource                                   |
 | `/dashboard/settings`       | Account settings                                                                             |
 | `/dashboard/profile`        | User’s own profile                                                                           |
-| `/team` or `/workspace/...` | **Manager** scope: manage the team(s) they manage (omit if single-tenant MVP defers team UI) |
-| `/work` or `/tasks/...`     | **Team member** scope: work assigned to them (representative list/detail)                    |
-| `/admin/...`                | **Super admin** only: global admin (users, orgs, settings)                                   |
+| `/dashboard/users`          | Users list / detail / create / edit (Role-gated via Access enforcement)                      |
+| `/admin/...`                | System admin only when present: global admin (orgs, settings)                                |
 
 
-Exact paths are flexible; **E2E and authorization** must match the **role model** in **§6**.
+Exact paths are flexible; **E2E and authorization** must match the **Role model** in **§4**.
 
 ---
 
@@ -141,25 +140,28 @@ If Docker is temporarily unavailable, native dev may be used only as a fallback 
 ### 4.1 Role types
 
 
-| Role            | Scope                                                                                                          |
-| --------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Super admin** | Global: all orgs/teams, all admin routes, sensitive settings.                                                  |
-| **Manager**     | Manage **their team(s)** — members, assignments, team settings—not global platform config.                     |
-| **Team member** | **Self** + **work they are responsible for** (tasks, tickets, items)—no team-wide admin unless also a manager. |
+| Role              | Code       | Scope                                                                                          |
+| ----------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| **System admin**  | `SYS_ADM`  | Cross-Domain admin; listed explicitly on Role-gated Actions.                                   |
+| **Users admin**   | `USR_ADM`  | Users Domain admin (including Delete user and Changes read).                                   |
+| **Users manager** | `USR_MGR`  | Users list/read/create/update and Changes read; cannot Delete user.                            |
+| **Users viewer**  | `USR_VWR`  | Users list and read only.                                                                      |
 
 
-### 4.2 Multiple roles per user
+Empty / missing `roles`: no Users Actions; Profile still via catalog sentinel `ANY`. See `GLOSSARY.md` and `docs/handoffs/access-enforcement.md`.
 
-- A single user **may hold more than one role** (e.g. manager + team member).  
-- Implement with a **set/array of roles** on the user (or membership) record in **Convex**, and evaluate **least privilege** per action: union of permissions from all roles, with explicit **deny** rules for dangerous actions.  
-- Map **WorkOS** identity → internal user; store roles in Convex; enforce in **Convex functions** (queries/mutations) and **Next.js** route/middleware guards.
+### 4.2 Multiple Roles per user
+
+- A single user **may hold more than one Role** (e.g. `USR_ADM` + `USR_VWR`).  
+- Implement with a **set/array of Role codes** on the App user record in **Convex**, and evaluate **least privilege** per Action via the code-defined `can({ domain, action })` catalog.  
+- Map **WorkOS** identity → App user; store Roles in Convex; enforce in **Convex functions** (queries/mutations) and **Next.js** route/layout gates.
 
 ---
 
 ## 5. Navigation
 
 - **Public nav:** Home, product/pricing, About, Contact, legal links, Sign in.  
-- **Authenticated nav:** Dashboard, Work, Team (if manager+), Profile, Admin (if super admin), Sign out.  
+- **Authenticated nav:** Dashboard, Users (when `users.list` allows), Profile, Settings, Sign out.  
 - **Responsive:** mobile drawer / sheet (shadcn patterns); **active state** via `usePathname()`.  
 - **Do not** duplicate dozens of links; group secondary items in footers on marketing pages.
 

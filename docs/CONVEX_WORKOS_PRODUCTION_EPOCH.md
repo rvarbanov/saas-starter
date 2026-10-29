@@ -80,7 +80,7 @@
 **Tracked debt** (soft warning — does **not** formally block shipping the Users list or RAD-61/64):
 
 1. [RAD-69](https://linear.app/radi-dev/issue/RAD-69/implement-rbac-user-role) — Implement RBAC / `user_role` (outside RAD-59; same project).
-2. [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — Restrict Users list read to Super admin **or** Manager; Team member → throw `"Unauthorized"`; Manager’s exact row filter deferred until teams/RBAC. Blocked by RAD-69. Neither blocks RAD-61/64.
+2. [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager) — Restrict Users list read (historical Super admin / Manager wording). Superseded in product by Access enforcement MVP 1 Role gates (`SYS_ADM` / `USR_*`). Blocked by RAD-69 at the time. Neither blocks RAD-61/64.
 
 ### Users table columns and affordances (RAD-61)
 

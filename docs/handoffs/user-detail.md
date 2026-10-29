@@ -105,20 +105,9 @@ Overrides shell “no row-click.”
 
 ### Roles editor on User detail (RAD-93)
 
-**Edit mode (other user):**
+**Superseded for product UI** by Access enforcement / Edit User: no Role checkboxes on User detail; Role writes stay on internal `setRoles`. View mode still shows Role labels from the live Role set (`SYS_ADM` / `USR_ADM` / `USR_MGR` / `USR_VWR`). Empty → see soft default below.
 
-- Checkboxes for assignable roles only: `manager` | `team_member`.
-- `super_admin` is never a checkbox.
-- Backend **rejects** any `updateUserDetail` whose `roles` array includes `super_admin`.
-- **Assignable-subset replace:** `args.roles` is the desired set of `manager`/`team_member`. Server writes  
-  `roles` = (existing `super_admin` on subject, if any) ∪ (validated `args.roles`).  
-  Prevents accidental demotion when UI never offered `super_admin`.
-- Empty assignable set (`roles: []`) allowed.
-- No other v1 guardrails (no last-Super-admin checks).
-
-**Own User detail:** roles control **read-only** (view-mode presentation). `firstName` / `lastName` / `email` remain editable.
-
-**View mode:** plain-text role labels (humanize slug → label). Empty → see soft default below.
+**Own User detail:** Roles are **read-only** (view-mode presentation). `firstName` / `lastName` / `email` remain editable when Edit allows.
 
 ### User detail edit-mode UI contract (RAD-90)
 
@@ -206,7 +195,7 @@ Breadcrumbs and identity labels via accessible names / visible text.
 **Soft defaults (do not re-grill; invent only within these):**
 
 - Empty roles view string: use **`None`** (not “No roles”).
-- Role label humanization: **Super admin** / **Manager** / **Team member** (match Users list Roles column from RAD-72).
+- Role label humanization: **System admin** / **Users admin** / **Users manager** / **Users viewer** (match Users list Roles column / `lib/role-labels.ts`).
 - Visual layout: follow existing App / Profile patterns (no new design system). Prefer shadcn primitives already in the repo; add via `pnpm exec shadcn add …` only if a Decision requires a control not already present (e.g. checkbox).
 - Row-as-link a11y pattern: any approach that keeps a real `href` and whole-row hit target.
 

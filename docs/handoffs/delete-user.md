@@ -24,7 +24,7 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 - Users list read lockdown — [RAD-70](https://linear.app/radi-dev/issue/RAD-70/restrict-users-list-read-to-super-admin-manager). Delete does not wait for it
 - Edit User route split — [RAD-126](https://linear.app/radi-dev/issue/RAD-126/wayfinder-edit-user-handoff). Place Delete on view mode, including the interim in-place view in `components/user-detail.tsx`
 - Bulk delete, Users list Load more, and new App user fields besides `deletedAt`
-- E2E for Manager / Team member (button absent), the last-Super-admin error, the “Deleting…” label, a dialog error, the Edit User page, and a second Delete — [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) remains a later rework
+- E2E for callers without `users.delete` (button absent), the last-System-admin error, the “Deleting…” label, a dialog error, the Edit User page, and a second Delete — [RAD-114](https://linear.app/radi-dev/issue/RAD-114/e2e-user-detail-edit-via-create-get-update-delete) remains a later rework
 
 ## Decisions
 
@@ -53,11 +53,11 @@ After pack, **this file wins** over Linear map summaries and child issue bodies.
 
 ### Who may delete an App user (RAD-140)
 
-- Super admin only (`isSuperAdmin`). A caller who also has another role may still delete.
-- Manager and Team member do not see Delete. The control is absent, not disabled.
-- The server rejects anyone who is not a Super admin with `"Unauthorized"`.
+- Callers with `users.delete` only (`SYS_ADM` / `USR_ADM` in Access enforcement MVP 1). A caller who also has another Role may still delete.
+- Callers without `users.delete` do not see Delete. The control is absent, not disabled.
+- The server rejects anyone without `users.delete` with `"Unauthorized"`.
 - No self-delete. Compare App user ids. Error: `"Cannot delete your own user"`.
-- A Super admin may delete another Super admin, except the last one. The count includes only App users who have the Super admin role and no `deletedAt`. Error: `"Cannot delete the last Super admin"`.
+- Reject Delete when the subject still holds `SYS_ADM` (Access enforcement). Historical “last Super admin” wording is superseded by that gate.
 
 ### Where Delete sits (RAD-141)
 

@@ -61,7 +61,7 @@ Tracked: `email`, `firstName`, `lastName`, `roles`.
 Stored field values:
 
 - `firstName`, `lastName`, `email`: the stored string, or `null` when unset.
-- `roles`: `null` when the set is empty, otherwise the `uniqueRoles` literals joined with `", "` (`manager, team_member`).
+- `roles`: `null` when the set is empty, otherwise the `uniqueRoles` literals joined with `", "` (e.g. `USR_MGR, USR_VWR`).
 
 ### Which App user writes record a Change
 
