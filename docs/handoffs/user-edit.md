@@ -122,7 +122,7 @@ Out of Acceptance: role writes and role checkboxes; Edit User not-found; teardow
 Do not drop these when in-place edit goes away:
 
 - Route `/dashboard/users/[userId]`. In-content not-found. Row on the Users list is a link to User detail.
-- View shows the public App user doc, including identity-link fields (app user id, token identifier, WorkOS user id, Convex id, created, updated) and plain-text roles (`formatRoleLabels`, empty → **None**).
+- View shows the public App user doc, including identity-link fields (app user id, token identifier, WorkOS user id, Convex id, created, updated) and plain-text roles (`formatRoleLabels`, empty → blank).
 - Invite-failed banner stays on User detail (`user-detail-invite-failed-banner` / `user-detail-invite-failed-dismiss`), not on Edit User.
 - Breadcrumbs on the view: Dashboard → Users → person.
 

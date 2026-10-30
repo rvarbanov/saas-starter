@@ -194,7 +194,7 @@ Breadcrumbs and identity labels via accessible names / visible text.
 
 **Soft defaults (do not re-grill; invent only within these):**
 
-- Empty roles view string: use **`None`** (not “No roles”).
+- Empty roles view string: leave blank (same as other empty data fields).
 - Role label humanization: **System admin** / **Users admin** / **Users manager** / **Users viewer** (match Users list Roles column / `lib/role-labels.ts`).
 - Visual layout: follow existing App / Profile patterns (no new design system). Prefer shadcn primitives already in the repo; add via `pnpm exec shadcn add …` only if a Decision requires a control not already present (e.g. checkbox).
 - Row-as-link a11y pattern: any approach that keeps a real `href` and whole-row hit target.

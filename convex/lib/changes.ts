@@ -129,7 +129,7 @@ export function actorLabelFor(
 function formatStoredValue(field: TrackedFieldName, value: string | null): string {
   if (field === "roles") {
     if (value === null || value.trim().length === 0) {
-      return "None";
+      return "";
     }
     return value
       .split(", ")
@@ -137,7 +137,7 @@ function formatStoredValue(field: TrackedFieldName, value: string | null): strin
       .map((part) => roleCodeLabel(part))
       .join(", ");
   }
-  return value === null ? "—" : value;
+  return value === null ? "" : value;
 }
 
 export function formatChangeFields(

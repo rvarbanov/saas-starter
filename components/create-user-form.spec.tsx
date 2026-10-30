@@ -83,6 +83,6 @@ describe("CreateUserForm", () => {
     renderForm();
     expect(screen.getByTestId("create-user-email")).toHaveAttribute("aria-required", "true");
     expect(screen.getByTestId("create-user-email")).not.toHaveAttribute("required");
-    expect(screen.getByTestId("create-user-roles")).toHaveTextContent("None");
+    expect(screen.getByTestId("create-user-roles")).toHaveTextContent("");
   });
 });

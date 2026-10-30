@@ -40,7 +40,7 @@ function CreateUserFormInner() {
           const path = userDetailPath(result.user._id);
           router.replace(result.inviteSent ? path : `${path}?invite=failed`);
         }}
-        rolesText="None"
+        rolesText=""
         testIdPrefix="create-user"
         title="Create user"
       />

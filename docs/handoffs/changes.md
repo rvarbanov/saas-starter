@@ -87,7 +87,7 @@ Delete user still sets `deletedAt` and `updatedAt` and leaves every other field.
 - Empty list, and no further page: the text **No changes yet**.
 - Each row shows the action label (**Create**, **Update**, **Delete**), the actor label, and the time via `formatListedUserDate`.
 - Actor label: **System** when `actorKind` is `system`. **Deleted user** when the actor row is missing or has `deletedAt`. Otherwise `userDetailLeafLabel` (first name and last name, then email). The actor is plain text, not a link.
-- An update lists each differing field with the labels **First name**, **Last name**, **Email**, **Roles**. `null` names and email render as `—`. Roles render through `formatRoleLabels` (`None` when the set is empty).
+- An update lists each differing field with the labels **First name**, **Last name**, **Email**, **Roles**. Empty / `null` values render blank. Roles render through Role labels when present.
 - Create and delete rows do not render a field list.
 - A deleted subject still has no User detail page. `getById` stays null. The page does not fetch Changes in that state. The rows remain in the table.
 

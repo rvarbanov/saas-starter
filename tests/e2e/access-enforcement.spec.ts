@@ -227,7 +227,7 @@ if (noRole) {
       await page.goto(APP_ROUTES.profile, { waitUntil: "load" });
       await expect(page.getByTestId("profile-form")).toBeVisible({ timeout: 15_000 });
       await expect(page.getByTestId("profile-email")).toHaveValue(noRole.email);
-      await expect(page.getByTestId("profile-roles")).toHaveText("None");
+      await expect(page.getByTestId("profile-roles")).toHaveText("");
 
       await expectUnauthorizedUsersPage(page, APP_ROUTES.users);
       await expectUnauthorizedUsersPage(page, APP_ROUTES.usersNew);
