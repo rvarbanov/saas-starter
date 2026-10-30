@@ -39,6 +39,11 @@ describe("formatListedUserRoles", () => {
   it("formats known roles for display", () => {
     expect(formatListedUserRoles(["SYS_ADM", "USR_VWR"])).toBe("System admin, Users viewer");
   });
+
+  it("shows None when no roles are assigned", () => {
+    expect(formatListedUserRoles([])).toBe("None");
+    expect(formatListedUserRoles(undefined)).toBe("None");
+  });
 });
 
 describe("UsersList", () => {

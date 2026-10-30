@@ -21,7 +21,7 @@ import { LIST_USERS_PAGE_SIZE } from "@/convex/lib/pagination";
 import { ROLE_VALUES, type Role } from "@/convex/lib/roles";
 import { createUserPath, userDetailPath } from "@/lib/app-routes";
 import { isConvexConfigured } from "@/lib/convex-config";
-import { ROLE_LABELS } from "@/lib/role-labels";
+import { formatRoleLabels, ROLE_LABELS } from "@/lib/role-labels";
 
 const COLUMN_HEADERS = [
   "First name",
@@ -44,8 +44,9 @@ export function formatListedUserDate(ms: number): string {
   return listedUserDateFormatter.format(new Date(ms));
 }
 
+/** Users list Roles column — empty sets show `None` (same as Profile / User detail). */
 export function formatListedUserRoles(roles: readonly Role[] | undefined): string {
-  return (roles ?? []).map((role) => ROLE_LABELS[role]).join(", ");
+  return formatRoleLabels(roles);
 }
 
 export function usersListErrorMessage(error: unknown): string {
@@ -165,7 +166,10 @@ function ListedUserRow({ user }: { user: ListUser }) {
       <TableCell className="min-w-48 truncate" title={user.email}>
         {user.email}
       </TableCell>
-      <TableCell className="w-40 truncate" title={rolesLabel}>
+      <TableCell
+        className={rolesLabel === "None" ? "w-40 truncate text-muted-foreground" : "w-40 truncate"}
+        title={rolesLabel}
+      >
         {rolesLabel}
       </TableCell>
       <TableCell className="w-52 whitespace-nowrap">
