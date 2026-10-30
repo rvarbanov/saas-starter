@@ -88,7 +88,7 @@ describe("diffTrackedFields", () => {
 });
 
 describe("formatChangeFields and actor labels", () => {
-  it("renders empty names as an em dash and empty roles as None", () => {
+  it("renders empty names and empty roles as blank", () => {
     expect(
       formatChangeFields([
         { field: "firstName", before: null, after: "Ada" },
@@ -96,9 +96,9 @@ describe("formatChangeFields and actor labels", () => {
         { field: "roles", before: null, after: "USR_MGR, USR_VWR" },
       ]),
     ).toEqual([
-      { label: "First name", before: "—", after: "Ada" },
+      { label: "First name", before: "", after: "Ada" },
       { label: "Email", before: "ada@example.com", after: "new@example.com" },
-      { label: "Roles", before: "None", after: "Users manager, Users viewer" },
+      { label: "Roles", before: "", after: "Users manager, Users viewer" },
     ]);
   });
 

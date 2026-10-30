@@ -40,7 +40,7 @@ describe("UserForm", () => {
         firstName="Ada"
         lastName="Lovelace"
         onSubmit={vi.fn()}
-        rolesText="None"
+        rolesText=""
         testIdPrefix="profile"
         title="Profile"
       />,

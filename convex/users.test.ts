@@ -877,7 +877,7 @@ describe("Changes recorded with App user writes", () => {
       expect.objectContaining({
         action: "update",
         actorLabel: "System",
-        fields: [{ label: "Roles", before: "None", after: "Users manager" }],
+        fields: [{ label: "Roles", before: "", after: "Users manager" }],
       }),
     ]);
 
