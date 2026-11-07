@@ -1,5 +1,5 @@
 import { paginationOptsValidator } from "convex/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
@@ -203,7 +203,8 @@ export const deleteUser = mutation({
       throw new Error("Cannot delete your own user");
     }
     if (hasRole(target.roles, "SYS_ADM")) {
-      throw new Error("Cannot delete a user who holds System admin");
+      // Production deployments hide plain Error text from the client.
+      throw new ConvexError("Cannot delete a user who holds System admin");
     }
 
     const now = Date.now();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useConvexAuth, useMutation, usePaginatedQuery, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -214,6 +215,16 @@ function UserDetailChanges({ userId }: { userId: Id<"users"> }) {
   );
 }
 
+function deleteErrorMessage(err: unknown): string {
+  if (err instanceof ConvexError && typeof err.data === "string" && err.data.trim() !== "") {
+    return err.data;
+  }
+  if (err instanceof Error && err.message.trim() !== "") {
+    return err.message;
+  }
+  return "Failed to delete user";
+}
+
 function DeleteUserControl({ userId }: { userId: Id<"users"> }) {
   const router = useRouter();
   const deleteUser = useMutation(api.users.deleteUser);
@@ -239,7 +250,7 @@ function DeleteUserControl({ userId }: { userId: Id<"users"> }) {
       await deleteUser({ userId });
       router.replace(APP_ROUTES.users);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete user");
+      setError(deleteErrorMessage(err));
       setPending(false);
     }
   }
