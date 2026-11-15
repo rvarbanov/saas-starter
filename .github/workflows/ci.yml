@@ -73,28 +73,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # RAD-184: PR e2e deploys to saas-starter-ci only. Never reference
-      # secrets.CONVEX_DEPLOY_KEY on pull_request (live incredible-dalmatian-315).
+      # RAD-184: PR e2e uses CONVEX_DEPLOY_KEY_CI + NEXT_PUBLIC_CONVEX_URL_CI only.
+      # Never reference secrets.CONVEX_DEPLOY_KEY on pull_request. Do not echo deploy keys.
       - name: Deploy Convex functions (PR → CI)
         if: github.event_name == 'pull_request'
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_CI }}
           NEXT_PUBLIC_CONVEX_URL_CI: ${{ vars.NEXT_PUBLIC_CONVEX_URL_CI }}
         run: |
-          if [ -z "${CONVEX_DEPLOY_KEY}" ]; then
-            echo "CONVEX_DEPLOY_KEY_CI unset — refusing PR Convex deploy." >&2
-            exit 1
-          fi
-          if [ -z "${NEXT_PUBLIC_CONVEX_URL_CI}" ]; then
-            echo "NEXT_PUBLIC_CONVEX_URL_CI unset — refusing PR Convex deploy." >&2
-            exit 1
-          fi
-          key_target="${CONVEX_DEPLOY_KEY%%|*}"
-          if [ "${key_target}" = "prod:incredible-dalmatian-315" ]; then
-            echo "Refusing PR deploy: CONVEX_DEPLOY_KEY_CI targets live production (${key_target})." >&2
-            exit 1
-          fi
-          echo "Deploying Convex for PR e2e to ${key_target} (URL host: ${NEXT_PUBLIC_CONVEX_URL_CI#https://})"
+          . scripts/ci-require-env.sh
+          require_env "CONVEX_DEPLOY_KEY_CI" "${CONVEX_DEPLOY_KEY}"
+          require_env "NEXT_PUBLIC_CONVEX_URL_CI" "${NEXT_PUBLIC_CONVEX_URL_CI}"
+          echo "Deploying Convex for PR e2e (URL host: ${NEXT_PUBLIC_CONVEX_URL_CI#https://})"
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
 
@@ -103,12 +93,9 @@ jobs:
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: |
-          if [ -z "${CONVEX_DEPLOY_KEY}" ]; then
-            echo "CONVEX_DEPLOY_KEY unset — refusing production Convex deploy." >&2
-            exit 1
-          fi
-          key_target="${CONVEX_DEPLOY_KEY%%|*}"
-          echo "Deploying Convex for main to ${key_target}"
+          . scripts/ci-require-env.sh
+          require_env "CONVEX_DEPLOY_KEY" "${CONVEX_DEPLOY_KEY}"
+          echo "Deploying Convex for main"
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
 
@@ -118,10 +105,8 @@ jobs:
         env:
           NEXT_PUBLIC_CONVEX_URL_CI: ${{ vars.NEXT_PUBLIC_CONVEX_URL_CI }}
         run: |
-          if [ -z "${NEXT_PUBLIC_CONVEX_URL_CI}" ]; then
-            echo "NEXT_PUBLIC_CONVEX_URL_CI unset — refusing e2e." >&2
-            exit 1
-          fi
+          . scripts/ci-require-env.sh
+          require_env "NEXT_PUBLIC_CONVEX_URL_CI" "${NEXT_PUBLIC_CONVEX_URL_CI}"
           echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL_CI}" >> "$GITHUB_ENV"
           echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL_CI#https://}"
 
