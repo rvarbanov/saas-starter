@@ -215,7 +215,8 @@ function UserDetailChanges({ userId }: { userId: Id<"users"> }) {
   );
 }
 
-function deleteErrorMessage(err: unknown): string {
+/** Prefer ConvexError.data so clients see app messages, not opaque "Server Error". */
+export function deleteErrorMessage(err: unknown): string {
   if (err instanceof ConvexError && typeof err.data === "string" && err.data.trim() !== "") {
     return err.data;
   }

@@ -4,6 +4,11 @@ import type { Doc } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
 import { diffTrackedFields, recordChange } from "./lib/changes";
+import {
+  DELETE_USER_NOT_FOUND,
+  DELETE_USER_SELF,
+  DELETE_USER_SYS_ADM,
+} from "./lib/deleteUserMessages";
 import { assertValidEmailFormat } from "./lib/email";
 import { extractEmailFromIdentity } from "./lib/identity";
 import { listUsersPageValidator, toListUser } from "./lib/listUser";
@@ -196,15 +201,15 @@ export const deleteUser = mutation({
 
     const target = await ctx.db.get("users", args.userId);
     if (!target || target.deletedAt !== undefined) {
-      throw new Error("User not found");
+      // ConvexError so production clients see the message (plain Error → opaque "Server Error").
+      throw new ConvexError(DELETE_USER_NOT_FOUND);
     }
 
     if (args.userId === caller._id) {
-      throw new Error("Cannot delete your own user");
+      throw new ConvexError(DELETE_USER_SELF);
     }
     if (hasRole(target.roles, "SYS_ADM")) {
-      // Production deployments hide plain Error text from the client.
-      throw new ConvexError("Cannot delete a user who holds System admin");
+      throw new ConvexError(DELETE_USER_SYS_ADM);
     }
 
     const now = Date.now();

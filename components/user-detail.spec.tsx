@@ -1,8 +1,10 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { InviteFailedBanner, UserDetail } from "./user-detail";
+import { DELETE_USER_SYS_ADM } from "@/convex/lib/deleteUserMessages";
+import { deleteErrorMessage, InviteFailedBanner, UserDetail } from "./user-detail";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: vi.fn(),
@@ -209,5 +211,19 @@ describe("User detail Changes", () => {
     expect(row).toHaveTextContent("Mina Manager");
     expect(row).not.toHaveTextContent("Email");
     expect(screen.queryByTestId("user-detail-changes-load-older")).not.toBeInTheDocument();
+  });
+});
+
+describe("deleteErrorMessage", () => {
+  it("prefers ConvexError.data for client-visible refusals", () => {
+    expect(deleteErrorMessage(new ConvexError(DELETE_USER_SYS_ADM))).toBe(DELETE_USER_SYS_ADM);
+  });
+
+  it("falls back to Error.message when data is missing", () => {
+    expect(deleteErrorMessage(new Error("network down"))).toBe("network down");
+  });
+
+  it("returns a generic message for unknown throws", () => {
+    expect(deleteErrorMessage("nope")).toBe("Failed to delete user");
   });
 });

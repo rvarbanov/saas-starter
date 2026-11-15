@@ -175,7 +175,7 @@ describe("users action gates", () => {
 
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId: sysId }),
-    ).rejects.toThrow("Cannot delete a user who holds System admin");
+    ).rejects.toThrow("You can’t delete a System admin. Remove that role first.");
 
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId: subjectId }),
@@ -187,7 +187,7 @@ describe("users action gates", () => {
     const otherSys = await insertUser(t2, { email: "sys@example.com", roles: ["SYS_ADM"] });
     await expect(
       t2.withIdentity(identity).mutation(api.users.deleteUser, { userId: otherSys }),
-    ).rejects.toThrow("Cannot delete a user who holds System admin");
+    ).rejects.toThrow("You can’t delete a System admin. Remove that role first.");
     await expect(
       t2.withIdentity(identity).mutation(api.users.deleteUser, { userId: otherId }),
     ).resolves.toBeNull();
