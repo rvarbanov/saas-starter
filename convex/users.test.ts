@@ -577,7 +577,7 @@ describe("users.deleteUser", () => {
     });
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
-    ).rejects.toThrow("User not found");
+    ).rejects.toThrow("This user could not be found.");
   });
 
   it("throws User not found when deletedAt is already set", async () => {
@@ -590,7 +590,7 @@ describe("users.deleteUser", () => {
     });
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId }),
-    ).rejects.toThrow("User not found");
+    ).rejects.toThrow("This user could not be found.");
   });
 
   it("throws when a Super admin deletes their own user", async () => {
@@ -598,7 +598,7 @@ describe("users.deleteUser", () => {
     const callerId = await insertCaller(t, ["SYS_ADM"]);
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId: callerId }),
-    ).rejects.toThrow("Cannot delete your own user");
+    ).rejects.toThrow("You can’t delete your own account.");
   });
 
   it("throws when the target holds System admin", async () => {
@@ -611,7 +611,7 @@ describe("users.deleteUser", () => {
     });
     await expect(
       t.withIdentity(identity).mutation(api.users.deleteUser, { userId: targetId }),
-    ).rejects.toThrow("Cannot delete a user who holds System admin");
+    ).rejects.toThrow("You can’t delete a System admin. Remove that role first.");
   });
 
   it("sets deletedAt and updatedAt and leaves other fields", async () => {
