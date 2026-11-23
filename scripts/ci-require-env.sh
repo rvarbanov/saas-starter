@@ -2,7 +2,7 @@
 # Fail if a required CI env value is empty. Labels are for humans; values are not logged.
 # Usage (source from a workflow step):
 #   . scripts/ci-require-env.sh
-#   require_env "CONVEX_DEPLOY_KEY_CI" "${CONVEX_DEPLOY_KEY}"
+#   require_env "CONVEX_DEPLOY_KEY" "${CONVEX_DEPLOY_KEY}"
 require_env() {
   label=$1
   value=$2

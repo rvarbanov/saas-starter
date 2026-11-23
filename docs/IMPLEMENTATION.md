@@ -306,7 +306,7 @@ Official: [GitHub Actions quickstart](https://docs.github.com/en/actions/quickst
 
 Secrets: use **GitHub Actions secrets** — never raw `.secret` in CI.
 
-**E2E CI (authenticated):** The e2e job uses the Playwright Docker image (bundled Chromium; do not force `channel: "chrome"`). It wires GitHub Actions secrets `E2E_WORKOS_EMAIL`, `E2E_WORKOS_PASSWORD`, and `WORKOS_API_KEY`, keeps a CI `WORKOS_COOKIE_PASSWORD` (≥32 chars), and relies on committed `.env` for `WORKOS_CLIENT_ID` / public URLs. Locally use **`.secret`**; on Cursor Cloud use environment runtime secrets (process env). `playwright.config.ts` fail-fasts if the required set is missing.
+**E2E CI (authenticated):** The e2e job runs in GitHub Environment **`ci`** (PR and main). It deploys Convex with that environment’s `CONVEX_DEPLOY_KEY` / `NEXT_PUBLIC_CONVEX_URL`, then uses the Playwright Docker image (bundled Chromium; do not force `channel: "chrome"`). Repo-level secrets `E2E_WORKOS_EMAIL`, `E2E_WORKOS_PASSWORD`, and `WORKOS_API_KEY` stay as-is; CI keeps a `WORKOS_COOKIE_PASSWORD` (≥32 chars); committed `.env` supplies `WORKOS_CLIENT_ID`. After `quality`, `docker-integration`, and `e2e` pass on **main**, job **`deploy-prod`** runs in Environment **`prod`** and deploys Convex only. Locally use **`.secret`**; on Cursor Cloud use environment runtime secrets (process env). `playwright.config.ts` fail-fasts if the required set is missing.
 
 ### 12.2 CD — Vercel
 
