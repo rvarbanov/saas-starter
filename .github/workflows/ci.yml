@@ -51,9 +51,7 @@ jobs:
       - name: Integration tests in Compose
         run: docker compose run --rm app pnpm test
 
-  # RAD-212: e2e always uses GitHub Environment `ci` (tangible-bat-100).
-  # Fork PRs: GitHub does not expose environment/repo secrets to workflows from forks
-  # by default — defense-in-depth; never reference the `prod` environment here.
+  # E2e uses Environment `ci` on PR and main. Do not reference Environment `prod`.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -128,8 +126,7 @@ jobs:
           E2E_NO_ROLE_EMAIL: ${{ secrets.E2E_NO_ROLE_EMAIL }}
           E2E_NO_ROLE_PASSWORD: ${{ secrets.E2E_NO_ROLE_PASSWORD }}
 
-  # RAD-212: Convex deploy for the live/prod backend only after all gates pass on main.
-  # Uses GitHub Environment `prod` (branch restriction: main). Never run on pull_request.
+  # Deploys Convex via Environment `prod` after gates pass (main only).
   deploy-prod:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
