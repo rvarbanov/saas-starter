@@ -51,10 +51,14 @@ jobs:
       - name: Integration tests in Compose
         run: docker compose run --rm app pnpm test
 
+  # RAD-212: e2e always uses GitHub Environment `ci` (tangible-bat-100).
+  # Fork PRs: GitHub does not expose environment/repo secrets to workflows from forks
+  # by default — defense-in-depth; never reference the `prod` environment here.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: quality
+    environment: ci
     # Browsers + OS deps are pre-installed; skip `playwright install --with-deps` (slow apt on every run).
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-noble
@@ -73,42 +77,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # RAD-184: PR e2e uses CONVEX_DEPLOY_KEY_CI + NEXT_PUBLIC_CONVEX_URL_CI only.
-      # Never reference secrets.CONVEX_DEPLOY_KEY on pull_request. Do not echo deploy keys.
-      - name: Deploy Convex functions (PR → CI)
-        if: github.event_name == 'pull_request'
-        env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_CI }}
-          NEXT_PUBLIC_CONVEX_URL_CI: ${{ vars.NEXT_PUBLIC_CONVEX_URL_CI }}
-        run: |
-          . scripts/ci-require-env.sh
-          require_env "CONVEX_DEPLOY_KEY_CI" "${CONVEX_DEPLOY_KEY}"
-          require_env "NEXT_PUBLIC_CONVEX_URL_CI" "${NEXT_PUBLIC_CONVEX_URL_CI}"
-          echo "Deploying Convex for PR e2e (URL host: ${NEXT_PUBLIC_CONVEX_URL_CI#https://})"
-          pnpm exec convex deploy --yes
-          pnpm convex:backfill-search-text
-
-      - name: Deploy Convex functions (main → production)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      # Environment `ci` supplies CONVEX_DEPLOY_KEY + NEXT_PUBLIC_CONVEX_URL.
+      # Do not echo deploy keys.
+      - name: Deploy Convex functions (CI)
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
         run: |
           . scripts/ci-require-env.sh
           require_env "CONVEX_DEPLOY_KEY" "${CONVEX_DEPLOY_KEY}"
-          echo "Deploying Convex for main"
+          require_env "NEXT_PUBLIC_CONVEX_URL" "${NEXT_PUBLIC_CONVEX_URL}"
+          echo "Deploying Convex for e2e (URL host: ${NEXT_PUBLIC_CONVEX_URL#https://})"
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
 
       # Job env inherits this so Playwright/Next see CI Convex instead of committed .env prod URL.
-      - name: Point PR e2e at CI Convex URL
-        if: github.event_name == 'pull_request'
+      - name: Point e2e at CI Convex URL
         env:
-          NEXT_PUBLIC_CONVEX_URL_CI: ${{ vars.NEXT_PUBLIC_CONVEX_URL_CI }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
         run: |
           . scripts/ci-require-env.sh
-          require_env "NEXT_PUBLIC_CONVEX_URL_CI" "${NEXT_PUBLIC_CONVEX_URL_CI}"
-          echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL_CI}" >> "$GITHUB_ENV"
-          echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL_CI#https://}"
+          require_env "NEXT_PUBLIC_CONVEX_URL" "${NEXT_PUBLIC_CONVEX_URL}"
+          echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}" >> "$GITHUB_ENV"
+          echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL#https://}"
 
       - name: E2E tests
         run: pnpm test:e2e
@@ -136,3 +127,35 @@ jobs:
           E2E_SYS_ADM_TARGET_PASSWORD: ${{ secrets.E2E_SYS_ADM_TARGET_PASSWORD }}
           E2E_NO_ROLE_EMAIL: ${{ secrets.E2E_NO_ROLE_EMAIL }}
           E2E_NO_ROLE_PASSWORD: ${{ secrets.E2E_NO_ROLE_PASSWORD }}
+
+  # RAD-212: Convex deploy for the live/prod backend only after all gates pass on main.
+  # Uses GitHub Environment `prod` (branch restriction: main). Never run on pull_request.
+  deploy-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [quality, docker-integration, e2e]
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.16.0"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy Convex functions (prod)
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: |
+          . scripts/ci-require-env.sh
+          require_env "CONVEX_DEPLOY_KEY" "${CONVEX_DEPLOY_KEY}"
+          echo "Deploying Convex for prod"
+          pnpm exec convex deploy --yes
+          pnpm convex:backfill-search-text

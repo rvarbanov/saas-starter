@@ -100,7 +100,9 @@ Detail: [`docs/research/convex-workos-client-id-environments.md`](../research/co
 
 ### CI dual-deploy-key and e2e Convex URL contract (RAD-208)
 
-| Item | Contract |
+> **Superseded by [RAD-212](https://linear.app/radi-dev/issue/RAD-212):** GitHub Environments **`ci`** / **`prod`**, each with `CONVEX_DEPLOY_KEY` (and `ci` with `NEXT_PUBLIC_CONVEX_URL`). E2e (PR + main) always uses **`ci`**; **`deploy-prod`** on main only uses **`prod`**. Repo-level `CONVEX_DEPLOY_KEY_CI` / `NEXT_PUBLIC_CONVEX_URL_CI` / repo `CONVEX_DEPLOY_KEY` are deleted after merge.
+
+| Item | Contract (historical RAD-208 / RAD-184) |
 | --- | --- |
 | Prod deploy secret | Keep name `CONVEX_DEPLOY_KEY` — **main / prod only** |
 | CI deploy secret | `CONVEX_DEPLOY_KEY_CI` — **`pull_request` only** |
@@ -112,7 +114,7 @@ Detail: [`docs/research/convex-workos-client-id-environments.md`](../research/co
 | Main events | Deploy + backfill with prod key only; e2e against prod URL |
 | Hard rule | `secrets.CONVEX_DEPLOY_KEY` must **not** be referenced on any `pull_request` step |
 
-**Pack vs execution:** this contract is frozen here; [RAD-184](https://linear.app/radi-dev/issue/RAD-184) does human provisioning + the `.github/workflows/ci.yml` change.
+**Pack vs execution:** RAD-208 contract executed via [RAD-184](https://linear.app/radi-dev/issue/RAD-184); environment split via [RAD-212](https://linear.app/radi-dev/issue/RAD-212).
 
 ### Vercel Deployment Checks selection and Force Promote stance (RAD-209)
 
