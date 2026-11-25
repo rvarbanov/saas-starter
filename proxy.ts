@@ -1,7 +1,10 @@
 import { authkitProxy } from "@workos-inc/authkit-nextjs";
+import { workosRedirectUri } from "@/lib/app-origin";
 import { AUTHKIT_UNAUTHENTICATED_PATHS } from "@/lib/auth-paths";
 
 export default authkitProxy({
+  // Dynamic on Vercel Preview: ignore committed localhost NEXT_PUBLIC_WORKOS_REDIRECT_URI.
+  redirectUri: workosRedirectUri(),
   middlewareAuth: {
     enabled: true,
     unauthenticatedPaths: [...AUTHKIT_UNAUTHENTICATED_PATHS],
