@@ -89,24 +89,24 @@ jobs:
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
 
-      # Job env inherits this so Playwright/Next see CI Convex (not a local .env.local).
-      - name: Point e2e at CI Convex URL
+      # Publish CI Convex URL + AuthKit client for Playwright/Next (Environment `ci` vars).
+      - name: Require e2e env and export job vars
         env:
           NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+          WORKOS_CLIENT_ID: ${{ vars.WORKOS_CLIENT_ID }}
+          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
+          E2E_WORKOS_EMAIL: ${{ secrets.E2E_WORKOS_EMAIL }}
+          E2E_WORKOS_PASSWORD: ${{ secrets.E2E_WORKOS_PASSWORD }}
         run: |
           . scripts/ci-require-env.sh
           require_env "NEXT_PUBLIC_CONVEX_URL" "${NEXT_PUBLIC_CONVEX_URL}"
-          echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}" >> "$GITHUB_ENV"
-          echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL#https://}"
-
-      # Environment `ci` must supply WORKOS_CLIENT_ID (AuthKit client for e2e; no committed .env).
-      - name: Require WorkOS client id for e2e
-        env:
-          WORKOS_CLIENT_ID: ${{ vars.WORKOS_CLIENT_ID }}
-        run: |
-          . scripts/ci-require-env.sh
           require_env "WORKOS_CLIENT_ID" "${WORKOS_CLIENT_ID}"
+          require_env "WORKOS_API_KEY" "${WORKOS_API_KEY}"
+          require_env "E2E_WORKOS_EMAIL" "${E2E_WORKOS_EMAIL}"
+          require_env "E2E_WORKOS_PASSWORD" "${E2E_WORKOS_PASSWORD}"
+          echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}" >> "$GITHUB_ENV"
           echo "WORKOS_CLIENT_ID=${WORKOS_CLIENT_ID}" >> "$GITHUB_ENV"
+          echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL#https://}"
 
       - name: E2E tests
         run: pnpm test:e2e
@@ -115,7 +115,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/callback
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-          # Real AuthKit key + e2e user (repo Actions secrets). Cookie password may be CI-only.
+          # Cookie password may be CI-only (≥32 chars). Role personas below are optional.
           WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
           WORKOS_COOKIE_PASSWORD: "01234567890123456789012345678901"
           E2E_WORKOS_EMAIL: ${{ secrets.E2E_WORKOS_EMAIL }}

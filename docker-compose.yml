@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
+    # `.env` is tracked (may be comment-only). `.env.local` / `.secret` are created locally;
+    # optional so Compose still starts for CI `docker compose run … pnpm test` without them.
     env_file:
       - path: .env
         required: false

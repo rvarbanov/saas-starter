@@ -37,7 +37,7 @@ yarn-error.log*
 .pnpm-debug.log*
 *.log
 
-# Env: tracked `.env` = universal defaults; tracked `.env.example` = local template.
+# Env: tracked `.env` = universal defaults; tracked `.env.local.example` = local template.
 # Never commit machine-specific overrides:
 .env.local
 .env.*.local

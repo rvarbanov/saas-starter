@@ -100,12 +100,12 @@ At minimum, the repository should include:
 ### Environment variables (file split)
 
 - **`.env`** — **Committed.** Universal non-secret defaults that are identical across local, CI, Preview, and Production. Must not contain host URLs, Convex deployment URLs, WorkOS client ids, or other environment-specific values.  
-- **`.env.example`** — **Committed.** Template for **local-specific** non-secrets (placeholders). Copy to **`.env.local`** and fill in.  
+- **`.env.local.example`** — **Committed.** Template for **local-specific** non-secrets (placeholders). Copy to **`.env.local`** and fill in (same pattern as `.secret.example` → `.secret`).  
 - **`.env.local`** — **Gitignored. Never committed.** Machine-specific non-secret overrides (public URLs, `WORKOS_CLIENT_ID`, Convex URL, Playwright base URL). Next.js loads it automatically and it overrides `.env`. Production, Preview, and CI inject the same names via Vercel / GitHub Actions instead.  
 - **`.secret.example`** — **Committed.** Template listing **secret** variable names with placeholder values (e.g. `WORKOS_API_KEY=replace-me`). Documents what real secrets are needed.  
 - **`.secret`** — **Gitignored. Never committed.** Developer or deploy environment copies from `.secret.example` and fills real secrets. CI and Vercel inject secrets via provider secret stores, not by committing `.secret`.
 
-Also maintain **`.gitignore`** rules: ignore `.env.local`, `.env.*.local`, and `.secret` (keep tracked `.env` and `.env.example`).
+Also maintain **`.gitignore`** rules: ignore `.env.local`, `.env.*.local`, and `.secret` (keep tracked `.env` and `.env.local.example`).
 
 Convex and Next may use additional env files per their docs; align with the split above (secrets only in `.secret` / CI secrets). **This template:** Next loads **`.secret`** from **`next.config.ts`** (so secrets stay out of `.env.local` unless you choose to add overrides there).
 
