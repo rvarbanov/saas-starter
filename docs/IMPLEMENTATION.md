@@ -91,11 +91,11 @@ Use these as the install / setup source of truth. Versions must satisfy `**SPECI
 1. Create a new repository from this template (via “Use this template” or by cloning and pushing to a new origin).
 2. Install dependencies using the chosen package manager (npm or pnpm), as documented in `../README.md`.
 
-### 2.2 Configure environment (`.env.example` → `.env.local` + `.secret`)
+### 2.2 Configure environment (`.env.local` + `.secret`)
 
 Per `**SPECIFICATION.md`**:
 
-1. `**.env.example**` — Committed template. Copy to **`.env.local`** and fill non-secret keys: e.g. **`NEXT_PUBLIC_APP_URL`**, **`NEXT_PUBLIC_CONVEX_URL`** (public HTTPS `https://….convex.cloud`), **`WORKOS_CLIENT_ID`**, **`NEXT_PUBLIC_WORKOS_REDIRECT_URI`**.
+1. `**.env.local**` — **Not committed.** Create locally with non-secret keys: e.g. **`NEXT_PUBLIC_APP_URL`**, **`NEXT_PUBLIC_CONVEX_URL`** (public HTTPS `https://….convex.cloud`), **`WORKOS_CLIENT_ID`**, **`NEXT_PUBLIC_WORKOS_REDIRECT_URI`**, optional **`PLAYWRIGHT_BASE_URL`**. Names are documented in `README.md` — there is no tracked env template for local-only values. Prod/Preview/CI set the same names in Vercel / Actions.
 2. `**.secret.example**` — Committed. Copy to **`.secret`** and replace `replace-me` entries.
 3. `**.secret**` — **Not committed.** Server secrets (e.g. **`WORKOS_API_KEY`**, **`WORKOS_COOKIE_PASSWORD`**); optional **`CONVEX_DEPLOY_KEY`** for CI deploy. CI/Vercel use their own secret stores.
 

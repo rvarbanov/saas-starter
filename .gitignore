@@ -37,11 +37,10 @@ yarn-error.log*
 .pnpm-debug.log*
 *.log
 
-# Env: never commit machine/env-specific values; use `.env.example` as the template
+# Env: local-only non-secrets (never commit). Prod/Preview/CI come from Vercel / Actions.
 .env
 .env.local
 .env.*.local
-!.env.example
 
 # TypeScript
 *.tsbuildinfo

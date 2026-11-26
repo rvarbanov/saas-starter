@@ -28,7 +28,7 @@
 | Sign-in entry    | `app/sign-in/route.ts` — `getSignInUrl()` + redirect                                            |
 | Protected route  | `app/dashboard/page.tsx` — `withAuth({ ensureSignedIn: true })`                                 |
 | Public home      | `app/page.tsx` — `withAuth()`, links to `/sign-in` or `/dashboard`                              |
-| Env split        | `.env.local` (from `.env.example`): client id, redirect, public URLs; `.secret`: `WORKOS_API_KEY`, `WORKOS_COOKIE_PASSWORD` |
+| Env split        | Local `.env.local` (gitignored): client id, redirect, public URLs; `.secret`: `WORKOS_API_KEY`, `WORKOS_COOKIE_PASSWORD`; Prod/Preview/CI via Vercel/Actions |
 
 
 **Outcome:** Users can complete AuthKit sign-in and reach `/dashboard` at the Next.js layer.
