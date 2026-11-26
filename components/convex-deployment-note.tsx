@@ -7,8 +7,8 @@ export function ConvexDeploymentNote() {
   if (!url || /placeholder/i.test(url)) {
     return (
       <p className="text-caption">
-        Convex: set <code>NEXT_PUBLIC_CONVEX_URL</code> in <code>.env.local</code> to your
-        deployment URL from the Convex dashboard.
+        Convex: copy <code>.env.example</code> → <code>.env.local</code> and set{" "}
+        <code>NEXT_PUBLIC_CONVEX_URL</code> to your deployment URL from the Convex dashboard.
       </p>
     );
   }
@@ -18,8 +18,9 @@ export function ConvexDeploymentNote() {
       Convex backend <code>{url}</code>: run <code>pnpm convex:dev</code> so this repo pushes
       functions to <strong>that same</strong> deployment (URLs must match). In the Convex dashboard
       → Environment Variables for that deployment, set <code>WORKOS_CLIENT_ID</code> (same value as{" "}
-      <code>.env.local</code>) and <code>WORKOS_API_KEY</code> (from <code>.secret</code>) so user
-      provisioning can read email from WorkOS when the JWT omits it.
+      <code>.env.local</code>, from <code>.env.example</code>) and <code>WORKOS_API_KEY</code> (from{" "}
+      <code>.secret</code> / <code>.secret.example</code>) so user provisioning can read email from
+      WorkOS when the JWT omits it.
     </p>
   );
 }
