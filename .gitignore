@@ -37,8 +37,8 @@ yarn-error.log*
 .pnpm-debug.log*
 *.log
 
-# Env: local-only non-secrets (never commit). Prod/Preview/CI come from Vercel / Actions.
-.env
+# Env: tracked `.env` = universal defaults; tracked `.env.example` = local template.
+# Never commit machine-specific overrides:
 .env.local
 .env.*.local
 

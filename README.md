@@ -75,13 +75,15 @@ Stack: **Next.js**, **WorkOS AuthKit**, **Convex**, **shadcn/ui**, **Vitest** (*
 
 | File                  | In git?             | Purpose                                                      |
 | --------------------- | ------------------- | ------------------------------------------------------------ |
-| `**.env.local**`      | **No** (gitignored) | Local-only non-secrets for this machine (app URL, Convex URL, WorkOS client id, redirects, optional Playwright base URL). |
+| `**.env**`            | **Yes**             | Universal non-secret defaults identical across environments (no host URLs, Convex URLs, or WorkOS client ids). |
+| `**.env.example**`    | **Yes**             | Template for local-specific non-secrets. Copy → **`.env.local`** and fill placeholders. |
+| `**.env.local**`      | **No** (gitignored) | Local overrides (app URL, Convex URL, WorkOS client id, redirects, optional Playwright base URL). |
 | `**.secret.example**` | **Yes**             | Template for **`.secret`** (copy and rename; fill `replace-me`) |
 | `**.secret**`         | **No** (gitignored) | Server secrets (e.g. **`WORKOS_API_KEY`**, **`WORKOS_COOKIE_PASSWORD`**). Vercel/GitHub use their own stores in deploy/CI. |
 
-Do **not** commit `.env` / `.env.local` (or an env template for them): those values are local-only. Create **`.env.local`** with the names below; Prod / Preview / CI inject the same names via Vercel or GitHub Actions.
+**Why `.env` and `.env.local`:** tracked **`.env`** is for values that are the same everywhere. **`.env.local`** (from **`.env.example`**) is for this machine only — that is when the `local` suffix earns its name. Prod / Preview / CI inject the same local-specific names via Vercel or GitHub Actions.
 
-| Variable | Local (`.env.local`) | Notes |
+| Variable (from `.env.example`) | Local (`.env.local`) | Notes |
 | --- | --- | --- |
 | `NEXT_PUBLIC_APP_URL` | e.g. `http://localhost:3000` | Sign-out / returnTo; loopback ignored on Vercel |
 | `NEXT_PUBLIC_CONVEX_URL` | your `https://….convex.cloud` URL | Browser Convex client |
@@ -89,7 +91,7 @@ Do **not** commit `.env` / `.env.local` (or an env template for them): those val
 | `NEXT_PUBLIC_WORKOS_REDIRECT_URI` | e.g. `http://localhost:3000/callback` | Registered AuthKit callback |
 | `PLAYWRIGHT_BASE_URL` | optional; defaults via app URL → localhost | Non-loopback skips local Playwright `webServer` |
 
-Next.js auto-loads **`.env.local`**. It does **not** load **`.secret`** by default; this repo loads it in **`next.config.ts`** (and Vitest loads it in **`vitest.setup.ts`**). Docker Compose references **`.env.local`**, **`.env`**, and **`.secret`** optionally (`required: false`).
+Next.js loads **`.env`** then **`.env.local`** (local wins). It does **not** load **`.secret`** by default; this repo loads it in **`next.config.ts`** (and Vitest loads it in **`vitest.setup.ts`**). Docker Compose references **`.env`**, **`.env.local`**, and **`.secret`** optionally (`required: false`).
 
 Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.md`** §2.2.
 
@@ -129,8 +131,10 @@ Details: **`docs/SPECIFICATION.md`** (Configuration) and **`docs/IMPLEMENTATION.
 ├── vitest.config.mts             # Vitest (ESM); see docs/IMPLEMENTATION.md §11
 ├── vitest.setup.ts               # @testing-library/jest-dom matchers (components project)
 ├── tsconfig.json
+├── .env                         # committed universal non-secret defaults
+├── .env.example                 # committed local template (copy → .env.local)
 ├── .secret.example              # committed secret template
-├── .gitignore                   # must ignore .env, .env.local, .secret
+├── .gitignore                   # must ignore .env.local, .secret
 └── docs/
     ├── INTENT.md
     ├── SPECIFICATION.md
@@ -193,7 +197,7 @@ Sign-out closes the Convex client on `pagehide` before the WorkOS logout redirec
 ## Quick start
 
 1. Clone / use template → `pnpm install`
-2. Create **`.env.local`** with local non-secrets (`NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_CONVEX_URL`, `WORKOS_CLIENT_ID`, `NEXT_PUBLIC_WORKOS_REDIRECT_URI` — see **Environment files**). Copy **`.secret.example`** → **`.secret`** and replace `replace-me` values.
+2. Copy **`.env.example`** → **`.env.local`** and fill local non-secrets (`NEXT_PUBLIC_CONVEX_URL`, `WORKOS_CLIENT_ID`, …). Copy **`.secret.example`** → **`.secret`** and replace `replace-me` values. Tracked **`.env`** holds universal defaults only.
 3. **Convex:** run **`npx convex dev`** (or **`pnpm convex:dev`**) so **`NEXT_PUBLIC_CONVEX_URL`** points at your deployment and **`convex/`** syncs. Set **`WORKOS_CLIENT_ID`** (and **`WORKOS_API_KEY`** for email updates) on the Convex deployment via `npx convex env set …`. **Users auto-provision on sign-in** (`users.store` upserts by WorkOS `tokenIdentifier`).
 4. Run **`make dev-all`** (Next.js + Convex sync in one terminal) or **`make dev`** plus **`make convex-dev`** in a second terminal, then open [http://localhost:3000](http://localhost:3000).
 5. Read **`docs/IMPLEMENTATION.md`** §1 for per-tool official links (Next.js, Convex, WorkOS, Biome, Docker, Vercel, Actions, OpenAPI, …)

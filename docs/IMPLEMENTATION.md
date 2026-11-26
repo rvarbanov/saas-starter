@@ -91,15 +91,16 @@ Use these as the install / setup source of truth. Versions must satisfy `**SPECI
 1. Create a new repository from this template (via “Use this template” or by cloning and pushing to a new origin).
 2. Install dependencies using the chosen package manager (npm or pnpm), as documented in `../README.md`.
 
-### 2.2 Configure environment (`.env.local` + `.secret`)
+### 2.2 Configure environment (`.env` + `.env.example` → `.env.local` + `.secret`)
 
 Per `**SPECIFICATION.md`**:
 
-1. `**.env.local**` — **Not committed.** Create locally with non-secret keys: e.g. **`NEXT_PUBLIC_APP_URL`**, **`NEXT_PUBLIC_CONVEX_URL`** (public HTTPS `https://….convex.cloud`), **`WORKOS_CLIENT_ID`**, **`NEXT_PUBLIC_WORKOS_REDIRECT_URI`**, optional **`PLAYWRIGHT_BASE_URL`**. Names are documented in `README.md` — there is no tracked env template for local-only values. Prod/Preview/CI set the same names in Vercel / Actions.
-2. `**.secret.example**` — Committed. Copy to **`.secret`** and replace `replace-me` entries.
-3. `**.secret**` — **Not committed.** Server secrets (e.g. **`WORKOS_API_KEY`**, **`WORKOS_COOKIE_PASSWORD`**); optional **`CONVEX_DEPLOY_KEY`** for CI deploy. CI/Vercel use their own secret stores.
+1. `**.env**` — Committed. Universal non-secret defaults only (identical across environments). Do not put Convex URLs, WorkOS client ids, or host URLs here.
+2. `**.env.example**` — Committed template for local-specific non-secrets. Copy to **`.env.local`** and fill: e.g. **`NEXT_PUBLIC_APP_URL`**, **`NEXT_PUBLIC_CONVEX_URL`**, **`WORKOS_CLIENT_ID`**, **`NEXT_PUBLIC_WORKOS_REDIRECT_URI`**, optional **`PLAYWRIGHT_BASE_URL`**. Prod/Preview/CI set the same names in Vercel / Actions.
+3. `**.secret.example**` — Committed. Copy to **`.secret`** and replace `replace-me` entries.
+4. `**.secret**` — **Not committed.** Server secrets (e.g. **`WORKOS_API_KEY`**, **`WORKOS_COOKIE_PASSWORD`**); optional **`CONVEX_DEPLOY_KEY`** for CI deploy. CI/Vercel use their own secret stores.
 
-**Loading:** Next.js auto-loads **`.env.local`**. It does not load **`.secret`** by default; this template loads it in **`next.config.ts`** (via `dotenv`) and **`vitest.setup.ts`** so local dev and tests match. Playwright loads **`.env`** → **`.env.local`** → **`.secret`**. **Docker Compose** lists **`.env.local`**, **`.env`**, and **`.secret`** as optional `env_file` entries (see `docker-compose.yml`).
+**Loading:** Next.js loads **`.env`** then **`.env.local`** (local wins). It does not load **`.secret`** by default; this template loads it in **`next.config.ts`** (via `dotenv`) and **`vitest.setup.ts`** so local dev and tests match. Playwright loads **`.env`** → **`.env.local`** → **`.secret`**. **Docker Compose** lists **`.env`**, **`.env.local`**, and **`.secret`** as optional `env_file` entries (see `docker-compose.yml`).
 
 **Convex:** Put the deployment URL in **`.env.local`** as **`NEXT_PUBLIC_CONVEX_URL`**, then run **`npx convex dev`** / **`pnpm convex:dev`** to sync `**convex/**` to that deployment and regenerate `**convex/_generated/**` when connected. Set **`WORKOS_CLIENT_ID`** on the Convex deployment (`npx convex env set …`) when using `**convex/auth.config.ts**`.
 

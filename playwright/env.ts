@@ -17,7 +17,7 @@ export const ACCESS_ROLE_STORAGE = {
 
 /**
  * Load local env files for Playwright (does not override process env already set by CI).
- * Order: `.env` → `.env.local` → `.secret` (secrets win). Local non-secrets live in gitignored `.env.local`.
+ * Order: `.env` (universal) → `.env.local` (from `.env.example`) → `.secret` (secrets win).
  */
 export function loadPlaywrightEnv(cwd = process.cwd()): void {
   const envPath = resolve(cwd, ".env");
