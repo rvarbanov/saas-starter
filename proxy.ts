@@ -13,9 +13,10 @@ export default authkitProxy({
 });
 
 export const config = {
-  // Exclude /sign-in/redirect: authkitProxy sets a PKCE cookie on every unauthenticated
-  // request, but that route also calls getSignInUrl() — two sealed states → OAuth state mismatch.
+  // Exclude /callback: handleAuth owns the OAuth exchange; proxy must not rewrite PKCE cookies.
+  // Exclude /sign-in/redirect: that route also starts OAuth — two sealed states → mismatch.
+  // Exclude /api/health: public probe should not run AuthKit session/PKCE work.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sign-in/redirect|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|callback|sign-in/redirect|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -10,18 +10,28 @@ export async function completeWorkOsHostedLogin(
   page: Page,
   { email, password }: WorkOsLoginCredentials,
 ): Promise<void> {
-  // AuthKit may skip the form when a hosted session already exists.
-  const emailField = page.getByLabel(/email/i);
-  if (await emailField.isVisible({ timeout: 5_000 }).catch(() => false)) {
-    await emailField.fill(email);
-    await page.getByRole("button", { name: /continue/i }).click();
+  // Prefer role: AuthKit may expose the email control without a <label> association.
+  const emailField = page.getByRole("textbox", { name: /^email$/i });
 
-    // Prefer role over getByLabel: WorkOS also exposes aria-label="Show password".
-    const passwordField = page.getByRole("textbox", { name: /password/i });
-    await expect(passwordField).toBeVisible({ timeout: 15_000 });
-    await passwordField.fill(password);
-    await page.getByRole("button", { name: /sign in|log in/i }).click();
+  // Session reuse skips the form and returns straight to the app.
+  const alreadyOnDashboard = await page
+    .waitForURL(/\/dashboard/, { timeout: 3_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (alreadyOnDashboard) {
+    await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
+    return;
   }
+
+  await expect(emailField).toBeVisible({ timeout: 30_000 });
+  await emailField.fill(email);
+  await page.getByRole("button", { name: /continue/i }).click();
+
+  // Prefer role over getByLabel: WorkOS also exposes aria-label="Show password".
+  const passwordField = page.getByRole("textbox", { name: /password/i });
+  await expect(passwordField).toBeVisible({ timeout: 15_000 });
+  await passwordField.fill(password);
+  await page.getByRole("button", { name: /sign in|log in/i }).click();
 
   await page.waitForURL(/\/dashboard/, { timeout: 60_000 });
   await expect(page.getByRole("heading", { name: /Signed in/i })).toBeVisible();
@@ -38,7 +48,7 @@ export async function signInViaWorkOs(
 }
 
 /**
- * Start OAuth from a protected route (sets `wos-auth-verifier`), then land on AuthKit.
+ * Start OAuth from a protected route (sets PKCE verifier cookie), then land on AuthKit.
  * Does not complete the hosted login — use for mid-login race coverage.
  */
 export async function beginDashboardAuthRedirect(page: Page): Promise<void> {

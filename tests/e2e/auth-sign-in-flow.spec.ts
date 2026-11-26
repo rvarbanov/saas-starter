@@ -40,7 +40,7 @@ async function clobberVerifierViaPublicRoutes(context: BrowserContext): Promise<
 
 test.describe("AuthKit sign-in workflow (RAD-215)", () => {
   // Each case starts logged out; keep them independent so one failure still runs the others.
-  test.describe.configure({ timeout: 120_000 });
+  test.describe.configure({ timeout: 180_000 });
 
   test("logged-out /dashboard → AuthKit email+password → /dashboard", async ({ page }) => {
     const credentials = requireCredentials();
@@ -94,8 +94,12 @@ test.describe("AuthKit sign-in workflow (RAD-215)", () => {
     expect(contentType).not.toMatch(/application\/json/i);
     expect(body).not.toMatch(/Couldn't sign in\. If you are not sure what happened/i);
 
-    await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
-    await expect(page.getByText(/try again|couldn't complete|sign-in failed/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /try again|sign in/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/sign-in\?.*error=callback/);
+    await expect(page.getByRole("heading", { name: /^Sign in$/i })).toBeVisible();
+    // Scope to main: Next also mounts a route announcer with role="alert".
+    await expect(page.locator("main [role='alert']")).toContainText(
+      /sign-in failed|couldn't complete/i,
+    );
+    await expect(page.getByRole("link", { name: /try again/i })).toBeVisible();
   });
 });

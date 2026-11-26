@@ -170,8 +170,10 @@ Vitest tests live as **`*.spec.ts`** / **`*.spec.tsx`** **beside** the module th
 
 | Project | When | Specs |
 | --- | --- | --- |
-| `chromium` | Always (after secrets gate) | Smoke + unauthenticated auth shell + visual captures |
+| `chromium` | Always (after secrets gate) | Smoke + unauthenticated auth shell + visual captures + AuthKit sign-in workflow (`auth-sign-in-flow`) |
 | `setup` + `authenticated` + `authenticated-sign-out` | Always (after secrets gate) | WorkOS login (once) → read-only session tests (parallel) → sign-out last |
+
+**AuthKit sign-in workflow (RAD-215):** `tests/e2e/auth-sign-in-flow.spec.ts` drives real AuthKit email/password login (dashboard redirect, mid-login `/` + `/api/health` interference, sign-out then sign-in, failed `/callback` HTML). Requires the same `E2E_WORKOS_*` / `WORKOS_*` secrets as other authenticated e2e. Against a deployed origin (preview/prod), set `PLAYWRIGHT_BASE_URL` to that HTTPS origin (skips the local webServer) and ensure the AuthKit redirect URI allow-list includes `{origin}/callback`. Local: `PLAYWRIGHT_CHANNEL=chrome pnpm exec playwright test auth-sign-in-flow --project=chromium`.
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |

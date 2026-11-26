@@ -12,8 +12,11 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@workos-inc/authkit-nextjs':
-        specifier: ^3.0.0
-        version: 3.0.0(next@16.2.2(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+        specifier: ^4.6.3
+        version: 4.6.3(@workos-inc/node@12.4.0)(next@16.2.2(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      '@workos-inc/node':
+        specifier: ^12.4.0
+        version: 12.4.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -958,6 +961,10 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
+  '@sindresorhus/fnv1a@3.1.0':
+    resolution: {integrity: sha512-KV321z5m/0nuAg83W1dPLy85HpHDk7Sdi4fJbwvacWsEhAh+rZUW4ZfGcXmUIvjZg4ss2bcwNlRhJ7GBEUG08w==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
@@ -1205,16 +1212,18 @@ packages:
   '@vitest/utils@4.1.2':
     resolution: {integrity: sha512-xw2/TiX82lQHA06cgbqRKFb5lCAy3axQ4H4SoUFhUsg+wztiet+co86IAMDtF6Vm1hc7J6j09oh/rgDn+JdKIQ==}
 
-  '@workos-inc/authkit-nextjs@3.0.0':
-    resolution: {integrity: sha512-9qER/fIlxGw0gfkBOcHh9Vi9LMBSq9zVsrJReQ6xbd08Ulz9QcrRDxOvs6CX6xitZjxrQKUwkWi0yH1vwUlhVA==}
+  '@workos-inc/authkit-nextjs@4.6.3':
+    resolution: {integrity: sha512-sLTHU/SHJEpyF4pR0T+JHdetJigz7PFR1OFd6H+DHMHS0eW6KxZIRlVZLLI0QnKUXePwbFWbIWloJUvAHeT06w==}
+    engines: {node: '>=22.11.0'}
     peerDependencies:
+      '@workos-inc/node': ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0
       next: ^13.5.9 || ^14.2.26 || ^15.2.3 || ^16
       react: ^18.0 || ^19.0.0
       react-dom: ^18.0 || ^19.0.0
 
-  '@workos-inc/node@8.12.0':
-    resolution: {integrity: sha512-y3WGK+A1dxUEsxV6jGXK4q5yVQLj47ZF5qphpEq+51axOhcbiInS28o8XDixVrtsDBCPDcQT+XCG909JmNgpbA==}
-    engines: {node: '>=20.15.0'}
+  '@workos-inc/node@12.4.0':
+    resolution: {integrity: sha512-bFpXWRTc4HR3uRaaB1mZiq5tl7aR4MVaao45b4GxEfgK8aLEjHI01oPStn7AjW7iQt8S6vSO2igFBF/MkPhyRg==}
+    engines: {node: '>=22.11.0'}
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -2594,6 +2603,9 @@ packages:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
     engines: {node: '>= 18'}
 
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
@@ -3714,6 +3726,8 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
+  '@sindresorhus/fnv1a@3.1.0': {}
+
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@standard-schema/spec@1.1.0': {}
@@ -3949,22 +3963,22 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@workos-inc/authkit-nextjs@3.0.0(next@16.2.2(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)':
+  '@workos-inc/authkit-nextjs@4.6.3(@workos-inc/node@12.4.0)(next@16.2.2(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)':
     dependencies:
-      '@workos-inc/node': 8.12.0
+      '@sindresorhus/fnv1a': 3.1.0
+      '@workos-inc/node': 12.4.0
       iron-session: 8.0.4
       jose: 5.10.0
       next: 16.2.2(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       path-to-regexp: 6.3.0
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
+      server-only: 0.0.1
       valibot: 1.3.1(typescript@5.9.3)
     transitivePeerDependencies:
       - typescript
 
-  '@workos-inc/node@8.12.0':
-    dependencies:
-      eventemitter3: 5.0.4
+  '@workos-inc/node@12.4.0': {}
 
   accepts@2.0.0:
     dependencies:
@@ -5220,6 +5234,8 @@ snapshots:
       send: 1.2.1
     transitivePeerDependencies:
       - supports-color
+
+  server-only@0.0.1: {}
 
   setprototypeof@1.2.0: {}
 
