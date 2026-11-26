@@ -10,7 +10,7 @@ export function ConvexStatus() {
   if (!isConvexConfigured()) {
     return (
       <p className="text-caption" data-testid="convex-status-unconfigured">
-        Convex: set <code>NEXT_PUBLIC_CONVEX_URL</code> in <code>.env</code> after{" "}
+        Convex: set <code>NEXT_PUBLIC_CONVEX_URL</code> in <code>.env.local</code> after{" "}
         <code>npx convex dev</code> (see dashboard URL).
       </p>
     );

@@ -89,7 +89,7 @@ jobs:
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
 
-      # Job env inherits this so Playwright/Next see CI Convex instead of committed .env prod URL.
+      # Job env inherits this so Playwright/Next see CI Convex (not a local .env.local).
       - name: Point e2e at CI Convex URL
         env:
           NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
@@ -99,12 +99,20 @@ jobs:
           echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}" >> "$GITHUB_ENV"
           echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL#https://}"
 
+      # Environment `ci` must supply WORKOS_CLIENT_ID (AuthKit client for e2e; no committed .env).
+      - name: Require WorkOS client id for e2e
+        env:
+          WORKOS_CLIENT_ID: ${{ vars.WORKOS_CLIENT_ID }}
+        run: |
+          . scripts/ci-require-env.sh
+          require_env "WORKOS_CLIENT_ID" "${WORKOS_CLIENT_ID}"
+          echo "WORKOS_CLIENT_ID=${WORKOS_CLIENT_ID}" >> "$GITHUB_ENV"
+
       - name: E2E tests
         run: pnpm test:e2e
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3000
-          # WORKOS_CLIENT_ID comes from committed `.env` (do not override with a placeholder).
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/callback
           NEXT_PUBLIC_APP_URL: http://localhost:3000
           # Real AuthKit key + e2e user (repo Actions secrets). Cookie password may be CI-only.

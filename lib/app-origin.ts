@@ -1,4 +1,4 @@
-/** True when the URL’s host is loopback (committed `.env` localhost values). */
+/** True when the URL’s host is loopback (typical local `.env.local` values). */
 function isLoopbackUrl(value: string): boolean {
   try {
     const { hostname } = new URL(value);
@@ -39,8 +39,8 @@ function vercelDeploymentOrigin(): string | undefined {
 
 /**
  * Use an explicit public URL when set, except ignore loopback values on Vercel.
- * Committed `.env` ships `http://localhost:3000` into Preview/Production builds;
- * those must not beat the deployment host.
+ * Local `.env.local` often sets `http://localhost:3000`; on Preview/Production that
+ * must not beat the deployment host.
  */
 function configuredPublicOrigin(envValue: string | undefined): string | undefined {
   const configured = envValue?.trim();
@@ -74,7 +74,7 @@ export function appHomeUrl(): string {
 
 /**
  * WorkOS AuthKit callback URL. Pass to `authkitProxy({ redirectUri })` so Preview
- * does not use the committed localhost `NEXT_PUBLIC_WORKOS_REDIRECT_URI`.
+ * does not use a localhost `NEXT_PUBLIC_WORKOS_REDIRECT_URI` from local env files.
  */
 export function workosRedirectUri(): string {
   const configured = configuredPublicOrigin(process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI);

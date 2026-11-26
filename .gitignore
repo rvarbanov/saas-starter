@@ -37,9 +37,11 @@ yarn-error.log*
 .pnpm-debug.log*
 *.log
 
-# Env: allow committed `.env` (non-secrets); ignore local overrides
+# Env: never commit machine/env-specific values; use `.env.example` as the template
+.env
 .env.local
 .env.*.local
+!.env.example
 
 # TypeScript
 *.tsbuildinfo
