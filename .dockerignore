@@ -4,6 +4,7 @@ node_modules
 coverage
 test-results
 playwright-report
+# Keep tracked `.env` (universal defaults) in the build context; omit local overrides / secrets.
 .env.local
 .secret
 *.log

@@ -89,14 +89,23 @@ jobs:
           pnpm exec convex deploy --yes
           pnpm convex:backfill-search-text
 
-      # Job env inherits this so Playwright/Next see CI Convex instead of committed .env prod URL.
-      - name: Point e2e at CI Convex URL
+      # Publish CI Convex URL + AuthKit client for Playwright/Next (Environment `ci` vars).
+      - name: Require e2e env and export job vars
         env:
           NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+          WORKOS_CLIENT_ID: ${{ vars.WORKOS_CLIENT_ID }}
+          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
+          E2E_WORKOS_EMAIL: ${{ secrets.E2E_WORKOS_EMAIL }}
+          E2E_WORKOS_PASSWORD: ${{ secrets.E2E_WORKOS_PASSWORD }}
         run: |
           . scripts/ci-require-env.sh
           require_env "NEXT_PUBLIC_CONVEX_URL" "${NEXT_PUBLIC_CONVEX_URL}"
+          require_env "WORKOS_CLIENT_ID" "${WORKOS_CLIENT_ID}"
+          require_env "WORKOS_API_KEY" "${WORKOS_API_KEY}"
+          require_env "E2E_WORKOS_EMAIL" "${E2E_WORKOS_EMAIL}"
+          require_env "E2E_WORKOS_PASSWORD" "${E2E_WORKOS_PASSWORD}"
           echo "NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}" >> "$GITHUB_ENV"
+          echo "WORKOS_CLIENT_ID=${WORKOS_CLIENT_ID}" >> "$GITHUB_ENV"
           echo "E2E NEXT_PUBLIC_CONVEX_URL host: ${NEXT_PUBLIC_CONVEX_URL#https://}"
 
       - name: E2E tests
@@ -104,10 +113,9 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3000
-          # WORKOS_CLIENT_ID comes from committed `.env` (do not override with a placeholder).
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/callback
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-          # Real AuthKit key + e2e user (repo Actions secrets). Cookie password may be CI-only.
+          # Cookie password may be CI-only (≥32 chars). Role personas below are optional.
           WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
           WORKOS_COOKIE_PASSWORD: "01234567890123456789012345678901"
           E2E_WORKOS_EMAIL: ${{ secrets.E2E_WORKOS_EMAIL }}

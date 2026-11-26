@@ -15,12 +15,19 @@ export const ACCESS_ROLE_STORAGE = {
   NO_ROLE: "playwright/.auth/no-role.json",
 } as const;
 
-/** Load `.env` then `.secret` (same order as playwright.config.ts). */
+/**
+ * Load local env files for Playwright (does not override process env already set by CI).
+ * Order: `.env` (universal) → `.env.local` (from `.env.local.example`) → `.secret` (secrets win).
+ */
 export function loadPlaywrightEnv(cwd = process.cwd()): void {
   const envPath = resolve(cwd, ".env");
+  const envLocalPath = resolve(cwd, ".env.local");
   const secretPath = resolve(cwd, ".secret");
   if (existsSync(envPath)) {
     loadEnv({ path: envPath, quiet: true });
+  }
+  if (existsSync(envLocalPath)) {
+    loadEnv({ path: envLocalPath, quiet: true });
   }
   if (existsSync(secretPath)) {
     loadEnv({ path: secretPath, quiet: true, override: true });
