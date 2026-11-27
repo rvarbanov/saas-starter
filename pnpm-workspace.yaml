@@ -8,3 +8,8 @@ allowBuilds:
   lightningcss: true
   msw: true
   sharp: true
+
+# Critical IP-spoofing fix (proxy-addr < 2.0.8). Comes transitively via
+# shadcn → @modelcontextprotocol/sdk → express@5.2.1 → proxy-addr@2.0.7.
+overrides:
+  proxy-addr: ">=2.0.8"
